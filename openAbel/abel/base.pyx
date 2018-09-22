@@ -31,7 +31,7 @@ ctypedef struct abel_plan:
 
 # Create plan for Abel transform
 cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double stepSize, 
-                         int method = 21, int order = 1, double eps = 1.e-15) nogil except NULL:
+                         int method = 4, int order = 2, double eps = 1.e-15) nogil except NULL:
 
     cdef:
         abel_plan* pl

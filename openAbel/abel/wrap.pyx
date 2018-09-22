@@ -11,7 +11,7 @@ cdef class Abel(object):
 
 
     def __init__(self, int nData, int forwardBackward, double shift, double stepSize, 
-                 int method = 4, int order = 1, double eps = 1.e-15):
+                 int method = 4, int order = 2, double eps = 1.e-15):
         
         try:
             self.plan = base.plan_fat(nData, forwardBackward, shift, stepSize, 

@@ -69,6 +69,7 @@ cdef int plan_fat_trapezoidalDesingConst(abel_plan* pl) nogil except -1:
     if pl.forwardBackward == -1:
         for ii in range(pl.nData-1):
             temp0 = mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+#            temp0 = mathFun.sqrt(pl.grid[ii+1]**2-pl.grid[ii]**2)
             md.desing[ii] = temp0/pl.stepSize
     elif pl.forwardBackward == 2 or pl.forwardBackward == 1:
         for ii in range(1,pl.nData-1):
@@ -227,6 +228,16 @@ cdef int execute_fat_trapezoidalDesingConst(abel_plan* pl, double* dataIn, doubl
                 dataOut[ii] += (dataInTemp1[jj]-dataInTemp1[ii]) * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             dataOut[ii] += 0.5*(dataInTemp1[jj]-dataInTemp1[ii]) * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             dataOut[ii] += dataInTemp1[ii]*md.desing[ii]
+#        for ii in range(pl.nData-1):
+#            for jj in range(ii+2, pl.nData-1):
+#                dataOut[ii] += dataInTemp1[jj] * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+#            jj = pl.nData-1
+#            dataOut[ii] += 0.5*dataInTemp1[jj] * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+#            jj = ii+1
+#            dataOut[ii] += 0.5*dataInTemp1[jj] * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+#            jj = ii+1
+#            dataOut[ii] += 0.5*(dataInTemp1[jj]-dataInTemp1[ii]) * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+#            dataOut[ii] += dataInTemp1[ii]*md.desing[ii]
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:
         for ii in range(pl.nData-1):
             for jj in range(ii+1, pl.nData-1):
@@ -578,7 +589,7 @@ ctypedef struct methodData_EndCorr:
 
 
 # Plan desingularized quadrature trapezoidal
-cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except -1:
+cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except -1:
     cdef:
         methodData_EndCorr* md
         double[:,::1] coeffs_nonsing_sqrt_small_memView
@@ -591,7 +602,7 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
         int ii, jj, ll
         double nInvSca, yInvSca
         int nCross, nLarge, nInvScaInt, yCross, yLarge, yInvScaInt
-        int orderM1Half, orderFilterM1Half
+        int orderM1Half, orderFilterM1Half, orderM1HalfInner
 
     # Main method struct
     md = <methodData_EndCorr*> malloc(sizeof(methodData_EndCorr))
@@ -612,7 +623,8 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
 
     # Load and prepare end correction coefficients
     md.order = order
-    orderM1Half = (md.order-1)/2
+    orderM1Half = <int> ((md.order-1)/2)
+    orderM1HalfInner = <int> (md.order/2)
     md.coeffsSing = <double*> malloc(md.order*(pl.nData-1)*sizeof(double))
     md.coeffsNonsing = <double*> malloc(md.order*(pl.nData-1)*sizeof(double))
     if (NULL == md.coeffsSing or NULL == md.coeffsNonsing):
@@ -648,18 +660,18 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
         nCross = coeffs_nonsing_sqrt_small_memView.shape[0]            
         for ii in range(max(pl.nData-1-nCross,0),pl.nData-1):
             for jj in range(md.order):
-                md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj]*(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize) / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj]*(pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize) / \
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         nLarge = coeffs_nonsing_sqrt_large_memView.shape[0]      
         for ii in range(max(pl.nData-1-nCross,0)):
             nInvSca = pl.stepSize/(pl.grid[pl.nData-1]-pl.grid[ii])*nCross*(nLarge-1)
             nInvScaInt = <int> mathFun.fmax(mathFun.fmin(nInvSca,nLarge-3),1)
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = interpCubic(nInvSca-nInvScaInt, md.order, &coeffs_nonsing_sqrt_large_memView[nInvScaInt-1,jj]) * \
-                                                   (pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize) / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                                                   (pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize) / \
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         for ii in range(pl.nData-1):
-            md.coeffsNonsing[md.order*ii+orderM1Half] -= 0.5*pl.grid[pl.nData-1]/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+            md.coeffsNonsing[md.order*ii+orderM1HalfInner] -= 0.5*pl.grid[pl.nData-1]/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
 
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:    # Backward transform
         with gil:
@@ -691,16 +703,16 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
         for ii in range(max(pl.nData-1-nCross,0),pl.nData-1):
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj] / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         nLarge = coeffs_nonsing_sqrt_large_memView.shape[0]      
         for ii in range(max(pl.nData-1-nCross,0)):
             nInvSca = pl.stepSize/(pl.grid[pl.nData-1]-pl.grid[ii])*nCross*(nLarge-1)
             nInvScaInt = <int> mathFun.fmax(mathFun.fmin(nInvSca,nLarge-3),1)
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = interpCubic(nInvSca-nInvScaInt, md.order, &coeffs_nonsing_sqrt_large_memView[nInvScaInt-1,jj]) / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         for ii in range(pl.nData-1):
-            md.coeffsNonsing[md.order*ii+orderM1Half] -= 0.5/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+            md.coeffsNonsing[md.order*ii+orderM1HalfInner] -= 0.5/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
 
     elif pl.forwardBackward == -2:    # Modified forward transform for 1/r^2 singular functions
         with gil:
@@ -732,8 +744,8 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
         for ii in range(max(pl.nData-1-nCross,0),pl.nData-1):
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj] * \
-                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize))**2 / \
-                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii]) *
+                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize))**2 / \
+                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii]) *
                                                                  (pl.grid[pl.nData-1]-pl.grid[ii]) )
         nLarge = coeffs_nonsing_sqrt_large_memView.shape[0]      
         for ii in range(max(pl.nData-1-nCross,0)):
@@ -741,11 +753,11 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
             nInvScaInt = <int> mathFun.fmax(mathFun.fmin(nInvSca,nLarge-3),1)
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = interpCubic(nInvSca-nInvScaInt, md.order, &coeffs_nonsing_sqrt_large_memView[nInvScaInt-1,jj]) * \
-                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize))**2 / \
-                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii]) *
+                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize))**2 / \
+                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii]) *
                                                                  (pl.grid[pl.nData-1]-pl.grid[ii]) )
         for ii in range(pl.nData-1):
-            md.coeffsNonsing[md.order*ii+orderM1Half] -= 0.5*(pl.grid[ii]/pl.grid[pl.nData-1])**2/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+            md.coeffsNonsing[md.order*ii+orderM1HalfInner] -= 0.5*(pl.grid[ii]/pl.grid[pl.nData-1])**2/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
 
     else:
         destroy_fat_trapezoidalEndCorr(pl)
@@ -754,8 +766,7 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
 
     # Input modification filter
     if pl.forwardBackward == 1:
-        md.orderFilter = md.order+2
-        orderFilterM1Half = (md.orderFilter-1)/2
+        md.orderFilter = md.order+1 + (md.order % 2)
         md.coeffsFilter = <double*> malloc(md.orderFilter*sizeof(double))
         if NULL == md.coeffsFilter:
             destroy_fat_trapezoidalEndCorr(pl)
@@ -763,7 +774,7 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 3) nogil except 
                 raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
         with gil:
             try:
-                coeffs_filter_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % (md.order+1) + ".npy")
+                coeffs_filter_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % (md.orderFilter-1) + ".npy")
             except:
                 destroy_fat_trapezoidalEndCorr(pl)
                 raise
@@ -796,11 +807,12 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
         methodData_EndCorr* md
         double* dataInTemp0 = NULL
         double* dataInTemp1 = NULL
-        int orderM1Half, orderFilterM1Half
+        int orderM1Half, orderFilterM1Half, orderM1HalfInner
         int nLeftExt, nRightExt
 
     md = <methodData_EndCorr*> pl.methodData
-    orderM1Half = (md.order-1)/2
+    orderM1Half = <int> ((md.order-1)/2)
+    orderM1HalfInner = <int> (md.order/2)
     orderFilterM1Half = (md.orderFilter-1)/2
 
     # Allocate temporary data arrays
@@ -905,7 +917,7 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
     # End correction right fairly smooth end
     for ii in range(pl.nData-1):
         for nn in range(md.order):
-            jj = pl.nData-1+nn
+            jj = pl.nData-1+nn-orderM1HalfInner+orderM1Half
             dataOut[ii] += md.coeffsNonsing[md.order*ii+nn]*dataInTemp1[jj]
 
     # End correction left singular end

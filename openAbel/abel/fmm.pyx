@@ -42,7 +42,7 @@ ctypedef struct methodData_FMM:
 
 # Plan FMM
 # Eps 1.e-15 is enough for machine precision error (caused by FMM)
-cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-15) nogil except -1:
+cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-15) nogil except -1:
 
     cdef:
         int ii, jj, ll, kk, mm
@@ -53,7 +53,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
         double[:,::1] coeffs_nonsing_sqrt_small_memView
         double[:,::1] coeffs_nonsing_sqrt_large_memView
         double[::1] coeffs_filter_memView
-        int orderM1Half
+        int orderM1Half, orderM1HalfInner
         double nInvSca, yInvSca
         int yCross, yLarge, yInvScaInt, nCross, nLarge, nInvScaInt
 
@@ -83,7 +83,8 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
 
     # Load and prepare end correction coefficients
     md.order = order
-    orderM1Half = (md.order-1)/2
+    orderM1Half = <int> ((md.order-1)/2)
+    orderM1HalfInner = <int> (md.order/2)
     md.coeffsSing = <double*> malloc(md.order*(pl.nData-1)*sizeof(double))
     md.coeffsNonsing = <double*> malloc(md.order*(pl.nData-1)*sizeof(double))
     if (NULL == md.coeffsSing or NULL == md.coeffsNonsing):
@@ -119,18 +120,18 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
         nCross = coeffs_nonsing_sqrt_small_memView.shape[0]            
         for ii in range(max(pl.nData-1-nCross,0),pl.nData-1):
             for jj in range(md.order):
-                md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj]*(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize) / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj]*(pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize) / \
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         nLarge = coeffs_nonsing_sqrt_large_memView.shape[0]      
         for ii in range(max(pl.nData-1-nCross,0)):
             nInvSca = pl.stepSize/(pl.grid[pl.nData-1]-pl.grid[ii])*nCross*(nLarge-1)
             nInvScaInt = <int> mathFun.fmax(mathFun.fmin(nInvSca,nLarge-3),1)
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = interpCubic(nInvSca-nInvScaInt, md.order, &coeffs_nonsing_sqrt_large_memView[nInvScaInt-1,jj]) * \
-                                                   (pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize) / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                                                   (pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize) / \
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         for ii in range(pl.nData-1):
-            md.coeffsNonsing[md.order*ii+orderM1Half] -= 0.5*pl.grid[pl.nData-1]/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+            md.coeffsNonsing[md.order*ii+orderM1HalfInner] -= 0.5*pl.grid[pl.nData-1]/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
 
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:    # Backward transform
         with gil:
@@ -162,16 +163,16 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
         for ii in range(max(pl.nData-1-nCross,0),pl.nData-1):
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj] / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         nLarge = coeffs_nonsing_sqrt_large_memView.shape[0]      
         for ii in range(max(pl.nData-1-nCross,0)):
             nInvSca = pl.stepSize/(pl.grid[pl.nData-1]-pl.grid[ii])*nCross*(nLarge-1)
             nInvScaInt = <int> mathFun.fmax(mathFun.fmin(nInvSca,nLarge-3),1)
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = interpCubic(nInvSca-nInvScaInt, md.order, &coeffs_nonsing_sqrt_large_memView[nInvScaInt-1,jj]) / \
-                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
+                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         for ii in range(pl.nData-1):
-            md.coeffsNonsing[md.order*ii+orderM1Half] -= 0.5/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+            md.coeffsNonsing[md.order*ii+orderM1HalfInner] -= 0.5/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
 
     elif pl.forwardBackward == -2:    # Modified forward transform for 1/r^2 singular functions
         with gil:
@@ -203,22 +204,20 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
         for ii in range(max(pl.nData-1-nCross,0),pl.nData-1):
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj] * \
-                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize))**2 / \
-                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii]) *
+                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize))**2 / \
+                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii]) *
                                                                  (pl.grid[pl.nData-1]-pl.grid[ii]) )
-#                md.coeffsNonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_memView[pl.nData-2-ii,jj]*(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize) / \
-#                                                   mathFun.sqrt((pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii])*(pl.grid[pl.nData-1]-pl.grid[ii]))
         nLarge = coeffs_nonsing_sqrt_large_memView.shape[0]      
         for ii in range(max(pl.nData-1-nCross,0)):
             nInvSca = pl.stepSize/(pl.grid[pl.nData-1]-pl.grid[ii])*nCross*(nLarge-1)
             nInvScaInt = <int> mathFun.fmax(mathFun.fmin(nInvSca,nLarge-3),1)
             for jj in range(md.order):
                 md.coeffsNonsing[md.order*ii+jj] = interpCubic(nInvSca-nInvScaInt, md.order, &coeffs_nonsing_sqrt_large_memView[nInvScaInt-1,jj]) * \
-                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize))**2 / \
-                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1Half)*pl.stepSize+pl.grid[ii]) *
+                                                   (pl.grid[ii]/(pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize))**2 / \
+                                                   mathFun.sqrt( (pl.grid[pl.nData-1]+(jj-orderM1HalfInner)*pl.stepSize+pl.grid[ii]) *
                                                                  (pl.grid[pl.nData-1]-pl.grid[ii]) )
         for ii in range(pl.nData-1):
-            md.coeffsNonsing[md.order*ii+orderM1Half] -= 0.5*(pl.grid[ii]/pl.grid[pl.nData-1])**2/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
+            md.coeffsNonsing[md.order*ii+orderM1HalfInner] -= 0.5*(pl.grid[ii]/pl.grid[pl.nData-1])**2/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
 
     else:
         destroy_fat_fmmTrapEndCorr(pl)
@@ -268,9 +267,6 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
         temp = 2.*(ii+1)/md.ss-1.
         for jj in range(md.pp1):
             md.ltp[ii*md.pp1+jj] = _lagrangePInt(temp, jj, md.chebRoots, md.pp1)
-
-#    with gil:
-#        print 1, datetime.datetime.now()
 
     # Different kernels for forward and backward transform
     if pl.forwardBackward == -1:
@@ -370,7 +366,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
 
     # Input modification filter
     if pl.forwardBackward == 1:
-        md.orderFilter = md.order+2
+        md.orderFilter = md.order+1 + (md.order % 2)
         md.coeffsFilter = <double*> malloc(md.orderFilter*sizeof(double))
         if NULL == md.coeffsFilter:
             destroy_fat_fmmTrapEndCorr(pl)
@@ -378,7 +374,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 7, double eps = 1.e-
                 raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
         with gil:
             try:
-                coeffs_filter_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % (md.order+1) + ".npy")
+                coeffs_filter_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % (md.orderFilter-1) + ".npy")
             except:
                 destroy_fat_fmmTrapEndCorr(pl)
                 raise
@@ -413,12 +409,13 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
         double* local = NULL
         double* dataInTemp0 = NULL
         double* dataInTemp1 = NULL
-        int orderM1Half, orderFilterM1Half
+        int orderM1Half, orderFilterM1Half, orderM1HalfInner
         int nLeftExt, nRightExt
 
     md = <methodData_FMM*> pl.methodData
-    orderM1Half = (md.order-1)/2
-    orderFilterM1Half = (md.orderFilter-1)/2
+    orderM1Half = <int> ((md.order-1)/2)
+    orderM1HalfInner = <int> (md.order/2)
+    orderFilterM1Half = <int> ((md.orderFilter-1)/2)
 
     # Allocate temporary data arrays
     dataInTemp0 = <double*> malloc((pl.nData+md.order+md.orderFilter-2)*sizeof(double))
@@ -438,7 +435,7 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
     # Right boundary handling
-    if rightBoundary == 0: # TODO or rightBoundary == 1 or rightBoundary == 2:
+    if rightBoundary == 0: # TODO maybe or rightBoundary == 1 or rightBoundary == 2:
         nRightExt = orderM1Half + orderFilterM1Half
     elif rightBoundary == 3:
         nRightExt = 0
@@ -554,7 +551,7 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
 
     # Potential evaluation / local to potential
     mm = (pl.nData-2)/md.ss - 1          # basically kl[0]-2, as last two block are not needed
-    blas.dgemm('t', 'n', &md.ss, &mm, &md.pp1, &ONED, md.ltp, &md.pp1, local, &md.pp1, &ZEROD, &dataOut[1], &md.ss) # In theory this might segfault I think TODO
+    blas.dgemm('t', 'n', &md.ss, &mm, &md.pp1, &ONED, md.ltp, &md.pp1, local, &md.pp1, &ZEROD, &dataOut[1], &md.ss) # TODO segfau. possible?
     # TODO Shouldn't be here some more local to potential?
     for jj in range(md.pp1):
         dataOut[0] += local[jj]*_lagrangePInt(-1., jj, md.chebRoots, md.pp1)
@@ -580,19 +577,14 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
 
     # End correction left singular end
     # TODO maybe BLAS
-    orderM1Half = (md.order-1)/2
     for ii in range(pl.nData-1):
         for jj in range(md.order):
             dataOut[ii] += md.coeffsSing[md.order*ii+jj]*dataInTemp1[ii+jj]
 
     # End correction right nonsingular end
     mm = pl.nData-1
-    blas.dgemv('t', &md.order, &mm, &ONED, md.coeffsNonsing, &md.order, &dataInTemp1[pl.nData-1], &ONE, &ONED, dataOut, &ONE)
-#    # End correction right fairly smooth end
-#    for ii in range(pl.nData-1):
-#        for nn in range(md.order):
-#            jj = pl.nData-1+nn
-#            dataOut[ii] += md.coeffsNonsing[md.order*ii+nn]*dataInTemp1[jj]
+    blas.dgemv('t', &md.order, &mm, &ONED, md.coeffsNonsing, &md.order, 
+               &dataInTemp1[pl.nData-1+orderM1Half-orderM1HalfInner], &ONE, &ONED, dataOut, &ONE)
 
     free(dataInTemp1)
 
