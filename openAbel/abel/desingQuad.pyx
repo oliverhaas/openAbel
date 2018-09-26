@@ -225,18 +225,21 @@ cdef int execute_fat_trapezoidalDesingConst(abel_plan* pl, double* dataIn, doubl
         for ii in range(pl.nData-1):
             for jj in range(ii+1, pl.nData-1):
                 dataOut[ii] += (dataInTemp1[jj]-dataInTemp1[ii]) * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+            jj = pl.nData-1
             dataOut[ii] += 0.5*(dataInTemp1[jj]-dataInTemp1[ii]) * pl.grid[jj]/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             dataOut[ii] += dataInTemp1[ii]*md.desing[ii]
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:
         for ii in range(pl.nData-1):
             for jj in range(ii+1, pl.nData-1):
                 dataOut[ii] += (dataInTemp1[jj]-dataInTemp1[ii]) / mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+            jj = pl.nData-1
             dataOut[ii] += 0.5*(dataInTemp1[jj]-dataInTemp1[ii]) / mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             dataOut[ii] += dataInTemp1[ii]*md.desing[ii]
     elif pl.forwardBackward == -2:
         for ii in range(pl.nData-1):
             for jj in range(ii+1, pl.nData-1):
                 dataOut[ii] += (dataInTemp1[jj]-dataInTemp1[ii]) * (pl.grid[ii]/pl.grid[jj])**2/mathFun.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+            jj = pl.nData-1
             dataOut[ii] += 0.5*(dataInTemp1[pl.nData-1]-dataInTemp1[ii]) * (pl.grid[ii]/pl.grid[pl.nData-1])**2/mathFun.sqrt(pl.grid[pl.nData-1]**2-pl.grid[ii]**2)
             dataOut[ii] += dataInTemp1[ii]*md.desing[ii]
     else:

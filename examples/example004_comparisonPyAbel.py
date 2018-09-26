@@ -1,6 +1,7 @@
 ############################################################################################################################################
 # Example to showcase the different openAbel methods in comparison with PyAbel methods.
 # Backward transform is done here since PyAbel focuses on that.
+# One obviously needs PyAbel installed for this example
 ############################################################################################################################################
 
 
@@ -8,7 +9,7 @@ import openAbel as oa
 import numpy as np
 from scipy.special import erf
 import matplotlib.pyplot as mpl
-import datetime as dt
+import time as ti
 import abel
 import os, glob
 
@@ -226,19 +227,19 @@ def runtimesAbel(nArray, nMeasure, method, order):
         dataIn = np.ones(nArray[ii])
         T = np.empty(nMeasure)
         for jj in range(nMeasure):
-            t0 = dt.datetime.now()
+            t0 = ti.time()
             abelObj = oa.Abel(nArray[ii], 1, 0., 1., method = method, order = order)
-            t1 = dt.datetime.now()
-            T[jj] = (t1-t0).total_seconds()
+            t1 = ti.time()
+            T[jj] = t1-t0
         runtimesPre[ii] = np.sum(T)/nMeasure
 
         abelObj = oa.Abel(nArray[ii], 1, 0., 1., method = method, order = order)
-        t0 = dt.datetime.now()
+        t0 = ti.time()
         for jj in range(nMeasure):
             dataOut = abelObj.execute(dataIn)
-        t1 = dt.datetime.now()
+        t1 = ti.time()
 
-        runtimes[ii] = (t1-t0).total_seconds()/nMeasure
+        runtimes[ii] = (t1-t0)/nMeasure
 
     return (runtimesPre, runtimes)
 
@@ -279,18 +280,18 @@ def runtimesAbelPyAbel(nArray, nMeasure, method, function):
         for jj in range(nMeasure):
             for filename in glob.glob(method + '*'):
                 os.remove(filename) 
-            t0 = dt.datetime.now()
+            t0 = ti.time()
             dataOut = function(dataIn, basis_dir='.', dr=1., direction="inverse")
-            t1 = dt.datetime.now()
-            T[jj] = (t1-t0).total_seconds()
+            t1 = ti.time()
+            T[jj] = t1-t0
         runtimesPre[ii] = np.sum(T)/nMeasure
 
-        t0 = dt.datetime.now()
+        t0 = ti.time()
         for jj in range(nMeasure):
             dataOut = function(dataIn, basis_dir='.', dr=1., direction="inverse")
-        t1 = dt.datetime.now()
+        t1 = ti.time()
 
-        runtimes[ii] = (t1-t0).total_seconds()/nMeasure
+        runtimes[ii] = (t1-t0)/nMeasure
         runtimesPre[ii] -= runtimes[ii]
 
     return (runtimesPre, runtimes)
@@ -302,13 +303,13 @@ functions = [abel.hansenlaw.hansenlaw_transform, abel.dasch.onion_peeling_transf
              abel.dasch.two_point_transform, abel.basex.basex_transform, abel.direct.direct_transform]
 nArray = 10**(np.arange(5)+2)
 for ii in range(1):
-    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
+    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 3, methods[ii], functions[ii])
     ax6.loglog(nArray, runtimes, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
 
 nArray = (10**(np.arange(3)*0.5+2)+0.5).astype(int)
 for ii in range(1,len(methods)):
-    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
+    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 3, methods[ii], functions[ii])
     ax5.loglog(nArray, runtimesPre, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
     ax6.loglog(nArray, runtimes, label='PA: '+str(methods[ii]), color = colors[jj+ii], 

@@ -64,7 +64,7 @@ mpl.show(block = False)
 ############################################################################################################################################
 # Now the same thing for the inverse transform
 forwardBackward = 1
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
+abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method = 0)
 
 # Backward transform
 dataOut = abelObj.execute(dataIn)
