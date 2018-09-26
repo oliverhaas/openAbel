@@ -2,14 +2,11 @@
 
 from libc.stdlib cimport malloc, free
 
-from openAbel.abel.hansenLaw cimport plan_fat_hansenLawOrgLin, execute_fat_hansenLawLinear, \
-                                            destroy_fat_hansenLawLinear
+from openAbel.abel.hansenLaw cimport plan_fat_hansenLawOrgLin, execute_fat_hansenLawLinear, destroy_fat_hansenLawLinear
 from openAbel.abel.desingQuad cimport plan_fat_trapezoidalDesingConst, execute_fat_trapezoidalDesingConst, \
-                                                     destroy_fat_trapezoidalDesingConst, \
-                                                     plan_fat_trapezoidalDesingLin, execute_fat_trapezoidalDesingLin, \
-                                                     destroy_fat_trapezoidalDesingLin, \
-                                                     plan_fat_trapezoidalEndCorr, execute_fat_trapezoidalEndCorr, \
-                                                     destroy_fat_trapezoidalEndCorr
+                                      destroy_fat_trapezoidalDesingConst, \
+                                      plan_fat_trapezoidalEndCorr, execute_fat_trapezoidalEndCorr, \
+                                      destroy_fat_trapezoidalEndCorr
 from openAbel.abel.fmm cimport plan_fat_fmmTrapEndCorr, execute_fat_fmmTrapEndCorr, destroy_fat_fmmTrapEndCorr
 
 
@@ -24,6 +21,7 @@ ctypedef struct abel_plan:
     void* methodData
 
 
+
 ############################################################################################################################################
 ### Fast Abel transforms                                                                                                                 ###
 ############################################################################################################################################
@@ -31,7 +29,7 @@ ctypedef struct abel_plan:
 
 # Create plan for Abel transform
 cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double stepSize, 
-                         int method = 4, int order = 2, double eps = 1.e-15) nogil except NULL:
+                         int method = 3, int order = 2, double eps = 1.e-15) nogil except NULL:
 
     cdef:
         abel_plan* pl
@@ -60,12 +58,10 @@ cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double st
     if pl.method == 0:
         plan_fat_trapezoidalDesingConst(pl)
     elif pl.method == 1:
-        plan_fat_trapezoidalDesingLin(pl)
-    elif pl.method == 2:
         plan_fat_hansenLawOrgLin(pl)
-    elif pl.method == 3:
+    elif pl.method == 2:
         plan_fat_trapezoidalEndCorr(pl, order = order)
-    elif pl.method == 4:
+    elif pl.method == 3:
         plan_fat_fmmTrapEndCorr(pl, order = order, eps = eps)
     else:
         with gil:
@@ -80,12 +76,10 @@ cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBou
     if pl.method == 0:
         execute_fat_trapezoidalDesingConst(pl, dataIn, dataOut, leftBoundary, rightBoundary)
     elif pl.method == 1:
-        execute_fat_trapezoidalDesingLin(pl, dataIn, dataOut, leftBoundary, rightBoundary)
-    elif pl.method == 2:
         execute_fat_hansenLawLinear(pl, dataIn, dataOut)
-    elif pl.method == 3:
+    elif pl.method == 2:
         execute_fat_trapezoidalEndCorr(pl, dataIn, dataOut, leftBoundary, rightBoundary)
-    elif pl.method == 4:
+    elif pl.method == 3:
         execute_fat_fmmTrapEndCorr(pl, dataIn, dataOut, leftBoundary, rightBoundary)
     else:
         with gil:
@@ -98,12 +92,10 @@ cdef int destroy_fat(abel_plan* pl) nogil except -1:
     if pl.method == 0:
         destroy_fat_trapezoidalDesingConst(pl)
     elif pl.method == 1:
-        destroy_fat_trapezoidalDesingLin(pl)
-    elif pl.method == 2:
         destroy_fat_hansenLawLinear(pl)
-    elif pl.method == 3:
+    elif pl.method == 2:
         destroy_fat_trapezoidalEndCorr(pl)
-    elif pl.method == 4:
+    elif pl.method == 3:
         destroy_fat_fmmTrapEndCorr(pl)
     else:
         with gil:

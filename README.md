@@ -74,7 +74,7 @@ There are two obstacles when calculating the transforms numerically: If one want
 grid points, computational complexity is *O(N^2)*. And the singularity at *r=y* is difficult to handle efficiently.
 
 The first problem can be solved by the [Fast Multipole Method](https://en.wikipedia.org/wiki/Fast_multipole_method) (FMM). The main reference
-for the implementation done here was the Chebyshev Interpolation FMM described by [Tausch](https://link.springer.com/chapter/10.1007/978-3-642-25670-7_6).
+for the implementation done here was the description of the Chebyshev Interpolation FMM by [Tausch](https://link.springer.com/chapter/10.1007/978-3-642-25670-7_6).
 This leads to an *O(N)* algorithm when applied to the (discretized and truncated) Abel transform.
 
 The second problem is often solved by removing the singularity analytically. For example for the Abel transform one can write
@@ -86,20 +86,22 @@ Now the singularity seems to be removed, but a closer look and one can see that 
 integrand, so the convergence is first order in *N* instead of second order expected when using trapezoidal rule. One can analytically remove the
 singularity in higher order with more terms, but for higher order than two the  trapezoidal rule has to be replaced by higher order quadrature rules, which then
 usually leads to the [Euler-Maclaurin formula](https://en.wikipedia.org/wiki/Euler%E2%80%93Maclaurin_formula). Since this gets kinda
-complicated in higher order (and actually possibly unstable and other more elaborate issues) it's simplier to go to end corrections which combine handling the singularity and higher order.
+complicated in higher order (and actually possibly unstable and there are other more elaborate issues) it's simpler 
+to go to end corrections which combine handling the singularity and higher order.
 These end corrections are described in several publications, but the main reference of **openAbel** was a paper by [Kapur](https://epubs.siam.org/doi/abs/10.1137/S0036142995287847).
 If data points outside of the integration interval can be provided these end corrections are arbitrary order stable. Otherwise I wouldn't
 recommend going higher than 5th order. As of now we provide the coefficients up to 20th order.
 Since the calculation of the end correction end correction coefficients requires some analytical calculations, is quite troublesome and time consuming, 
 they have been precalculated in *Mathematica* and stored efficiently, so they only have to be loaded by the **openAbel** code
-when needed. The *Mathematica* notebook can be found in this [repository though](add/end_corrections/calcEndCorr.nb).
+when needed. The *Mathematica* [notebook](add/calcEndCorr.nb) can be found in this repository as well.
 
 Overall to my knowledge there are no better methods for the described purpose.
 For specifically the inverse Abel transform of noisy data there are a lot of algorithms described in literature which perform better in
 some aspects, since they either incorporate some assumptions about the data or some kind of smoothing/filtering of the noise. A nice
 starting point for people interested in that is the Python module [PyAbel](https://github.com/PyAbel/PyAbel). However, one can use 
 **openAbel** for a noisy inverse transform as well, but one should do some manual filtering beforehand. I've had good results with
-[Maxflat filters](https://ieeexplore.ieee.org/document/7944698/) (see [exampleXXX](examples/exampleXXX) and the [Mathematica notebook](add/filtering/calcMaxFlat.nb)).
+[maximally flat filters](https://ieeexplore.ieee.org/document/7944698/) (see [example003](examples/example003_inverse.py) 
+and the *Mathematica* [notebook](add/calcMaxFlat.nb)).
 
 In the examples some more details are discussed and mentioned; in general the examples are a good way to learn how to understand and
 use the code.

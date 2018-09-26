@@ -11,7 +11,7 @@ cdef class Abel(object):
 
 
     def __init__(self, int nData, int forwardBackward, double shift, double stepSize, 
-                 int method = 4, int order = 2, double eps = 1.e-15):
+                 int method = 3, int order = 2, double eps = 1.e-15):
         
         try:
             self.plan = base.plan_fat(nData, forwardBackward, shift, stepSize, 
@@ -39,7 +39,7 @@ cdef class Abel(object):
         return numpy.asarray(dataOut)[:self.plan.nData]
 
 
-    def __del__(self):
+    def __dealloc__(self):
 
         base.destroy_fat(self.plan)
 

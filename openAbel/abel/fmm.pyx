@@ -57,6 +57,11 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
         double nInvSca, yInvSca
         int yCross, yLarge, yInvScaInt, nCross, nLarge, nInvScaInt
 
+    # Input check
+    if NULL == pl or order <= 0 or eps <= 1.e-50:
+        with gil:
+            raise ValueError('Illegal input argument.')   
+
     # Main method struct
     md = <methodData_FMM*> malloc(sizeof(methodData_FMM))
     if NULL == md:

@@ -155,7 +155,7 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
         dataOut[nData-1] = 0.
         for kk in range(model.nk):
             xk[kk] = 0.
-        for ii in range(nData-2, -1, -1):
+        for ii in range(nData-2, 0, -1):
             sn[1] = (dataInOld-dataIn[ii])/plan.stepSize
             xk[0] += -constants.piinv*mathFun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
             dataInOld = dataIn[ii]
@@ -163,7 +163,8 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
             for kk in range(1, model.nk):
                 jj = 2*(model.nk-1)*ii + 2*(kk-1)
                 xk[kk] = xk[kk]*methodData.coeffs[jj] - methodData.coeffs[jj+1]*sn[1]
-                dataOut[ii] += xk[kk] 
+                dataOut[ii] += xk[kk]
+        dataOut[0] = dataOut[1]
     else:
         with gil:
             raise NotImplementedError
