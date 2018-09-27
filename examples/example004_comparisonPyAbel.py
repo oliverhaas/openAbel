@@ -44,16 +44,11 @@ def errorAbel(nData, method, order):
 
     dx = 1./(nData-1);
     xx = np.linspace(0., 1., nData)
-    sig = 1./8.
-    
-    dataIn = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xx**2/sig**2)
 
-    dataAna = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xx**2/sig**2) * \
-              1./np.sqrt(np.pi*2.)/sig*erf(np.sqrt(1**2-xx**2)/np.sqrt(2.)/sig)
-
+    dataIn = 3./8.*np.pi*(1-xx**2)**2
+    dataAna = np.sqrt(1-xx**2)**3
     abelObj = oa.Abel(nData, 1, 0., dx, method = method, order = order)
     dataOut = abelObj.execute(dataIn)
-
     abserr = dataOut-dataAna
     relerr = np.abs(abserr/np.clip(dataAna, 1.e-300, None))
 
@@ -67,7 +62,7 @@ methods = [1, 3, 3]
 
 for ii in range(len(orders)):
 
-    (xx, abserr, relerr, dataOut, dataAna) = errorAbel(200, methods[ii], orders[ii])
+    (xx, abserr, relerr, dataOut, dataAna) = errorAbel(30, methods[ii], orders[ii])
     ax1.plot(xx, dataOut, label=str(names[ii]), color = colors[ii], 
              linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
     ax2.plot(xx, abserr, label=str(names[ii]), color = colors[ii], 
@@ -84,14 +79,10 @@ def errorAbelPyAbel(nData, method, function):
 
     dx = 1./(nData-1);
     xx = np.linspace(0., 1., nData)
-    sig = 1./8.
-    
-    dataIn = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xx**2/sig**2)
-    dataAna = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xx**2/sig**2) * \
-              1./np.sqrt(np.pi*2.)/sig*erf(np.sqrt(1**2-xx**2)/np.sqrt(2.)/sig)
 
+    dataIn = 3./8.*np.pi*(1-xx**2)**2
+    dataAna = np.sqrt(1-xx**2)**3
     dataOut = function(dataIn, basis_dir='.', dr=dx, direction="inverse")
-
     abserr = dataOut-dataAna
     relerr = np.abs(abserr/np.clip(dataAna, 1.e-300, None))
 
@@ -105,7 +96,7 @@ functions = [abel.dasch.three_point_transform, abel.dasch.two_point_transform, a
              abel.hansenlaw.hansenlaw_transform, abel.basex.basex_transform, abel.direct.direct_transform]
 for ii in range(len(methods)):
 
-    (xx, abserr, relerr, dataOut, dataAna) = errorAbelPyAbel(200, methods[ii], functions[ii])
+    (xx, abserr, relerr, dataOut, dataAna) = errorAbelPyAbel(30, methods[ii], functions[ii])
     ax1.plot(xx, dataOut, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
              linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
     ax2.plot(xx, abserr, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
@@ -140,18 +131,13 @@ def convergenceAbel(nArray, method, order):
         nData = nArray[ii]
         dx = 1./(nData-1);
         xx = np.linspace(0., 1., nData)
-        sig = 1./3.
         
-        dataIn = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xx**2/sig**2)
-        
+        dataIn = 3./8.*np.pi*(1-xx**2)**2
         abelObj = oa.Abel(nData, 1, 0., dx, method = method, order = order)
         dataOut = abelObj.execute(dataIn)
+        dataAna = np.sqrt(1-xx**2)**3
 
-        ind = int(nData/4)
-        xInd = dx*ind
-        dataAnaInd = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xInd**2/sig**2) * \
-                     1./np.sqrt(np.pi*2.)/sig*erf(np.sqrt(1**2-xInd**2)/np.sqrt(2.)/sig)
-        conv[ii] = np.abs((dataOut[ind]-dataAnaInd)/np.clip(dataAnaInd, 1.e-300, None))
+        conv[ii] = np.sqrt(np.sum(((dataOut[:-1]-dataAna[:-1])/dataAna[:-1])**2)/(nData-1))
 
     return conv
 
@@ -175,19 +161,13 @@ def convergenceAbelPyAbel(nArray, method, function):
         nData = nArray[ii]
         dx = 1./(nData-1);
         xx = np.linspace(0., 1., nData)
-        sig = 1./8.
         
-        dataIn = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xx**2/sig**2)
-        
+        dataIn = 3./8.*np.pi*(1-xx**2)**2
         dataOut = function(dataIn, basis_dir='.', dr=dx, direction="inverse")
+        dataAna = np.sqrt(1-xx**2)**3
 
-        ind = int(nData/8)
-        xInd = dx*ind
-        dataAnaInd = 1./sig/np.sqrt(2*np.pi)*np.exp(-0.5*xInd**2/sig**2) * \
-                     1./np.sqrt(np.pi*2.)/sig*erf(np.sqrt(1**2-xInd**2)/np.sqrt(2.)/sig)
-        conv[ii] = np.abs((dataOut[ind]-dataAnaInd)/np.clip(dataAnaInd, 1.e-300, None))
+        conv[ii] = np.sqrt(np.sum(((dataOut[:-1]-dataAna[:-1])/dataAna[:-1])**2)/(nData-1))
     
-
     return conv
 
 
@@ -303,13 +283,13 @@ functions = [abel.hansenlaw.hansenlaw_transform, abel.dasch.onion_peeling_transf
              abel.dasch.two_point_transform, abel.basex.basex_transform, abel.direct.direct_transform]
 nArray = 10**(np.arange(5)+2)
 for ii in range(1):
-    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 3, methods[ii], functions[ii])
+    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
     ax6.loglog(nArray, runtimes, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
 
 nArray = (10**(np.arange(3)*0.5+2)+0.5).astype(int)
-for ii in range(1,len(methods)):
-    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 3, methods[ii], functions[ii])
+for ii in range(1,len(methods)-2):
+    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
     ax5.loglog(nArray, runtimesPre, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
     ax6.loglog(nArray, runtimes, label='PA: '+str(methods[ii]), color = colors[jj+ii], 

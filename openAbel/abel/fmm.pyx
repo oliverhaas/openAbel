@@ -58,7 +58,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
         int yCross, yLarge, yInvScaInt, nCross, nLarge, nInvScaInt
 
     # Input check
-    if NULL == pl or order <= 0 or eps <= 1.e-50:
+    if NULL == pl or order <= 0 or eps <= 1.e-18:
         with gil:
             raise ValueError('Illegal input argument.')   
 
@@ -230,7 +230,8 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
             raise NotImplementedError('Method not implemented for given parameters.')
 
     # Hierarchical decomposition
-    md.pp = max(md.order+1, <int> ( -0.7*mathFun.log(eps)/mathFun.log(5.) + 1. ) )      # Somewhat empiral scaling constant
+#    md.pp = max(md.order+1, <int> ( -0.7*mathFun.log(eps)/mathFun.log(5.) + 1. ) )      # Somewhat empiral scaling constant
+    md.pp = max(4, <int> ( -0.55*mathFun.log(2.*eps) + 1. ) )                           # New empirical scaling, should be exponential
     md.pp1 = md.pp + 1
     md.nlevs = max(<int> ( mathFun.log2((pl.nData-1.)/(2.*md.pp)) + 1. ), 2)
     md.ss = max(<int> ( (pl.nData-1.)/2**md.nlevs + 1. ), 3)                            # ss ~= 2*pp theoretical

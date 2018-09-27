@@ -175,7 +175,7 @@ nArraySmall = 10**(np.arange(3)+2)
 
 for ii in range(3):
 
-    (runtimesPre, runtimes) = runtimesAbel(nArray, 3, methods[ii], orders[ii])
+    (runtimesPre, runtimes) = runtimesAbel(nArray, 5, methods[ii], orders[ii])
     ax5.loglog(nArray, runtimesPre, label=str(names[ii]), color = colors[ii], 
                linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
     ax6.loglog(nArray, runtimes, label=str(names[ii]), color = colors[ii], 
@@ -183,7 +183,7 @@ for ii in range(3):
 
 for ii in range(3,len(names)):
 
-    (runtimesPre, runtimes) = runtimesAbel(nArraySmall, 3, methods[ii], orders[ii])
+    (runtimesPre, runtimes) = runtimesAbel(nArraySmall, 5, methods[ii], orders[ii])
     ax5.loglog(nArraySmall, runtimesPre, label=str(names[ii]), color = colors[ii], 
                linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
     ax6.loglog(nArraySmall, runtimes, label=str(names[ii]), color = colors[ii], 

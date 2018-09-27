@@ -55,23 +55,33 @@ cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double st
     for ii in range(nData):
         pl.grid[ii] = (ii+shift)*stepSize
 
-    if pl.method == 0:
-        plan_fat_trapezoidalDesingConst(pl)
-    elif pl.method == 1:
-        plan_fat_hansenLawOrgLin(pl)
-    elif pl.method == 2:
-        plan_fat_trapezoidalEndCorr(pl, order = order)
-    elif pl.method == 3:
-        plan_fat_fmmTrapEndCorr(pl, order = order, eps = eps)
-    else:
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
+    with gil:
+        try:
+            if pl.method == 0:
+                plan_fat_trapezoidalDesingConst(pl)
+            elif pl.method == 1:
+                plan_fat_hansenLawOrgLin(pl)
+            elif pl.method == 2:
+                plan_fat_trapezoidalEndCorr(pl, order = order)
+            elif pl.method == 3:
+                plan_fat_fmmTrapEndCorr(pl, order = order, eps = eps)
+            else:
+                with gil:
+                    raise NotImplementedError('Method not implemented for given parameters.')
+        except:
+            free(pl.grid)
+            free(pl)
+            raise
 
     return pl
 
 
 # Execute given plan for Abel transform
 cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary = 0, int rightBoundary = 0) nogil except -1:
+
+    if NULL == pl:
+        with gil:
+            raise TypeError('Input plan is NULL.')
 
     if pl.method == 0:
         execute_fat_trapezoidalDesingConst(pl, dataIn, dataOut, leftBoundary, rightBoundary)
@@ -88,6 +98,10 @@ cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBou
 
 # Destroy given plan for Abel transform
 cdef int destroy_fat(abel_plan* pl) nogil except -1:
+
+    if NULL == pl:
+        with gil:
+            raise TypeError('Input plan is NULL.')
 
     if pl.method == 0:
         destroy_fat_trapezoidalDesingConst(pl)

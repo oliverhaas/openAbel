@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      8030,        245]
-NotebookOptionsPosition[      7425,        218]
-NotebookOutlinePosition[      7772,        233]
-CellTagsIndexPosition[      7729,        230]
+NotebookDataLength[      8042,        245]
+NotebookOptionsPosition[      7437,        218]
+NotebookOutlinePosition[      7784,        233]
+CellTagsIndexPosition[      7741,        230]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -83,7 +83,7 @@ Cell[BoxData[{
     RowBox[{"Pp1", "-", "1"}]}], ";"}], " "}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
-   RowBox[{"Q", "=", "8"}], ";", " ", 
+   RowBox[{"Q", "=", "20"}], ";", " ", 
    RowBox[{"(*", " ", 
     RowBox[{"Order", " ", "of", " ", "noise", " ", "suppression"}], " ", 
     "*)"}], "\[IndentingNewLine]", 
@@ -194,24 +194,24 @@ Cell[BoxData[{
     RowBox[{"LinearSolve", "[", 
      RowBox[{"A", ",", "b"}], "]"}]}], ";"}], 
   "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
- RowBox[{"SetPrecision", "[", 
+ RowBox[{
   RowBox[{
    RowBox[{"Chop", "[", 
     RowBox[{"res", ",", 
      RowBox[{"10", "^", 
       RowBox[{"(", 
        RowBox[{
-        RowBox[{"-", "prec"}], "/", "2"}], ")"}]}]}], "]"}], ",", "16"}], 
-  "]"}]}], "Input",
+        RowBox[{"-", "prec"}], "/", "2"}], ")"}]}]}], "]"}], "//", "N"}], "//",
+   "Reverse"}]}], "Input",
  CellChangeTimes->CompressedData["
-1:eJxTTMoPSmViYGCQBGIQ7VYfo828/bWjW/0SUxD9bON+KxAtdVjXGkSfqK0P
+1:eJxTTMoPSmViYGCQAmIQ7VYfo828/bWjW/0SUxD9bON+KxAtdVjXGkSfqK0P
 BtHb358JAdEJmVnb2UDyF3LB9JJ/GXvZgfTXmw/3geic2xmiHEDaZVK7FIjW
 kWFRANHfeI6C6bTAIg0QbWnaoQ2i5xhwloLo42k8YPqV/t0IXiB9qkYsEkQf
 Zry3WB1IB/35vAxEs/VyrQbRbz9krgHR26ynsmuA3H1zOpheEXtGQWvHa8dF
 vtqKIPqKFa+MLpDO+5srB6JnlRybffTVa0exytzFILpnbc4KED0v/NwqEP1s
 T896EH00IWYviJa5VHsYRNe8uH0cRPdf+LXtGJD2S8nfC6KnnmZ+D6KlC4x+
 gmh+pX9/QfReMWXO40D6x+GnQiD6X9RDMRC9Pqz3zykg/eVSG+tpIJ2WdU4B
-RC/qjtcC0QBWN9q6
+RC/qjtcC0X5l2sZngPSB9K3mIBoASkjjtA==
   "]]
 }, Open  ]]
 }, Open  ]]
@@ -244,7 +244,7 @@ Cell[2304, 59, 131, 2, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[2484, 67, 427, 5, 64, "Chapter"],
-Cell[2914, 74, 4483, 140, 411, "Input"]
+Cell[2914, 74, 4495, 140, 411, "Input"]
 }, Open  ]]
 }, Open  ]]
 }
