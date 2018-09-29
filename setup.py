@@ -61,8 +61,8 @@ extensions = cythonize([
                         )
 
 
-setup(name = 'openChargeState',
-      version='0.1',
+setup(name = 'openAbel',
+      version='0.2',
       packages = ['openAbel', 
                   'openAbel.abel'],
       package_data={'openAbel': ['*.pxd'], 
