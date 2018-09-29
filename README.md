@@ -109,8 +109,21 @@ use the code.
 
 ## Copyright and license
 
-The code **openAbel** is published under the GNU GPL version 3. For more information see [COPYING.md](COPYING.md). 
-Since I'm mostly interested in getting reasonable credit for my work, you can write me if you need some other arrangement.
+Copyright &copy; 2016-2018 Oliver Sebastian Haas.
+
+The code **openAbel** is published under the GNU GPL version 3. This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by the Free Software Foundation. 
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+For more information see the GNU General Public License copy provided in this repository [LICENSE](LICENSE).
+
+
+
+
+
+
+
 
 
 
