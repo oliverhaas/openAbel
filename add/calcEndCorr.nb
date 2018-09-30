@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    228896,       5290]
-NotebookOptionsPosition[    225387,       5161]
-NotebookOutlinePosition[    225733,       5176]
-CellTagsIndexPosition[    225690,       5173]
+NotebookDataLength[    231473,       5347]
+NotebookOptionsPosition[    227731,       5211]
+NotebookOutlinePosition[    228077,       5226]
+CellTagsIndexPosition[    228034,       5223]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -37,10 +37,9 @@ numerical Abel Transform.
 Some calculations actually take quite a while. In general I valued accuracy \
 over run time to ensure double precision accuracy of the final results. There \
 might be room for tweaks, but since the whole script runs over one night (and \
-then save the result and I never intent to use the script again more or less) \
-I think it\[CloseCurlyQuote]s not really necessary.
-Evaluation times estimates are for 2018 middle of the pack workstations, \
-since I used several different ones.\
+then I save the result and I never intent to use the script again, more or \
+less) I think it\[CloseCurlyQuote]s not really necessary.
+Evaluation times estimates are for 2018 middle of the pack workstations.\
 \>", "Text",
  CellChangeTimes->{{3.71846937031215*^9, 3.7184693977478733`*^9}, {
    3.719907329525364*^9, 3.719907348294083*^9}, {3.7203543216609287`*^9, 
@@ -48,7 +47,8 @@ since I used several different ones.\
    3.720934020043079*^9, 3.7209340227857037`*^9}, 3.720935156268909*^9, {
    3.720935193828916*^9, 3.720935212979561*^9}, {3.746611532181793*^9, 
    3.7466116166289387`*^9}, {3.7467940949805393`*^9, 
-   3.7467941444120865`*^9}, {3.74697344570164*^9, 3.746973627129376*^9}}],
+   3.7467941444120865`*^9}, {3.74697344570164*^9, 3.746973627129376*^9}, {
+   3.7472875599736443`*^9, 3.7472876118930387`*^9}}],
 
 Cell[CellGroupData[{
 
@@ -57,6 +57,8 @@ Cell["Initialization", "Chapter",
   3.7467941579792624`*^9, 3.7467941624281683`*^9}, {3.7467950871577196`*^9, 
   3.746795095285771*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{
   RowBox[{"SetDirectory", "[", 
@@ -64,9 +66,16 @@ Cell[BoxData[
   RowBox[{"(*", " ", 
    RowBox[{
    "Just", " ", "set", " ", "the", " ", "directory", " ", "to", " ", "the", 
-    " ", "notebook", " ", "so", " ", "coefficients", " ", "are", " ", "saved",
-     " ", "there"}], " ", "*)"}]}]], "Input",
- CellChangeTimes->{{3.746973631672824*^9, 3.746973671264349*^9}}]
+    " ", "notebook", " ", "directory", " ", "so", " ", "coefficients", " ", 
+    "are", " ", "saved", " ", 
+    RowBox[{"there", "."}]}], " ", "*)"}]}]], "Input",
+ CellChangeTimes->{{3.746973631672824*^9, 3.746973671264349*^9}, {
+  3.747287621473395*^9, 3.7472876261735177`*^9}}],
+
+Cell[BoxData["\<\"D:\\\\HESSENBOX-DA\\\\PhD\\\\code\\\\openAbel\\\\add\"\>"], \
+"Output",
+ CellChangeTimes->{3.7472887420998077`*^9}]
+}, Open  ]]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -87,11 +96,18 @@ Cell[TextData[{
 
 Cell["\<\
 These here are used for the upper end of the integration interval of the Abel \
-transform.\
+transform. In principle one could use just end corrections for smooth \
+integrands, but treating the 1/Sqrt[r-y] part even when it\[CloseCurlyQuote]s \
+not obviously close improves the error of the result at the right end of the \
+interval quite a bit. End corrections for 1/Sqrt[r^2-y^2] are in principle \
+possible as well, but they depend on too many variables (at least two of y, \
+r-y or r+y) to store efficiently, at least as far as I understood.\
 \>", "Text",
  CellChangeTimes->{{3.7469737402970743`*^9, 3.746973757565529*^9}, {
   3.7469750287011175`*^9, 3.7469750523159447`*^9}, {3.7469750828566556`*^9, 
-  3.7469751058509846`*^9}, {3.7469751428415093`*^9, 3.7469752846865005`*^9}}],
+  3.7469751058509846`*^9}, {3.7469751428415093`*^9, 3.7469752846865005`*^9}, {
+  3.74728763522897*^9, 3.747287875828151*^9}, {3.7472879345706587`*^9, 
+  3.747287963890277*^9}}],
 
 Cell[CellGroupData[{
 
@@ -372,7 +388,7 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"1393.6535799572584`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"1390.6454982616842`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{
   3.718023666032325*^9, 3.718466637344494*^9, 3.718470913615587*^9, 
    3.718515980113626*^9, 3.718620155482313*^9, 3.718620253723724*^9, 
@@ -388,7 +404,7 @@ Cell[BoxData[
    3.721374187205223*^9, 3.72137428413548*^9, 3.7213743142494497`*^9, {
    3.7213744086860523`*^9, 3.7213744329491405`*^9}, 3.721374488485334*^9, 
    3.721375589726413*^9, 3.721375636002647*^9, 3.721375688812847*^9, 
-   3.721376203620419*^9, 3.7466000412772837`*^9}]
+   3.721376203620419*^9, 3.7466000412772837`*^9, 3.7472901329640846`*^9}]
 }, Open  ]]
 }, Closed]],
 
@@ -816,7 +832,7 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"20.565014202148802`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"16.191334512601543`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{
   3.718364738843885*^9, 3.718364966677202*^9, 3.718365201279017*^9, 
    3.7184679035451326`*^9, {3.7184681381727195`*^9, 3.7184681678493977`*^9}, 
@@ -827,10 +843,10 @@ Cell[BoxData[
    3.720712582205134*^9, 3.720785309871719*^9, 3.721325144873831*^9, 
    3.7213261347232695`*^9, 3.721331558239505*^9, {3.7213734844286103`*^9, 
    3.721373498901207*^9}, 3.721376210422855*^9, 3.746596654870495*^9, 
-   3.746600061919222*^9}]
+   3.746600061919222*^9, 3.7472901492698584`*^9}]
 }, Open  ]]
 }, Closed]]
-}, Open  ]]
+}, Closed]]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -850,6 +866,14 @@ Cell[TextData[{
   3.717757220707312*^9}, {3.717757269894465*^9, 3.717757269989544*^9}, {
   3.7209340239678917`*^9, 3.720934024102963*^9}, {3.720935258283783*^9, 
   3.720935259324072*^9}}],
+
+Cell["\<\
+Singularity treatment of the forward Abel transform. For large y the \
+coefficients vary very smoothly with 1/y, so I interpolate in the final code \
+instead of pre-calculating and saving a crazy amount of coefficients.\
+\>", "Text",
+ CellChangeTimes->{{3.7472878856232853`*^9, 3.7472879150978293`*^9}, {
+  3.747287982041687*^9, 3.747288089344437*^9}}],
 
 Cell[CellGroupData[{
 
@@ -1397,12 +1421,13 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"735.879030355866`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"620.602083475004`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.721388017151552*^9, 3.721388212800432*^9, 
   3.721388283967185*^9, 3.721388586193712*^9, 3.721388755784637*^9, 
   3.721388991443563*^9, 3.7214671625447693`*^9, 3.721467389273459*^9, 
   3.721467531211226*^9, 3.721468534261793*^9, 3.721547333688397*^9, 
-  3.721547408081448*^9, 3.721547670858618*^9, 3.7466007978668985`*^9}]
+  3.721547408081448*^9, 3.721547670858618*^9, 3.7466007978668985`*^9, 
+  3.7472907699557095`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1857,14 +1882,15 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"839.8718802006141`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"772.9631498126819`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.7202636776040382`*^9, 3.720263942120448*^9, 
   3.7202708213069973`*^9, 3.72028422289999*^9, 3.720285099440126*^9, 
   3.720285131903027*^9, 3.72028525707063*^9, 3.72028573202836*^9, 
   3.720451466960186*^9, 3.7206083505273323`*^9, 3.72061685690168*^9, 
   3.720618628021886*^9, 3.7207078000962276`*^9, 3.7207819718346033`*^9, 
   3.7213265043895187`*^9, 3.721326574582593*^9, 3.721326615916994*^9, 
-  3.7214220963907003`*^9, 3.7215479528849487`*^9, 3.7466016378163514`*^9}]
+  3.7214220963907003`*^9, 3.7215479528849487`*^9, 3.7466016378163514`*^9, 
+  3.747291542991583*^9}]
 }, Open  ]]
 }, Closed]],
 
@@ -1888,7 +1914,7 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], 
-  "\n"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\n", 
  RowBox[{
   RowBox[{
    RowBox[{"prec", "=", "80"}], ";"}], " "}], "\n", 
@@ -1929,7 +1955,7 @@ Cell[BoxData[{
   RowBox[{
    RowBox[{"yIndTab", " ", "=", " ", 
     RowBox[{"1", "/", "yInvTable"}]}], ";"}], " ", 
-  "\[IndentingNewLine]"}], "\n", 
+  "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"Do", "[", "\[IndentingNewLine]", 
@@ -2270,9 +2296,10 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"149.93571205217992`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"132.26270034589908`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.721546880297613*^9, 3.721546950468796*^9, 
-  3.72154702724271*^9, 3.721547200426264*^9, 3.746601787846962*^9}]
+  3.72154702724271*^9, 3.721547200426264*^9, 3.746601787846962*^9, 
+  3.7472916753705187`*^9}]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
@@ -2293,6 +2320,12 @@ Cell[TextData[{
  CellChangeTimes->{{3.7177548018952417`*^9, 3.717754828938238*^9}, {
   3.717754866660471*^9, 3.717754883528428*^9}, {3.717757220620521*^9, 
   3.717757220707312*^9}, {3.720934025449567*^9, 3.720934025589076*^9}}],
+
+Cell["\<\
+Singularity treatment of the backward or inverse Abel transform. Same \
+reasoning as for the forward Abel transform.\
+\>", "Text",
+ CellChangeTimes->{{3.7472881087077594`*^9, 3.747288140928117*^9}}],
 
 Cell[CellGroupData[{
 
@@ -2850,7 +2883,7 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"630.1007454883317`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"567.4798220797818`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{
   3.720341609074449*^9, 3.7204526012173977`*^9, 3.720713407809924*^9, 
    3.720766769403919*^9, 3.720780660704095*^9, {3.721550321878893*^9, 
@@ -2859,7 +2892,8 @@ Cell[BoxData[
    3.721550887599*^9, 3.721550949339973*^9, 3.721551319949428*^9, 
    3.721551422319109*^9, 3.721551863522161*^9, 3.7215519164969387`*^9, 
    3.721551959924796*^9, 3.7215520896211557`*^9, 3.7215523768959093`*^9, 
-   3.7215619065057173`*^9, 3.721562220316914*^9, 3.7466024180527782`*^9}]
+   3.7215619065057173`*^9, 3.721562220316914*^9, 3.7466024180527782`*^9, 
+   3.747292242933988*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -3286,13 +3320,13 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"747.5104883644241`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"735.0768113892613`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.720341792729974*^9, 3.720453688405151*^9, 
   3.720714167618886*^9, 3.7207672354257402`*^9, 3.720778846565193*^9, 
   3.720779000179368*^9, 3.720779994238091*^9, 3.721552881335416*^9, 
-  3.746602863197279*^9, 3.746603647878724*^9}]
+  3.746602863197279*^9, 3.746603647878724*^9, 3.7472929780833397`*^9}]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -3313,7 +3347,7 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], 
-  "\[IndentingNewLine]"}], "\n", 
+  "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"prec", "=", "80"}], ";"}], " "}], "\n", 
@@ -3354,7 +3388,7 @@ Cell[BoxData[{
   RowBox[{
    RowBox[{"yIndTab", " ", "=", " ", 
     RowBox[{"1", "/", "yInvTable"}]}], ";"}], " ", 
-  "\n"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\n", 
  RowBox[{
   RowBox[{
    RowBox[{"Do", "[", "\[IndentingNewLine]", 
@@ -3648,11 +3682,11 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"116.26239362614731`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"118.74052504844778`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.721548797855873*^9, 3.721548887757689*^9, 
-  3.746603764204209*^9}]
+  3.746603764204209*^9, 3.7472930969419518`*^9}]
 }, Open  ]]
-}, Open  ]]
+}, Closed]]
 }, Open  ]]
 }, Closed]],
 
@@ -3674,6 +3708,14 @@ Cell[TextData[{
  CellChangeTimes->{{3.721021663776155*^9, 3.721021673992641*^9}, {
   3.721991465654776*^9, 3.721991467155756*^9}, {3.746534069043803*^9, 
   3.7465340895156884`*^9}}],
+
+Cell["\<\
+Singularity treatment of the modified Abel transform. This isn\
+\[CloseCurlyQuote]t really a transform defined in literature, but it pops up \
+when calculating Abel transforms of radial vector quantities. Same reasoning \
+as for the forward Abel transform for the splitting of small and large y. \
+\>", "Text",
+ CellChangeTimes->{{3.747288149294471*^9, 3.7472882353809495`*^9}}],
 
 Cell[CellGroupData[{
 
@@ -4197,7 +4239,7 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"2344.348569641744`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"2522.268087858422`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{
   3.720272657763727*^9, 3.720272708601898*^9, 3.720272758938056*^9, 
    3.720284729963998*^9, 3.72028548967353*^9, 3.7204500872663193`*^9, 
@@ -4221,7 +4263,7 @@ Cell[BoxData[
    3.721031517046961*^9, 3.7218491948596497`*^9, 3.721849952850563*^9, 
    3.721849991932398*^9, 3.7218502381415586`*^9, 3.72185082634151*^9, 
    3.721903835457176*^9, 3.721904619064303*^9, 3.7219912286814823`*^9, 
-   3.721991990799852*^9, 3.746606108600906*^9}]
+   3.721991990799852*^9, 3.746606108600906*^9, 3.7472956192036977`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -4675,16 +4717,16 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"2650.45118077146`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"3119.4756884763`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.7202636776040382`*^9, 3.720263942120448*^9, 
   3.7202708213069973`*^9, 3.72028422289999*^9, 3.720285099440126*^9, 
   3.720285131903027*^9, 3.72028525707063*^9, 3.72028573202836*^9, 
   3.720451466960186*^9, 3.7206083505273323`*^9, 3.72061685690168*^9, 
   3.720618628021886*^9, 3.7207078000962276`*^9, 3.7207819718346033`*^9, 
   3.721031652702283*^9, 3.721851513262048*^9, 3.7218535009920053`*^9, 
-  3.721992756545948*^9, 3.746608758784828*^9}]
+  3.721992756545948*^9, 3.746608758784828*^9, 3.7472987386079607`*^9}]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -4698,7 +4740,7 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], 
-  "\n"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\n", 
  RowBox[{
   RowBox[{
    RowBox[{"prec", "=", "80"}], ";"}], " "}], "\n", 
@@ -4739,7 +4781,7 @@ Cell[BoxData[{
   RowBox[{
    RowBox[{"yIndTab", " ", "=", " ", 
     RowBox[{"1", "/", "yInvTable"}]}], ";"}], " ", 
-  "\[IndentingNewLine]"}], "\n", 
+  "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"Do", "[", "\[IndentingNewLine]", 
@@ -5045,15 +5087,15 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"1203.8885036713898`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"1419.125046911335`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{3.721031780540066*^9, 3.7218535043090143`*^9, 
   3.721854063894061*^9, 3.721993186791274*^9, 3.7466094321776743`*^9, 
-  3.7466108703021965`*^9}]
+  3.7466108703021965`*^9, 3.7473001577987113`*^9}]
 }, Open  ]],
 
 Cell[BoxData[""], "Input",
  CellChangeTimes->{{3.7466036477772584`*^9, 3.746603650017318*^9}}]
-}, Open  ]]
+}, Closed]]
 }, Open  ]]
 }, Closed]],
 
@@ -5065,6 +5107,13 @@ Cell["Numerical derivative", "Chapter",
    3.7204490672561493`*^9, 3.72044907563925*^9}, {3.7209340186001673`*^9, 
    3.720934018781063*^9}, {3.720935313896204*^9, 3.7209353183993196`*^9}, 
    3.746793808239376*^9, {3.746795192464986*^9, 3.7467951946289587`*^9}}],
+
+Cell["\<\
+Numerical derivative needed for the calculation calculation of the backward \
+or inverse Abel transform. Basic central finite difference of arbitrary order \
+accuracy. \
+\>", "Text",
+ CellChangeTimes->{{3.7472883740302734`*^9, 3.74728845546145*^9}}],
 
 Cell[CellGroupData[{
 
@@ -5149,13 +5198,14 @@ Cell[BoxData[{
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"0.07444981788870397`", ",", "Null"}], "}"}]], "Output",
+  RowBox[{"0.09956925507218584`", ",", "Null"}], "}"}]], "Output",
  CellChangeTimes->{{3.721458734353923*^9, 3.7214587458686047`*^9}, 
    3.7214587789990892`*^9, 3.746611238936285*^9, 3.7466135596975975`*^9, 
    3.7467939339597497`*^9, 3.746793979998028*^9, 3.7467941726079473`*^9, {
-   3.7467950837986135`*^9, 3.7467951059631214`*^9}, 3.7467951973792763`*^9}]
+   3.7467950837986135`*^9, 3.7467951059631214`*^9}, 3.7467951973792763`*^9, 
+   3.747300157998724*^9}]
 }, Open  ]]
-}, Open  ]]
+}, Closed]]
 }, Closed]]
 }, Open  ]]
 },
@@ -5177,119 +5227,126 @@ CellTagsIndex->{}
 Notebook[{
 Cell[CellGroupData[{
 Cell[580, 22, 225, 3, 90, "Title"],
-Cell[808, 27, 1444, 23, 182, "Text"],
+Cell[808, 27, 1462, 23, 182, "Text"],
 Cell[CellGroupData[{
-Cell[2277, 54, 205, 3, 64, "Chapter"],
-Cell[2485, 59, 414, 9, 50, "Input"]
-}, Closed]],
+Cell[2295, 54, 205, 3, 64, "Chapter"],
 Cell[CellGroupData[{
-Cell[2936, 73, 528, 12, 75, "Chapter"],
-Cell[3467, 87, 338, 6, 30, "Text"],
-Cell[CellGroupData[{
-Cell[3830, 97, 256, 4, 61, "Subchapter"],
-Cell[CellGroupData[{
-Cell[4111, 105, 174, 2, 63, "Section"],
-Cell[4288, 109, 255, 3, 30, "Text"],
-Cell[CellGroupData[{
-Cell[4568, 116, 12021, 254, 601, "Input"],
-Cell[16592, 372, 1180, 18, 30, "Output"]
+Cell[2525, 61, 503, 11, 50, "Input"],
+Cell[3031, 74, 133, 2, 30, "Output"]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[17821, 396, 176, 2, 49, "Section"],
-Cell[18000, 400, 240, 4, 30, "Text"],
+Cell[3213, 82, 528, 12, 75, "Chapter"],
+Cell[3744, 96, 879, 13, 87, "Text"],
 Cell[CellGroupData[{
-Cell[18265, 408, 19291, 406, 1038, "Input"],
-Cell[37559, 816, 789, 13, 30, "Output"]
+Cell[4648, 113, 256, 4, 61, "Subchapter"],
+Cell[CellGroupData[{
+Cell[4929, 121, 174, 2, 63, "Section"],
+Cell[5106, 125, 255, 3, 30, "Text"],
+Cell[CellGroupData[{
+Cell[5386, 132, 12021, 254, 601, "Input"],
+Cell[17410, 388, 1204, 18, 70, "Output"]
+}, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[18663, 412, 176, 2, 49, "Section"],
+Cell[18842, 416, 240, 4, 30, "Text"],
+Cell[CellGroupData[{
+Cell[19107, 424, 19291, 406, 1038, "Input"],
+Cell[38401, 832, 813, 13, 70, "Output"]
+}, Open  ]]
+}, Closed]]
+}, Closed]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[39287, 853, 530, 14, 85, "Chapter"],
+Cell[39820, 869, 362, 6, 49, "Text"],
+Cell[CellGroupData[{
+Cell[40207, 879, 198, 3, 61, "Subchapter"],
+Cell[CellGroupData[{
+Cell[40430, 886, 142, 2, 63, "Section"],
+Cell[CellGroupData[{
+Cell[40597, 892, 24777, 527, 1304, "Input"],
+Cell[65377, 1421, 463, 8, 70, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[65877, 1434, 20097, 446, 1209, "Input"],
+Cell[85977, 1882, 610, 10, 70, "Output"]
+}, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[86636, 1898, 203, 5, 49, "Section"],
+Cell[86842, 1905, 219, 3, 30, "Text"],
+Cell[CellGroupData[{
+Cell[87086, 1912, 16533, 382, 1076, "Input"],
+Cell[103622, 2296, 253, 5, 70, "Output"]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[38421, 837, 530, 14, 85, "Chapter"],
+Cell[103948, 2309, 430, 12, 85, "Chapter"],
+Cell[104381, 2323, 208, 4, 30, "Text"],
 Cell[CellGroupData[{
-Cell[38976, 855, 198, 3, 61, "Subchapter"],
+Cell[104614, 2331, 174, 3, 61, "Subchapter"],
 Cell[CellGroupData[{
-Cell[39199, 862, 142, 2, 63, "Section"],
+Cell[104813, 2338, 118, 2, 63, "Section"],
 Cell[CellGroupData[{
-Cell[39366, 868, 24777, 527, 1304, "Input"],
-Cell[64146, 1397, 436, 7, 30, "Output"]
+Cell[104956, 2344, 23472, 537, 1551, "Input"],
+Cell[128431, 2883, 721, 12, 70, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[64619, 1409, 20097, 446, 1209, "Input"],
-Cell[84719, 1857, 585, 9, 30, "Output"]
+Cell[129189, 2900, 18003, 418, 1266, "Input"],
+Cell[147195, 3320, 368, 6, 70, "Output"]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[85353, 1872, 203, 5, 49, "Section"],
-Cell[85559, 1879, 219, 3, 30, "Text"],
+Cell[147612, 3332, 181, 5, 49, "Section"],
+Cell[147796, 3339, 167, 2, 30, "Text"],
 Cell[CellGroupData[{
-Cell[85803, 1886, 16533, 382, 1076, "Input"],
-Cell[102339, 2270, 226, 4, 30, "Output"]
+Cell[147988, 3345, 13221, 335, 1076, "Input"],
+Cell[161212, 3682, 207, 4, 70, "Output"]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[102638, 2282, 430, 12, 85, "Chapter"],
+Cell[161492, 3694, 462, 15, 101, "Chapter"],
+Cell[161957, 3711, 388, 6, 49, "Text"],
 Cell[CellGroupData[{
-Cell[103093, 2298, 174, 3, 61, "Subchapter"],
+Cell[162370, 3721, 99, 1, 61, "Subchapter"],
 Cell[CellGroupData[{
-Cell[103292, 2305, 118, 2, 63, "Section"],
+Cell[162494, 3726, 145, 2, 63, "Section"],
 Cell[CellGroupData[{
-Cell[103435, 2311, 23472, 537, 1551, "Input"],
-Cell[126910, 2850, 695, 11, 30, "Output"]
+Cell[162664, 3732, 23961, 505, 1285, "Input"],
+Cell[186628, 4239, 1757, 26, 70, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[127642, 2866, 18003, 418, 1266, "Input"],
-Cell[145648, 3286, 344, 6, 70, "Output"]
-}, Open  ]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[146041, 3298, 181, 5, 63, "Section"],
-Cell[146225, 3305, 167, 2, 30, "Text"],
-Cell[CellGroupData[{
-Cell[146417, 3311, 13221, 335, 1076, "Input"],
-Cell[159641, 3648, 183, 4, 70, "Output"]
-}, Open  ]]
-}, Open  ]]
+Cell[188422, 4270, 19830, 445, 1209, "Input"],
+Cell[208255, 4717, 579, 9, 70, "Output"]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[159897, 3660, 462, 15, 101, "Chapter"],
+Cell[208883, 4732, 143, 2, 49, "Section"],
 Cell[CellGroupData[{
-Cell[160384, 3679, 99, 1, 61, "Subchapter"],
-Cell[CellGroupData[{
-Cell[160508, 3684, 145, 2, 63, "Section"],
-Cell[CellGroupData[{
-Cell[160678, 3690, 23961, 505, 1285, "Input"],
-Cell[184642, 4197, 1733, 26, 30, "Output"]
+Cell[209051, 4738, 13791, 347, 1076, "Input"],
+Cell[222845, 5087, 281, 5, 70, "Output"]
 }, Open  ]],
-Cell[CellGroupData[{
-Cell[186412, 4228, 19830, 445, 1209, "Input"],
-Cell[206245, 4675, 556, 9, 30, "Output"]
-}, Open  ]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[206850, 4690, 143, 2, 63, "Section"],
-Cell[CellGroupData[{
-Cell[207018, 4696, 13791, 347, 1076, "Input"],
-Cell[220812, 5045, 258, 5, 30, "Output"]
-}, Open  ]],
-Cell[221085, 5053, 94, 1, 30, "Input"]
-}, Open  ]]
+Cell[223141, 5095, 94, 1, 30, "Input"]
+}, Closed]]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[221240, 5061, 402, 5, 53, "Chapter"],
+Cell[223296, 5103, 402, 5, 53, "Chapter"],
+Cell[223701, 5110, 259, 5, 49, "Text"],
 Cell[CellGroupData[{
-Cell[221667, 5070, 205, 3, 61, "Subchapter"],
-Cell[221875, 5075, 223, 3, 30, "Text"],
+Cell[223985, 5119, 205, 3, 61, "Subchapter"],
+Cell[224193, 5124, 223, 3, 30, "Text"],
 Cell[CellGroupData[{
-Cell[222123, 5082, 2820, 65, 240, "Input"],
-Cell[224946, 5149, 389, 6, 30, "Output"]
+Cell[224441, 5131, 2820, 65, 240, "Input"],
+Cell[227264, 5198, 415, 7, 70, "Output"]
 }, Open  ]]
-}, Open  ]]
+}, Closed]]
 }, Closed]]
 }, Open  ]]
 }
