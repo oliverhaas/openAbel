@@ -168,7 +168,6 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
     else:
         with gil:
             raise NotImplementedError
-        return -1
 
     free(xk)
 

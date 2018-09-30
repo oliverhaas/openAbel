@@ -306,10 +306,8 @@ ax6.set_ylabel('run time main computation in s')
 ax6.grid(True)
 
 
-
 mpl.tight_layout()
-mpl.subplots_adjust(top = 0.9)
-fig.suptitle('Comparison of different methods/orders of Abel transforms', fontsize=16)
+mpl.savefig('example005_comparisonPyAbel.png', dpi=300)
 
 mpl.show()
 

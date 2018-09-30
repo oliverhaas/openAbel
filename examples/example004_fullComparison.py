@@ -1,6 +1,7 @@
 ############################################################################################################################################
-# Example to showcase the different methods and orders.
+# Example to showcase the different methods and orders, including convergence study and run times.
 # Forward transform is done here, but similar results apply to the backward transform.
+# This example takes possibly minutes to run, so beware
 ############################################################################################################################################
 
 
@@ -65,7 +66,7 @@ methods = [0, 1, 2, 3, 3, 3, 3]
 
 for ii in range(len(orders)):
 
-    (xx, abserr, relerr, dataOut, dataAna) = errorAbel(100, methods[ii], orders[ii])
+    (xx, abserr, relerr, dataOut, dataAna) = errorAbel(40, methods[ii], orders[ii])
     ax1.plot(xx, dataOut, label = str(names[ii]), color = colors[ii], 
              linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
     ax2.plot(xx, abserr, label = str(names[ii]), color = colors[ii], 
@@ -78,17 +79,17 @@ ax1.plot(xx, dataAna, label = 'analytical', color = colors[ii],
          linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
 
 ax1.legend()
-ax1.set_xlabel('radius')
+ax1.set_xlabel('y')
 ax1.set_ylabel('value')
 ax1.grid(True)
 
 ax2.legend()
-ax2.set_xlabel('radius')
+ax2.set_xlabel('y')
 ax2.set_ylabel('absolute error')
 ax2.grid(True)
 
 ax3.legend()
-ax3.set_xlabel('radius')
+ax3.set_xlabel('y')
 ax3.set_ylabel('relative error')
 ax3.grid(True)
 
@@ -189,7 +190,6 @@ for ii in range(3,len(names)):
     ax6.loglog(nArraySmall, runtimes, label=str(names[ii]), color = colors[ii], 
                linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
 
-
 ax5.legend()
 ax5.set_xlabel('number of data points')
 ax5.set_ylabel('run time pre computation in s')
@@ -201,10 +201,8 @@ ax6.set_ylabel('run time main computation in s')
 ax6.grid(True)
 
 
-
 mpl.tight_layout()
-mpl.subplots_adjust(top = 0.9)
-fig.suptitle('Comparison of different methods/orders of Abel transforms', fontsize=16)
+mpl.savefig('example004_fullComparison.png', dpi=300)
 
 mpl.show()
 

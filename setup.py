@@ -7,7 +7,8 @@ ecadef = ["-O3", "-Wunused-but-set-variable"]
 #ecadef = ["-O0", "-g", "-Wunused-but-set-variable"]
 iddef = ["/usr/local/include/", "./"]
 lddef = ["/usr/local/lib/"]
-compdir = {'boundscheck': False, 'nonecheck': False, 'wraparound': False, 'cdivision': True, 'profile': False, 'infer_types': False}
+compdir = {'boundscheck': False, 'nonecheck': False, 'wraparound': False, 'cdivision': True, 
+           'profile': False, 'infer_types': False, 'binding': True}
 
 
 extensions = cythonize([

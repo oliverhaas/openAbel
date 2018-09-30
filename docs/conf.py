@@ -14,7 +14,15 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, os.path.abspath('.'))
+# sys.path.insert(0, os.path.abspath('../openAbel/abel'))
+
+
+# Small monkey patch to make Cython autodoc possible
+# See https://opendreamkit.org/2017/06/09/CythonSphinx/
+def isfunction(obj):
+    return hasattr(type(obj), "__code__")
+import inspect
+inspect.isfunction = isfunction
 
 
 # -- Project information -----------------------------------------------------
