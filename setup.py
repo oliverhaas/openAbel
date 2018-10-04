@@ -3,8 +3,8 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
+
 ecadef = ["-O3", "-Wunused-but-set-variable"]
-#ecadef = ["-O0", "-g", "-Wunused-but-set-variable"]
 iddef = ["/usr/local/include/", "./"]
 lddef = ["/usr/local/lib/"]
 compdir = {'boundscheck': False, 'nonecheck': False, 'wraparound': False, 'cdivision': True, 
@@ -12,16 +12,6 @@ compdir = {'boundscheck': False, 'nonecheck': False, 'wraparound': False, 'cdivi
 
 
 extensions = cythonize([
-                        Extension('openAbel.__init__',
-                            sources=['openAbel/__init__.pyx'],
-                            extra_compile_args = ecadef,
-                            include_dirs = iddef
-                            ),
-                        Extension('openAbel.abel.__init__',
-                            sources=['openAbel/abel/__init__.pyx'],
-                            extra_compile_args = ecadef,
-                            include_dirs = iddef
-                            ),
                         Extension('openAbel.abel.base',
                             sources=['openAbel/abel/base.pyx'],
                             extra_compile_args = ecadef,

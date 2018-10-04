@@ -15,6 +15,7 @@ Most importantly one can see the fast convergence of the higher order methods in
 computational complexity of the main methods in the bottom middle and right plots.
 
 
+
 .. literalinclude:: ../../examples/example004_fullComparison.py
     :linenos:
     :language: python

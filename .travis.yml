@@ -1,6 +1,6 @@
 language: python
 install:
-- pip install --only-binary=numpy,scipy,cython,matplotlib numpy scipy cython matplotlib
+- pip install --only-binary=numpy,scipy,cython,nose numpy scipy cython nose
 - python setup.py install
 script:
-- python -c 'import openAbel'
+- nosetests tests/
