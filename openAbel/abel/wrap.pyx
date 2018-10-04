@@ -47,7 +47,6 @@ cdef class Abel(object):
             self.plan = base.plan_fat(nData, forwardBackward, shift, stepSize, 
                                       method = method, order = order, eps = eps)
         except:
-            print "Unexpected error in Cython routines:", sys.exc_info()[0], sys.exc_info()[1]
             raise
 
 
@@ -91,7 +90,6 @@ cdef class Abel(object):
         try:
             base.execute_fat(self.plan, &dataInTemp[0], &dataOut[0], leftBoundary = leftBoundary, rightBoundary = rightBoundary)
         except:
-            print "Unexpected error in Cython routines:", sys.exc_info()[0], sys.exc_info()[1]
             raise        
 
         return numpy.asarray(dataOut)[:self.plan.nData]

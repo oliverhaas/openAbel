@@ -100,8 +100,7 @@ cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBou
 cdef int destroy_fat(abel_plan* pl) nogil except -1:
 
     if NULL == pl:
-        with gil:
-            raise TypeError('Input plan is NULL.')
+        return 1
 
     if pl.method == 0:
         destroy_fat_trapezoidalDesingConst(pl)

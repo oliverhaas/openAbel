@@ -1,1 +1,1 @@
-from openAbel.abel.wrap import Abel
+from abel import Abel
