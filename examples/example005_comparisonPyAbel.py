@@ -288,7 +288,7 @@ for ii in range(1):
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
 
 nArray = (10**(np.arange(3)*0.5+2)+0.5).astype(int)
-for ii in range(1,len(methods)-2):
+for ii in range(1,len(methods)):
     (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
     ax5.loglog(nArray, runtimesPre, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)

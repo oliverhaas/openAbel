@@ -84,7 +84,7 @@ cdef int plan_fat_hansenLawLinear(abel_plan* plan) nogil:
                 methodData.coeffs[jj+2] = 2.*methodData.model.hk[kk]*(1.-methodData.coeffs[jj]*xjp1oxj**2)*plan.grid[ii]**2 / \
                                           (methodData.model.lamk[kk]+2.)
 
-    elif plan.forwardBackward == 1:
+    elif plan.forwardBackward == 1 or plan.forwardBackward == 2:
 
         methodData.coeffs = <double*> malloc(2*plan.nData*(methodData.model.nk-1)*sizeof(double))
         if NULL == methodData.coeffs:
@@ -110,7 +110,6 @@ cdef int plan_fat_hansenLawLinear(abel_plan* plan) nogil:
     else:
         with gil:
             raise NotImplementedError
-        return -1
 
     return 0
 
@@ -157,6 +156,21 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
             xk[kk] = 0.
         for ii in range(nData-2, 0, -1):
             sn[1] = (dataInOld-dataIn[ii])/plan.stepSize
+            xk[0] += -constants.piinv*mathFun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
+            dataInOld = dataIn[ii]
+            dataOut[ii] = xk[0]
+            for kk in range(1, model.nk):
+                jj = 2*(model.nk-1)*ii + 2*(kk-1)
+                xk[kk] = xk[kk]*methodData.coeffs[jj] - methodData.coeffs[jj+1]*sn[1]
+                dataOut[ii] += xk[kk]
+        dataOut[0] = dataOut[1]
+    elif plan.forwardBackward == 2:
+        dataInOld = dataIn[nData-1]
+        dataOut[nData-1] = 0.
+        for kk in range(model.nk):
+            xk[kk] = 0.
+        for ii in range(nData-2, 0, -1):
+            sn[1] = (dataIn[ii]+dataIn[ii-1])*0.5
             xk[0] += -constants.piinv*mathFun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
             dataInOld = dataIn[ii]
             dataOut[ii] = xk[0]

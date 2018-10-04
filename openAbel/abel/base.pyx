@@ -3,10 +3,10 @@
 from libc.stdlib cimport malloc, free
 
 from openAbel.abel.hansenLaw cimport plan_fat_hansenLawOrgLin, execute_fat_hansenLawLinear, destroy_fat_hansenLawLinear
-from openAbel.abel.desingQuad cimport plan_fat_trapezoidalDesingConst, execute_fat_trapezoidalDesingConst, \
-                                      destroy_fat_trapezoidalDesingConst, \
-                                      plan_fat_trapezoidalEndCorr, execute_fat_trapezoidalEndCorr, \
-                                      destroy_fat_trapezoidalEndCorr
+from openAbel.abel.trap cimport plan_fat_trapezoidalDesingConst, execute_fat_trapezoidalDesingConst, \
+                                destroy_fat_trapezoidalDesingConst, \
+                                plan_fat_trapezoidalEndCorr, execute_fat_trapezoidalEndCorr, \
+                                destroy_fat_trapezoidalEndCorr
 from openAbel.abel.fmm cimport plan_fat_fmmTrapEndCorr, execute_fat_fmmTrapEndCorr, destroy_fat_fmmTrapEndCorr
 
 

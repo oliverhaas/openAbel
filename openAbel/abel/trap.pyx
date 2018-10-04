@@ -8,6 +8,7 @@ from libc.stdlib cimport malloc, calloc, free
 from libc.string cimport memset
 cimport scipy.linalg.cython_blas as blas
 
+import openAbel.abel.coeffs as coeffs
 
 cimport openAbel.mathFun as mathFun
 cimport openAbel.constants as constants
@@ -332,13 +333,13 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except 
     if pl.forwardBackward == -1:    # Forward transform
         with gil:
             try:
-                coeffs_sing_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqLin_sing_large_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_small_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_large_" + "%02d" % order + ".npy")
+                coeffs_sing_large_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_large', order)
+                coeffs_nonsing_sqrt_small_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqLin_sing_small_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqLin_sing_small_halfShift_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small_halfShift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -374,13 +375,13 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except 
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:    # Backward transform
         with gil:
             try:
-                coeffs_sing_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSq_sing_large_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_small_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_large_" + "%02d" % order + ".npy")
+                coeffs_sing_large_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_large', order)
+                coeffs_nonsing_sqrt_small_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSq_sing_small_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSq_sing_small_halfShift_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small_halfShift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -415,13 +416,13 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except 
     elif pl.forwardBackward == -2:    # Modified forward transform for 1/r^2 singular functions
         with gil:
             try:
-                coeffs_sing_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqY2OR2_sing_large_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_small_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_large_" + "%02d" % order + ".npy")
+                coeffs_sing_large_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_large', order)
+                coeffs_nonsing_sqrt_small_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqY2OR2_sing_small_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift_', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -472,7 +473,7 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except 
                 raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
         with gil:
             try:
-                coeffs_filter_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % (md.orderFilter-1) + ".npy")
+                coeffs_filter_memView = coeffs.getCoeffs('coeffs_deriv_smooth', md.orderFilter-1)
             except:
                 destroy_fat_trapezoidalEndCorr(pl)
                 raise

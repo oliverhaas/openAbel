@@ -9,6 +9,8 @@ from libc.string cimport memset
 
 cimport scipy.linalg.cython_blas as blas
 
+import openAbel.abel.coeffs as coeffs
+
 cimport openAbel.mathFun as mathFun
 cimport openAbel.constants as constants
 from openAbel.abel.base cimport abel_plan
@@ -99,13 +101,13 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
     if pl.forwardBackward == -1:    # Forward transform
         with gil:
             try:
-                coeffs_sing_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqLin_sing_large_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_small_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_large_" + "%02d" % order + ".npy")
+                coeffs_sing_large_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_large', order)
+                coeffs_nonsing_sqrt_small_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqLin_sing_small_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqLin_sing_small_halfShift_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small_halfShift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -141,13 +143,13 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:    # Backward transform
         with gil:
             try:
-                coeffs_sing_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSq_sing_large_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_small_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_large_" + "%02d" % order + ".npy")
+                coeffs_sing_large_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_large', order)
+                coeffs_nonsing_sqrt_small_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSq_sing_small_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSq_sing_small_halfShift_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small_halfShift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -182,13 +184,13 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
     elif pl.forwardBackward == -2:    # Modified forward transform for 1/r^2 singular functions
         with gil:
             try:
-                coeffs_sing_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqY2OR2_sing_large_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_small_" + "%02d" % order + ".npy")
-                coeffs_nonsing_sqrt_large_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrt_nonsing_large_" + "%02d" % order + ".npy")
+                coeffs_sing_large_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_large', order)
+                coeffs_nonsing_sqrt_small_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_memView = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqY2OR2_sing_small_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift_" + "%02d" % order + ".npy")
+                    coeffs_sing_small_memView = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift_', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -230,8 +232,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
             raise NotImplementedError('Method not implemented for given parameters.')
 
     # Hierarchical decomposition
-#    md.pp = max(md.order+1, <int> ( -0.7*mathFun.log(eps)/mathFun.log(5.) + 1. ) )      # Somewhat empiral scaling constant
-    md.pp = max(4, <int> ( -0.55*mathFun.log(2.*eps) + 1. ) )                           # New empirical scaling, should be exponential
+    md.pp = max(4, <int> ( -0.55*mathFun.log(2.*eps) + 1. ) )                           # Empirical scaling, should be exponential
     md.pp1 = md.pp + 1
     md.nlevs = max(<int> ( mathFun.log2((pl.nData-1.)/(2.*md.pp)) + 1. ), 2)
     md.ss = max(<int> ( (pl.nData-1.)/2**md.nlevs + 1. ), 3)                            # ss ~= 2*pp theoretical
@@ -380,7 +381,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = 1.e-
                 raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
         with gil:
             try:
-                coeffs_filter_memView = numpy.load(os.path.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % (md.orderFilter-1) + ".npy")
+                coeffs_filter_memView = coeffs.getCoeffs('coeffs_deriv_smooth', md.orderFilter-1)
             except:
                 destroy_fat_fmmTrapEndCorr(pl)
                 raise

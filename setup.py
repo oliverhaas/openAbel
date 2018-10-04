@@ -32,8 +32,8 @@ extensions = cythonize([
                             extra_compile_args = ecadef,
                             include_dirs = iddef
                             ),
-                        Extension('openAbel.abel.desingQuad',
-                            sources=['openAbel/abel/desingQuad.pyx'],
+                        Extension('openAbel.abel.trap',
+                            sources=['openAbel/abel/trap.pyx'],
                             extra_compile_args = ecadef,
                             include_dirs = iddef
                             ),
@@ -67,7 +67,7 @@ setup(name = 'openAbel',
       packages = ['openAbel', 
                   'openAbel.abel'],
       package_data={'openAbel': ['*.pxd'], 
-                    'openAbel.abel': ['*.pxd','data/*']},
+                    'openAbel.abel': ['*.pxd','coeffsData/*']},
       cmdclass = {'build_ext': build_ext},
       ext_modules = extensions
      )
