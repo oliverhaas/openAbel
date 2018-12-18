@@ -15,7 +15,9 @@ Start by having a look at the :doc:`README <readmeLink>`, at the
    :maxdepth: 2
    
    readmeLink
+   transformTypes
    transformMethods
    examples
+   remarks
 
 

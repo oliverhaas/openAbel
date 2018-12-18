@@ -9,6 +9,7 @@ from openAbel.abel.trap cimport plan_fat_trapezoidalDesingConst, execute_fat_tra
                                 destroy_fat_trapezoidalEndCorr
 from openAbel.abel.fmm cimport plan_fat_fmmTrapEndCorr, execute_fat_fmmTrapEndCorr, destroy_fat_fmmTrapEndCorr
 
+cimport openAbel.constants as const
 
 
 ctypedef struct abel_plan:
@@ -29,7 +30,7 @@ ctypedef struct abel_plan:
 
 # Create plan for Abel transform
 cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double stepSize, 
-                         int method = 3, int order = 2, double eps = 1.e-15) nogil except NULL:
+                         int method = 3, int order = 2, double eps = 1.e3*const.machineEpsilon) nogil except NULL:
 
     cdef:
         abel_plan* pl

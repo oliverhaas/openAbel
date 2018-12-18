@@ -149,7 +149,7 @@ some aspects, since they either incorporate some assumptions about the data or s
 starting point for people interested in those methods is the Python module `PyAbel <https://github.com/PyAbel/PyAbel>`_. 
 
 However, there is no reason not to combine the methods provided in **openAbel** with some kind of filering for nicer results.
-I've had good results with`maximally flat filters <https://ieeexplore.ieee.org/document/7944698/>_, as seen
+I've had good results with`maximally flat filters <https://ieeexplore.ieee.org/document/7944698/>`_, as seen
 in `example003_noisyBackward <https://openabel.readthedocs.io/en/latest/examples/example003.html>`_, and with additional material
 in the `Mathematica notebook <https://github.com/oliverhaas/openAbel/tree/master/add/calcEndCorr.nb>`_.
 
