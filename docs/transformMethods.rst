@@ -4,18 +4,6 @@ Transform Methods
 
 In **openAbel** there are a couple of different algorithms for the calculation of the Abel transforms implemented, although most of them are just for comparisons and is it recommended to only use the default method. 
 
-Due to the equispaced discretization all methods truncate the Abel transform integral, e.g. for the forward Abel transform 
-
-.. math::
-        F(y)=2\int_y^\infty\frac{f(r)r}{\sqrt{r^2-y^2}}dr\approx2\int_y^R\frac{f(r)r}{\sqrt{r^2-y^2}}dr\; .
-        
-This is sometimes called finite Abel transform. Since :math:`f(r)` often has compact support or decays very quickly (and R can
-be chosen very large with a fast transform method) this usually introduces an arbitrary small error.
-
-It should be noted that often one can use variable transformations or other discretizations to simplify the calculation of the above
-integrals. However, often one is interested in exactly the in **openAbel** implemented case on equispaced discretization. This is often due to the 
-`relation of the Abel transform with the Fourier and Hankel transforms <https://en.wikipedia.org/wiki/Abel_transform#Relationship_to_the_Fourier_and_Hankel_transforms>`_ and the desire to use the same discretization as the FFT or a discrete convolution, or just by the given data (e.g. from experiments).
-
 The main two obstacles when calculating the transforms numerically are the singularity at :math:`r=y` and the dependence of the 
 result on :math:`y`, meaning computational complexity is quadratic :math:`O(N^2)` if one naively integrates. The main difference
 between the implemented transforms is how those two issues are treated.
@@ -86,7 +74,7 @@ is in practice not possible to achieve with high accuracy and reasonable :math:`
 limitation of the method, and the original space state model approxmation has a typical relative
 error of :math:`10^{-3}` at best -- then it just stops converging with increasing :math:`N`. If one 
 ignores several details that makes the method apparently linear :math:`O(N)` computational complexity,
-so it is implemented here for comparisons.
+so it is implemented here for comparisons. More comments in the `remarks <https://openabel.readthedocs.io/en/latest/remarks.html>`_.
 
 
 Trapezoidal Rule with End Corrections
@@ -137,20 +125,22 @@ and applied by `Tausch <https://link.springer.com/chapter/10.1007/978-3-642-2567
 In principle the FMM uses a hierarchic decomposition to combine a linear amount of direct short-range contributions
 and smooth approximations of long-range contributions with efficient reuse of intermediate results to get in total 
 a linear :math:`O(N)` computational complexity algorithm. This method thus provides extremely fast convergence and
-fast computational, and is optimal for the intended purpose.
+fast computation, and is optimal in that sense for the intended purpose.
 
 
 
 Remarks on Transforms of Noisy Data
 --------------
 
-For specifically the inverse Abel transform of noisy data there are a lot of algorithms described in literature which perform better in
+For specifically the inverse Abel transform of noisy data (e.g. experimental data) there are a lot of algorithms described in literature which might perform better in
 some aspects, since they either incorporate some assumptions about the data or some kind of smoothing/filtering of the noise. A nice
 starting point for people interested in those methods is the Python module `PyAbel <https://github.com/PyAbel/PyAbel>`_. 
 
 However, there is no reason not to combine the methods provided in **openAbel** with some kind of filering for nicer results.
-I've had good results with`maximally flat filters <https://ieeexplore.ieee.org/document/7944698/>`_, as seen
+I've had good results with `maximally flat filters <https://ieeexplore.ieee.org/document/7944698/>`_, as seen
 in `example003_noisyBackward <https://openabel.readthedocs.io/en/latest/examples/example003.html>`_, and with additional material
-in the `Mathematica notebook <https://github.com/oliverhaas/openAbel/tree/master/add/calcEndCorr.nb>`_.
+in the `Mathematica notebook <https://github.com/oliverhaas/openAbel/tree/master/add/calcMaxFlat.nb>`_.
+
+Overall even in this special case there are no algorithms to my knowledge which perform inherently better than the default algorithms of **openAbel** by default.
 
 

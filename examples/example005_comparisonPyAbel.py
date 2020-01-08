@@ -181,7 +181,7 @@ for ii in range(1):
     ax4.loglog(nArray, conv, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
 
-nArray = (10**(np.arange(3)*0.5+2)+0.5).astype(int)
+nArray = (10**(np.arange(4)*0.5+2)+0.5).astype(int)
 for ii in range(1,len(methods)):
     conv = convergenceAbelPyAbel(nArray, methods[ii], functions[ii])
     ax4.loglog(nArray, conv, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
@@ -238,7 +238,7 @@ for ii in range(3):
     ax6.loglog(nArray, runtimes, label=str(names[ii]), color = colors[ii], 
                linestyle = linestyles[ii], marker = markers[ii], linewidth=lw)
 
-nArray = 10**(np.arange(3)+2)
+nArray = 10**(np.arange(4)+2)
 for ii in range(3,len(names)):
 
     (runtimesPre, runtimes) = runtimesAbel(nArray, 1, methods[ii], orders[ii])
@@ -287,7 +287,7 @@ for ii in range(1):
     ax6.loglog(nArray, runtimes, label='PA: '+str(methods[ii]), color = colors[jj+ii], 
                linestyle = linestyles[jj+ii], marker = markers[jj+ii], linewidth=lw)
 
-nArray = (10**(np.arange(3)*0.5+2)+0.5).astype(int)
+nArray = (10**(np.arange(4)*0.5+2)+0.5).astype(int)
 for ii in range(1,len(methods)):
     (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
     ax5.loglog(nArray, runtimesPre, label='PA: '+str(methods[ii]), color = colors[jj+ii], 

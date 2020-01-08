@@ -20,7 +20,7 @@ Introduction
 
 
 The main goal of **openAbel** is to provide fast and efficients Abel transforms of equispaced data
-from smooth functions in Python with all actual calculations done in Cython. 
+in Python with all actual calculations done in Cython.
 The most useful methods implemented in this module for that purpose use the Fast Multipole Method combined with
 arbitrary order end correction of the trapezoidal rule to achieve small errors and fast convergence,
 as well as linear computational complexity. A couple of other methods are implemented for comparisons.
@@ -48,22 +48,20 @@ The code was run on several Ubuntu systems without problems. More specific I'm r
 Python modules, which were all installed the standard way with either :code:`sudo apt install libName` or 
 :code:`sudo pip install moduleName`. 
 
-- Python 2.7.12
+- Python 3.5.2
 
-- Numpy 1.14.0
+- Numpy 1.18.1
 
-- Scipy 1.1.0
+- Scipy 1.4.1
 
-- Cython 0.23.4
+- Cython 0.29.14
 
-- Matplotlib 2.2.0
-
-- gcc 5.4.0
+- Matplotlib 3.0.3
 
 
 As usual newer versions of the libraries should work as well, and many older versions will too. I'm sure it's possible to
 get **openAbel** to run on vastly different systems, like e.g. Windows systems, but obviously I haven't extensively tested
-different setups.
+majorly different setups.
 
 
 
@@ -84,9 +82,11 @@ as described by `Tausch <https://link.springer.com/chapter/10.1007/978-3-642-256
 specifically for the Abel transform similar to `Kapur <https://epubs.siam.org/doi/abs/10.1137/S0036142995287847>`_. 
 If data points outside of the integration interval can be provided these end corrections are arbitrary order stable
 and we provide coefficients up to 20th order, otherwise it's recommended to use at most 5th order.
-The FMM leads to an linear *O(N)* computational complexity algorithm.
+The FMM leads to a linear *O(N)* computational complexity algorithm.
 
-In both error and computational complexity there is no better existing method for the intended purpose to my knowledge.
+In both error and computational complexity there is no better existing method for the intended purpose to my knowledge. I should really
+stress that there are dozens of publications and methods out there which claim to be fast and/or accurate, but don't get anywhere close to
+**openAbel** in those aspects.
 
 For more information see the **openAbel** documentation on the 
 `transform methods <https://openabel.readthedocs.io/en/latest/transformMethods.html>`_ and 
@@ -96,7 +96,7 @@ For more information see the **openAbel** documentation on the
 Copyright and License
 --------------
 
-Copyright 2016-2018 Oliver Sebastian Haas.
+Copyright 2016-2020 Oliver Sebastian Haas.
 
 The code **openAbel** is published under the GNU GPL version 3. This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by the Free Software Foundation. 

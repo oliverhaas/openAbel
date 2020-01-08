@@ -1,6 +1,6 @@
 language: python
 install:
-- pip install --only-binary=numpy,scipy,cython,nose numpy scipy cython nose
+- pip install --only-binary=numpy,scipy,cython,nose,matplotlib numpy scipy cython nose matplotlib
 - python setup.py install
 script:
 - cd tests/

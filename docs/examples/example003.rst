@@ -1,7 +1,7 @@
 example003_noisyBackward
 =================
 
-This example shows how to filter and transform noisy data.
+This example shows how to filter and transform noisy data. It illustrates how noisy input data can lead to large errors of the the backward transform result, and how filters can be used to -- at elast visually -- alleviate those errors.
    
    
 .. figure:: example003_noisyBackward.png

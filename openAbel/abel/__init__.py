@@ -1,1 +1,1 @@
-from wrap import Abel
+from .wrap import Abel

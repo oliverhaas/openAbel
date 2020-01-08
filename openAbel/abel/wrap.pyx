@@ -1,11 +1,9 @@
 
 
-import sys
 import numpy
 
-cimport base
-
-
+cimport openAbel.abel.base as base
+cimport openAbel.constants as const
 
 cdef class Abel(object):
     """
@@ -22,7 +20,7 @@ cdef class Abel(object):
         - '1' backward (or inverse) Abel transform
         - '2' backward (or inverse) Abel transform with the 
           derivative already supplied by user
-        - '-2' modified Abel transform.
+        - '-2' modified forward Abel transform.
     shift : double
         Shift of the first sample away from 0 in units of stepSize.
         Usually this is either 0 or 0.5, and some methods only support these
@@ -41,7 +39,7 @@ cdef class Abel(object):
     """
 
     def __init__(self, int nData, int forwardBackward, double shift, double stepSize, 
-                 int method = 3, int order = 2, double eps = 1.e-15):
+                 int method = 3, int order = 2, double eps = 1.e1*const.machineEpsilon):
         
         try:
             self.plan = base.plan_fat(nData, forwardBackward, shift, stepSize, 

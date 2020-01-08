@@ -2,8 +2,9 @@ example005_comparisonPyAbel
 =================
 
 This example provides a rather extensive comparison of different **openAbel** methods with
-`PyAbel <https://www.github.com/PyAbel/PyAbel>`_ methods. The output figure is given below.
-   
+`PyAbel <https://www.github.com/PyAbel/PyAbel>`_ methods. It shows how well the main methods of **openAbel** perform in every regard, especially if the input data is sufficiently smooth. 
+
+Since **PyAbel**'s focus is on the backward (or inverse) transform, this example does it as well.
    
 .. figure:: example005_comparisonPyAbel.png
    :align: center
@@ -11,7 +12,7 @@ This example provides a rather extensive comparison of different **openAbel** me
 
    Comparison of different openAbel with PyAbel methods.
 
-Since **PyAbel**'s focus is on the backward (or inverse) transform, this example does it as well.
+
 
 
 .. literalinclude:: ../../examples/example005_comparisonPyAbel.py

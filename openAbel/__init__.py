@@ -1,1 +1,1 @@
-from abel import Abel
+from .abel import Abel
