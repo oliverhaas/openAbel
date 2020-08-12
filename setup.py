@@ -2,7 +2,8 @@ from setuptools import setup, Extension
 from Cython.Build import cythonize
 
 
-ecadef = ["-O3", "-Wunused-but-set-variable"]
+# I suppress some warnings here since Cython produces quite a lot without real reason.
+ecadef = ['-O3', '-Wunused-but-set-variable', '-Wsign-compare']
 compdir = {'boundscheck': False, 'nonecheck': False, 'wraparound': False, 'cdivision': True, 
            'profile': False, 'infer_types': False, 'binding': True, 'language_level' : '3'}
 
@@ -32,14 +33,18 @@ extensions = 	[
 		    sources=['openAbel/constants.pyx'],
 		    extra_compile_args = ecadef,
 		    ),
+		Extension('openAbel.helper',
+		    sources=['openAbel/helper.pyx'],
+		    extra_compile_args = ecadef,
+		    ),
 		Extension('openAbel.mathFun',
 		    sources=['openAbel/mathFun.pyx'],
 		    extra_compile_args = ecadef,
-		    ),
+		    )
 		]
 
 
-vers = '0.5'
+vers = '0.6'
 setup(name = 'openAbel',
       version = vers,
       packages = ['openAbel', 

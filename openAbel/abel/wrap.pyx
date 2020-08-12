@@ -22,9 +22,8 @@ cdef class Abel(object):
           derivative already supplied by user
         - '-2' modified forward Abel transform.
     shift : double
-        Shift of the first sample away from 0 in units of stepSize.
-        Usually this is either 0 or 0.5, and some methods only support these
-        two values.
+        Shift of the first sample away from 0 in positive direction in units of stepSize.
+        Usually this is either 0 or 0.5, and some methods only support these two values.
     stepSize : double
         Step size (or grid spacing) between two data points.
     method : int, optional
@@ -48,6 +47,7 @@ cdef class Abel(object):
             raise
 
 
+    # TODO maybe support 2D (or nD) arrays as well here?
     def execute(self, double[:] dataIn, int leftBoundary = 0, int rightBoundary = 0):
         """
         This is the function which actually does the transform.
@@ -64,7 +64,7 @@ cdef class Abel(object):
             - '3' data is given outside domain as well.
         rightBoundary : int, optional
             Almost the same as `leftBoundary` only for end the data.
-            '1' and '2' are not supported.
+            '1' and '2' are not supported here.
 
         Returns
         ------

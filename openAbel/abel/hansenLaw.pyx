@@ -1,7 +1,7 @@
 
 
-from libc.stdlib cimport malloc, free
-
+from libc.stdlib cimport free
+from openAbel.helper cimport nullCheckMalloc as malloc
 
 cimport openAbel.constants as constants
 cimport openAbel.mathFun as mathFun
@@ -12,8 +12,8 @@ from openAbel.abel.base cimport abel_plan
 
 
 
-############################################################################################################################################
-### Hansen Law space state model for Abel transform                                                                                      ###
+########################################################################################################################
+### Hansen Law space state model for Abel transform                                                                  ###
 
 
 ctypedef struct methodData_hansenLaw:
@@ -35,7 +35,7 @@ model_hansenLawOrg.lamk = [0.0, -2.1, -6.2, -22.4, -92.5, -414.5, -1889.4, -8990
 
 
 
-############################################################################################################################################
+########################################################################################################################
 # Plan Hansen Law original model (9th order linear)
 cdef int plan_fat_hansenLawOrgLin(abel_plan* plan) nogil:
     
@@ -48,65 +48,56 @@ cdef int plan_fat_hansenLawOrgLin(abel_plan* plan) nogil:
 
     return plan_fat_hansenLawLinear(plan)
 
-############################################################################################################################################
+########################################################################################################################
 # Plan Hansen Law linear
 cdef int plan_fat_hansenLawLinear(abel_plan* plan) nogil:
-    
+  
     cdef:
-        unsigned int ii, jj, kk, indStart
-        methodData_hansenLaw* methodData = <methodData_hansenLaw*> plan.methodData
+        methodData_hansenLaw* md = <methodData_hansenLaw*> plan.methodData
+        model_hansenLaw* mod = md.model
+        int ii, jj, kk, indStart
         double xjp1oxj
-
+          
     if plan.forwardBackward == -1:
-
-        methodData.coeffs = <double*> malloc(3*plan.nData*(methodData.model.nk-1)*sizeof(double))
-        if NULL == methodData.coeffs:
-            free(methodData)
-            with gil:
-                raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
-
+        md.coeffs = <double*> malloc(3*plan.nData*(mod.nk-1)*sizeof(double))
         if plan.shift == 0.:
-            for kk in range(1,methodData.model.nk):
+            for kk in range(1,mod.nk):
                 jj = 3*(kk-1)
-                methodData.coeffs[jj] = 0.
-                methodData.coeffs[jj+1] = 0.
-                methodData.coeffs[jj+2] = 0.
+                md.coeffs[jj] = 0.
+                md.coeffs[jj+1] = 0.
+                md.coeffs[jj+2] = 0.
             indStart = 1
         else:
             indStart = 0
         for ii in range(indStart, plan.nData-1):
             xjp1oxj = plan.grid[ii+1]/plan.grid[ii]
-            for kk in range(1,methodData.model.nk):
-                jj = 3*(methodData.model.nk-1)*ii + 3*(kk-1)
-                methodData.coeffs[jj] = xjp1oxj**methodData.model.lamk[kk]
-                methodData.coeffs[jj+1] = 2.*methodData.model.hk[kk]*(1.-methodData.coeffs[jj]*xjp1oxj)*plan.grid[ii] / \
-                                          (methodData.model.lamk[kk]+1.)
-                methodData.coeffs[jj+2] = 2.*methodData.model.hk[kk]*(1.-methodData.coeffs[jj]*xjp1oxj**2)*plan.grid[ii]**2 / \
-                                          (methodData.model.lamk[kk]+2.)
+            for kk in range(1,mod.nk):
+                jj = 3*(mod.nk-1)*ii + 3*(kk-1)
+                md.coeffs[jj] = xjp1oxj**mod.lamk[kk]
+                md.coeffs[jj+1] = 2.*mod.hk[kk]*(1.-md.coeffs[jj]*xjp1oxj)*plan.grid[ii] / \
+                                          (mod.lamk[kk]+1.)
+                md.coeffs[jj+2] = 2.*mod.hk[kk]*(1.-md.coeffs[jj]*xjp1oxj**2)*plan.grid[ii]**2 / \
+                                          (mod.lamk[kk]+2.)
 
     elif plan.forwardBackward == 1 or plan.forwardBackward == 2:
 
-        methodData.coeffs = <double*> malloc(2*plan.nData*(methodData.model.nk-1)*sizeof(double))
-        if NULL == methodData.coeffs:
-            free(methodData)
-            with gil:
-                raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
+        md.coeffs = <double*> malloc(2*plan.nData*(mod.nk-1)*sizeof(double))
 
         if plan.shift == 0.:
-            for kk in range(1,methodData.model.nk):
+            for kk in range(1,mod.nk):
                 jj = 2*(kk-1)
-                methodData.coeffs[jj] = 0.
-                methodData.coeffs[jj+1] = 0.
+                md.coeffs[jj] = 0.
+                md.coeffs[jj+1] = 0.
             indStart = 1
         else:
             indStart = 0
 
         for ii in range(indStart, plan.nData-1):
             xjp1oxj = plan.grid[ii+1]/plan.grid[ii]
-            for kk in range(1,methodData.model.nk):
-                jj = 2*(methodData.model.nk-1)*ii + 2*(kk-1)
-                methodData.coeffs[jj] = xjp1oxj**methodData.model.lamk[kk]
-                methodData.coeffs[jj+1] = constants.piinv*methodData.model.hk[kk]*(methodData.coeffs[jj]-1.)/methodData.model.lamk[kk]
+            for kk in range(1,mod.nk):
+                jj = 2*(mod.nk-1)*ii + 2*(kk-1)
+                md.coeffs[jj] = xjp1oxj**mod.lamk[kk]
+                md.coeffs[jj+1] = constants.piinv*mod.hk[kk]*(md.coeffs[jj]-1.)/mod.lamk[kk]
     else:
         with gil:
             raise NotImplementedError
@@ -118,26 +109,18 @@ cdef int plan_fat_hansenLawLinear(abel_plan* plan) nogil:
 cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* dataOut) nogil:
 
     cdef:
-        int ii, jj, kk
-        double* sn = [0., 0.]
-        double dataInOld
-        double* xk
-        methodData_hansenLaw* methodData = <methodData_hansenLaw*> plan.methodData
-        model_hansenLaw* model = methodData.model
-        int nData = plan.nData
-        double shift = plan.shift
-        int method = plan.method
+        methodData_hansenLaw* md = <methodData_hansenLaw*> plan.methodData
+        model_hansenLaw* mod = md.model
+        int ii, jj, kk, nData = plan.nData, method = plan.method
+        (double*) xk, sn = [0., 0.]
+        double shift = plan.shift, dataInOld
 
-    xk = <double*> malloc(model.nk*sizeof(double))
-    if NULL == xk:
-        free(xk)
-        with gil:
-            raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
+    xk = <double*> malloc(mod.nk*sizeof(double))
 
     if plan.forwardBackward == -1:
         dataInOld = dataIn[nData-1]
         dataOut[nData-1] = 0.
-        for kk in range(model.nk):
+        for kk in range(mod.nk):
             xk[kk] = 0.
         for ii in range(nData-2, -1, -1):
             sn[1] = (dataInOld-dataIn[ii])/plan.stepSize
@@ -145,38 +128,38 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
             xk[0] += (2.*sn[0] + (plan.grid[ii+1]+plan.grid[ii])*sn[1])*plan.stepSize
             dataInOld = dataIn[ii]
             dataOut[ii] = xk[0]
-            for kk in range(1, model.nk):
-                jj = 3*(model.nk-1)*ii + 3*(kk-1)
-                xk[kk] = xk[kk]*methodData.coeffs[jj] - methodData.coeffs[jj+1]*sn[0] - methodData.coeffs[jj+2]*sn[1]
+            for kk in range(1, mod.nk):
+                jj = 3*(mod.nk-1)*ii + 3*(kk-1)
+                xk[kk] = xk[kk]*md.coeffs[jj] - md.coeffs[jj+1]*sn[0] - md.coeffs[jj+2]*sn[1]
                 dataOut[ii] += xk[kk] 
     elif plan.forwardBackward == 1:
         dataInOld = dataIn[nData-1]
         dataOut[nData-1] = 0.
-        for kk in range(model.nk):
+        for kk in range(mod.nk):
             xk[kk] = 0.
         for ii in range(nData-2, 0, -1):
             sn[1] = (dataInOld-dataIn[ii])/plan.stepSize
             xk[0] += -constants.piinv*mathFun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
             dataInOld = dataIn[ii]
             dataOut[ii] = xk[0]
-            for kk in range(1, model.nk):
-                jj = 2*(model.nk-1)*ii + 2*(kk-1)
-                xk[kk] = xk[kk]*methodData.coeffs[jj] - methodData.coeffs[jj+1]*sn[1]
+            for kk in range(1, mod.nk):
+                jj = 2*(mod.nk-1)*ii + 2*(kk-1)
+                xk[kk] = xk[kk]*md.coeffs[jj] - md.coeffs[jj+1]*sn[1]
                 dataOut[ii] += xk[kk]
         dataOut[0] = dataOut[1]
     elif plan.forwardBackward == 2:
         dataInOld = dataIn[nData-1]
         dataOut[nData-1] = 0.
-        for kk in range(model.nk):
+        for kk in range(mod.nk):
             xk[kk] = 0.
         for ii in range(nData-2, 0, -1):
             sn[1] = (dataIn[ii]+dataIn[ii-1])*0.5
             xk[0] += -constants.piinv*mathFun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
             dataInOld = dataIn[ii]
             dataOut[ii] = xk[0]
-            for kk in range(1, model.nk):
-                jj = 2*(model.nk-1)*ii + 2*(kk-1)
-                xk[kk] = xk[kk]*methodData.coeffs[jj] - methodData.coeffs[jj+1]*sn[1]
+            for kk in range(1, mod.nk):
+                jj = 2*(mod.nk-1)*ii + 2*(kk-1)
+                xk[kk] = xk[kk]*md.coeffs[jj] - md.coeffs[jj+1]*sn[1]
                 dataOut[ii] += xk[kk]
         dataOut[0] = dataOut[1]
     else:
@@ -191,10 +174,10 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
 cdef int destroy_fat_hansenLawLinear(abel_plan* plan) nogil:
 
     cdef:
-        methodData_hansenLaw* methodData = <methodData_hansenLaw*> plan.methodData
+        methodData_hansenLaw* md = <methodData_hansenLaw*> plan.methodData
 
-    free(methodData.coeffs)
-    free(methodData)
+    free(md.coeffs)
+    free(md)
 
     return 0
 

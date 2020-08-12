@@ -1,6 +1,7 @@
 
 
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport free
+from openAbel.helper cimport nullCheckMalloc as malloc
 
 from openAbel.abel.hansenLaw cimport plan_fat_hansenLawOrgLin, execute_fat_hansenLawLinear, destroy_fat_hansenLawLinear
 from openAbel.abel.trap cimport plan_fat_trapezoidalDesingConst, execute_fat_trapezoidalDesingConst, \
@@ -23,9 +24,9 @@ ctypedef struct abel_plan:
 
 
 
-############################################################################################################################################
-### Fast Abel transforms                                                                                                                 ###
-############################################################################################################################################
+########################################################################################################################
+### Fast Abel transforms                                                                                             ###
+########################################################################################################################
 
 
 # Create plan for Abel transform
@@ -37,22 +38,13 @@ cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double st
         int ii
 
     pl = <abel_plan*> malloc(sizeof(abel_plan))
-    if NULL == pl:
-        with gil:
-            raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
-    else:
-        pl.grid = NULL
-        pl.methodData = NULL
+    pl.methodData = NULL
     pl.nData = nData
     pl.forwardBackward = forwardBackward
     pl.shift = shift
     pl.stepSize = stepSize
     pl.method = method
     pl.grid = <double*> malloc(nData*sizeof(double))
-    if NULL == pl.grid:
-        free(pl)
-        with gil:
-            raise MemoryError('Malloc ruturned a NULL pointer, probably not enough memory available.')
     for ii in range(nData):
         pl.grid[ii] = (ii+shift)*stepSize
 
@@ -78,7 +70,8 @@ cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double st
 
 
 # Execute given plan for Abel transform
-cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary = 0, int rightBoundary = 0) nogil except -1:
+cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary = 0, 
+                     int rightBoundary = 0) nogil except -1:
 
     if NULL == pl:
         with gil:
