@@ -86,7 +86,8 @@ cdef class Abel(object):
         dataOut = numpy.copy(dataInTemp)
 
         try:
-            base.execute_fat(self.plan, &dataInTemp[0], &dataOut[0], leftBoundary = leftBoundary, rightBoundary = rightBoundary)
+            base.execute_fat(self.plan, &dataInTemp[0], &dataOut[0], leftBoundary = leftBoundary, 
+                             rightBoundary = rightBoundary)
         except:
             raise        
 

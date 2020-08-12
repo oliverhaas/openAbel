@@ -14,11 +14,8 @@ cimport openAbel.constants as const
 
 
 ctypedef struct abel_plan:
-    int nData
-    int forwardBackward
-    double shift
-    double stepSize
-    int method
+    int nData, forwardBackward, method
+    double shift, stepSize
     double* grid
     void* methodData
 
