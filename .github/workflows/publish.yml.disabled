@@ -10,6 +10,14 @@
 #   5. Refresh the action pins in the three `.disabled` files: dependabot does not see them.
 #   6. Rename `publish.yml.disabled`, `tag.yml.disabled` and `docs.yml.disabled` to `.yml`.
 #   7. Delete the Read the Docs project or leave a redirect; set `[project.urls] Documentation` in pyproject.toml.
+#   8. Exercise cibuildwheel before the first tag, the workflow has never run: locally with
+#      `uvx cibuildwheel --platform linux --only cp314-manylinux_x86_64` (needs Docker), then through a
+#      `workflow_dispatch` of publish.yml. The cp314t and macOS arm64 legs need numpy and scipy wheels for those
+#      interpreters (the test step installs the built wheel with its dependencies).
+#   9. Enable "Allow auto-merge" in the repository settings and make the CI jobs required status checks on `main`,
+#      otherwise dependabot-automerge.yml merges dependabot PRs before CI finishes.
+#  10. Check that the first dependabot merge triggers CI on `main`: events caused by GITHUB_TOKEN may not start
+#      `push` workflows; if CI stays silent, let the auto-merge step use a fine-grained personal access token.
 name: Publish
 
 on:
