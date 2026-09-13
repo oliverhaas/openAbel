@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Cython build products (the .pyx/.pxd sources are what is tracked)
+src/**/*.c
+src/**/*.so
+src/**/*.html
+build/
+dist/
+wheelhouse/
+
+# Docs
+site/
+
+# Local tooling state
+.claude/worktrees/
+.superpowers/

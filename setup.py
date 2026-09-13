@@ -1,71 +1,29 @@
-from setuptools import setup, Extension
+"""Build the Cython extension modules; everything else lives in pyproject.toml."""
+
+from pathlib import Path
+
 from Cython.Build import cythonize
+from setuptools import Extension, setup
 
+SRC = Path("src")
+COMPILER_DIRECTIVES = {
+    "binding": True,
+    "boundscheck": False,
+    "cdivision": True,
+    "cpow": True,  # keep the Cython 0.29 semantics of `2 ** int` (integer result) in fmm.pyx
+    "freethreading_compatible": True,
+    "language_level": "3",
+    "nonecheck": False,
+    "wraparound": False,
+}
 
-# I suppress some warnings here since Cython produces quite a lot without real reason.
-ecadef = ['-O3', '-Wunused-but-set-variable', '-Wsign-compare']
-compdir = {'boundscheck': False, 'nonecheck': False, 'wraparound': False, 'cdivision': True, 
-           'profile': False, 'infer_types': False, 'binding': True, 'language_level' : '3'}
+extensions = [
+    Extension(
+        pyx.relative_to(SRC).with_suffix("").as_posix().replace("/", "."),
+        [str(pyx)],
+        extra_compile_args=["-O3"],
+    )
+    for pyx in sorted((SRC / "openAbel").rglob("*.pyx"))
+]
 
-
-extensions = 	[
-		Extension('openAbel.abel.base',
-		    sources=['openAbel/abel/base.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.abel.hansenLaw',
-		    sources=['openAbel/abel/hansenLaw.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.abel.trap',
-		    sources=['openAbel/abel/trap.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.abel.fmm',
-		    sources=['openAbel/abel/fmm.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.abel.wrap',
-		    sources=['openAbel/abel/wrap.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.constants',
-		    sources=['openAbel/constants.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.helper',
-		    sources=['openAbel/helper.pyx'],
-		    extra_compile_args = ecadef,
-		    ),
-		Extension('openAbel.mathFun',
-		    sources=['openAbel/mathFun.pyx'],
-		    extra_compile_args = ecadef,
-		    )
-		]
-
-
-vers = '0.6'
-setup(name = 'openAbel',
-      version = vers,
-      packages = ['openAbel', 
-                  'openAbel.abel'],
-      package_data={'openAbel': ['*.pxd'], 
-                    'openAbel.abel': ['*.pxd','coeffsData/*']},
-      ext_modules = cythonize(extensions, compiler_directives = compdir)
-     )
-
-
-logoArt = """
-
-                             _   _         _ 
-        ___ _ __  ___ _ _   /_\ | |__  ___| |
-       / _ \ '_ \/ -_) ' \ / _ \| '_ \/ -_) |
-       \___/ .__/\___|_||_/_/ \_\_.__/\___|_|
-           |_|                               
-      
-openAbel """ + vers + """  Copyright (C) 2016-2020  Oliver Sebastian Haas
-                                             
-"""
-print(logoArt)
-     
-     
+setup(ext_modules=cythonize(extensions, compiler_directives=COMPILER_DIRECTIVES))
