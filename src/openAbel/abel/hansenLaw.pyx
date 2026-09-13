@@ -37,7 +37,7 @@ model_hansenLawOrg.lamk = [0.0, -2.1, -6.2, -22.4, -92.5, -414.5, -1889.4, -8990
 
 ########################################################################################################################
 # Plan Hansen Law original model (9th order linear)
-cdef int plan_fat_hansenLawOrgLin(abel_plan* plan) nogil:
+cdef int plan_fat_hansenLawOrgLin(abel_plan* plan) except -1 nogil:
     
     cdef:
         methodData_hansenLaw* methodData = <methodData_hansenLaw*> malloc(sizeof(methodData_hansenLaw))
@@ -50,7 +50,7 @@ cdef int plan_fat_hansenLawOrgLin(abel_plan* plan) nogil:
 
 ########################################################################################################################
 # Plan Hansen Law linear
-cdef int plan_fat_hansenLawLinear(abel_plan* plan) nogil:
+cdef int plan_fat_hansenLawLinear(abel_plan* plan) except -1 nogil:
   
     cdef:
         methodData_hansenLaw* md = <methodData_hansenLaw*> plan.methodData
@@ -106,7 +106,7 @@ cdef int plan_fat_hansenLawLinear(abel_plan* plan) nogil:
 
 
 # Hansen Law with linear approximation of function
-cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* dataOut) nogil:
+cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* dataOut) except -1 nogil:
 
     cdef:
         methodData_hansenLaw* md = <methodData_hansenLaw*> plan.methodData
@@ -171,7 +171,7 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
     return 0
 
 
-cdef int destroy_fat_hansenLawLinear(abel_plan* plan) nogil:
+cdef int destroy_fat_hansenLawLinear(abel_plan* plan) except -1 nogil:
 
     cdef:
         methodData_hansenLaw* md = <methodData_hansenLaw*> plan.methodData

@@ -28,7 +28,7 @@ ctypedef struct abel_plan:
 
 # Create plan for Abel transform
 cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double stepSize, 
-                         int method = 3, int order = 2, double eps = 1.e3*const.machineEpsilon) nogil except NULL:
+                         int method = 3, int order = 2, double eps = 1.e3*const.machineEpsilon) except NULL nogil:
 
     cdef:
         abel_plan* pl
@@ -67,7 +67,7 @@ cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double st
 
 # Execute given plan for Abel transform
 cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary = 0, 
-                     int rightBoundary = 0) nogil except -1:
+                     int rightBoundary = 0) except -1 nogil:
 
     if NULL == pl:
         with gil:
@@ -87,7 +87,7 @@ cdef int execute_fat(abel_plan* pl, double* dataIn, double* dataOut, int leftBou
 
 
 # Destroy given plan for Abel transform
-cdef int destroy_fat(abel_plan* pl) nogil except -1:
+cdef int destroy_fat(abel_plan* pl) except -1 nogil:
 
     if NULL == pl:
         return 1

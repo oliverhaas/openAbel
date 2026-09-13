@@ -33,7 +33,7 @@ ctypedef struct methodData_DesingConst:
     int orderFilter
 
 # Plan desingularized quadrature trapezoidal
-cdef int plan_fat_trapezoidalDesingConst(abel_plan* pl) nogil except -1:
+cdef int plan_fat_trapezoidalDesingConst(abel_plan* pl) except -1 nogil:
 
     cdef:
         methodData_DesingConst* md = <methodData_DesingConst*> malloc(sizeof(methodData_DesingConst))
@@ -113,7 +113,7 @@ cdef int plan_fat_trapezoidalDesingConst(abel_plan* pl) nogil except -1:
 
 # Execute desingularized quadrature trapezoidal
 cdef int execute_fat_trapezoidalDesingConst(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary, 
-                                            int rightBoundary) nogil except -1:
+                                            int rightBoundary) except -1 nogil:
 
     cdef:
         int ii, jj, nn, orderFilterM1Half, nLeftExt, nRightExt
@@ -233,7 +233,7 @@ cdef int execute_fat_trapezoidalDesingConst(abel_plan* pl, double* dataIn, doubl
     return 0
 
 
-cdef int destroy_fat_trapezoidalDesingConst(abel_plan* pl) nogil except -1:
+cdef int destroy_fat_trapezoidalDesingConst(abel_plan* pl) except -1 nogil:
 
     cdef:
         methodData_DesingConst* md = <methodData_DesingConst*> pl.methodData
@@ -262,7 +262,7 @@ ctypedef struct methodData_EndCorr:
 
 
 # Plan desingularized quadrature trapezoidal
-cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except -1:
+cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) except -1 nogil:
     cdef:
         methodData_EndCorr* md
         double[:,::1] coeffs_nonsing_sqrt_small_mv
@@ -478,7 +478,7 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) nogil except 
 
 # Execute end-corrected trapezoidal
 cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary, 
-                                        int rightBoundary) nogil except -1:
+                                        int rightBoundary) except -1 nogil:
 
     cdef:
         int ii, jj, nn
@@ -603,7 +603,7 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
     return 0
 
 
-cdef int destroy_fat_trapezoidalEndCorr(abel_plan* pl) nogil except -1:
+cdef int destroy_fat_trapezoidalEndCorr(abel_plan* pl) except -1 nogil:
 
     cdef:
         methodData_EndCorr* md
