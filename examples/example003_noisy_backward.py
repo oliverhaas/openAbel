@@ -49,33 +49,38 @@ lw = 2
 ############################################################################################################################################
 
 # Parameters
-nData = 80
-xMax = 1.0
+n_data = 80
+x_max = 1.0
 shift = 0.0
 sig = 1.0 / 4.0
-stepSize = xMax / (nData - 1)
-forwardBackward = 2
-noiseAmp = 0.01
+step_size = x_max / (n_data - 1)
+forward_backward = 2
+noise_amp = 0.01
 
-abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize)  # Backward Abel transform where user inputs derivative
+abel_obj = openabel.Abel(
+    n_data,
+    forward_backward,
+    shift,
+    step_size,
+)  # Backward Abel transform where user inputs derivative
 
 
 # No filtering
-der = np.asarray([0.5, 0.0, -0.5]) / stepSize
+der = np.asarray([0.5, 0.0, -0.5]) / step_size
 xx = np.linspace(
-    -stepSize * (der.shape[0] - 1) / 2,
-    xMax + stepSize * (der.shape[0] - 1) / 2,
-    nData + (der.shape[0] - 1),
+    -step_size * (der.shape[0] - 1) / 2,
+    x_max + step_size * (der.shape[0] - 1) / 2,
+    n_data + (der.shape[0] - 1),
 )
-dataIn = np.exp(-0.5 * xx**2 / sig**2)
+data_in = np.exp(-0.5 * xx**2 / sig**2)
 np.random.seed(2202)
-dataInWithNoise = dataIn + noiseAmp * np.random.randn(nData + (der.shape[0] - 1))
+data_in_with_noise = data_in + noise_amp * np.random.randn(n_data + (der.shape[0] - 1))
 
 # Take derivatives
-dataInD = np.convolve(dataInWithNoise, der, mode="valid")
+data_in_d = np.convolve(data_in_with_noise, der, mode="valid")
 
 # Backward transform
-dataOutNoFilter = abelObj.execute(dataInD)
+data_out_no_filter = abel_obj.execute(data_in_d)
 
 
 # Maximally flat filtering
@@ -109,41 +114,41 @@ der = (
             -4.76837e-7,
         ],
     )
-    / stepSize
+    / step_size
 )
 xx = np.linspace(
-    -stepSize * (der.shape[0] - 1) / 2,
-    xMax + stepSize * (der.shape[0] - 1) / 2,
-    nData + (der.shape[0] - 1),
+    -step_size * (der.shape[0] - 1) / 2,
+    x_max + step_size * (der.shape[0] - 1) / 2,
+    n_data + (der.shape[0] - 1),
 )
-dataIn = np.exp(-0.5 * xx**2 / sig**2)
+data_in = np.exp(-0.5 * xx**2 / sig**2)
 np.random.seed(2202)
-dataInWithNoise = dataIn + noiseAmp * np.random.randn(nData + (der.shape[0] - 1))
+data_in_with_noise = data_in + noise_amp * np.random.randn(n_data + (der.shape[0] - 1))
 
 # Take derivatives
-dataInD = np.convolve(dataInWithNoise, der, mode="valid")
+data_in_d = np.convolve(data_in_with_noise, der, mode="valid")
 
 # Backward transform
-dataOutMaxFlat = abelObj.execute(dataInD)
+data_out_max_flat = abel_obj.execute(data_in_d)
 
 # Analytical result
-xx = np.linspace(stepSize * shift, xMax, nData)
-dataIn = np.exp(-0.5 * xx**2 / sig**2)
-dataOutAna = dataIn / np.sqrt(2 * np.pi) / sig * erf(np.sqrt((xMax**2 - xx**2) / 2) / sig)
+xx = np.linspace(step_size * shift, x_max, n_data)
+data_in = np.exp(-0.5 * xx**2 / sig**2)
+data_out_ana = data_in / np.sqrt(2 * np.pi) / sig * erf(np.sqrt((x_max**2 - xx**2) / 2) / sig)
 
 
 # Plotting
 fig, axarr = mpl.subplots(2, 1, sharex=True)
 
-axarr[0].plot(xx, dataOutAna, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
-axarr[0].plot(xx, dataOutNoFilter, color=colors[1], marker=markers[1], linestyle=linestyles[2], label="no filter")
-axarr[0].plot(xx, dataOutMaxFlat, color=colors[2], marker=markers[2], linestyle=linestyles[3], label="maxflat")
+axarr[0].plot(xx, data_out_ana, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
+axarr[0].plot(xx, data_out_no_filter, color=colors[1], marker=markers[1], linestyle=linestyles[2], label="no filter")
+axarr[0].plot(xx, data_out_max_flat, color=colors[2], marker=markers[2], linestyle=linestyles[3], label="maxflat")
 axarr[0].set_ylabel("value")
 axarr[0].legend()
 
 axarr[1].semilogy(
     xx[:-1],
-    np.abs((dataOutNoFilter[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
+    np.abs((data_out_no_filter[:-1] - data_out_ana[:-1]) / data_out_ana[:-1]),
     color=colors[1],
     marker=markers[1],
     linestyle=linestyles[1],
@@ -151,7 +156,7 @@ axarr[1].semilogy(
 )
 axarr[1].semilogy(
     xx[:-1],
-    np.abs((dataOutMaxFlat[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
+    np.abs((data_out_max_flat[:-1] - data_out_ana[:-1]) / data_out_ana[:-1]),
     color=colors[2],
     marker=markers[2],
     linestyle=linestyles[2],

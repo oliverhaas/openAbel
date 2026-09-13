@@ -35,12 +35,12 @@ A forward transform of a Gaussian sampled on 200 points, the first sample at `x 
 import numpy as np
 import openabel
 
-nData = 200
-stepSize = 3.5 / (nData - 1)
-x = np.arange(nData) * stepSize
+n_data = 200
+step_size = 3.5 / (n_data - 1)
+x = np.arange(n_data) * step_size
 
-abelObj = openabel.Abel(nData, -1, 0.0, stepSize)
-dataOut = abelObj.execute(np.exp(-(x**2)))
+abel_obj = openabel.Abel(n_data, -1, 0.0, step_size)
+data_out = abel_obj.execute(np.exp(-(x**2)))
 ```
 
 The [examples](https://github.com/oliverhaas/openAbel/tree/main/examples) show the transform types and

@@ -47,53 +47,57 @@ lw = 2
 ############################################################################################################################################
 
 # Parameters
-nData = 40
+n_data = 40
 shift = 0.0
-xMax = 3.5
+x_max = 3.5
 sig = 1.0
-stepSize = xMax / (nData - 1)
+step_size = x_max / (n_data - 1)
 
-forwardBackward = -1  # Forward transform, similar definition ('1' = backward) as in FFT libraries.
+forward_backward = -1  # Forward transform, similar definition ('1' = backward) as in FFT libraries.
 
 # Create Abel transform object for three different methods and orders.
 # Some methods ignore the order keyword argument, and for the normal user
 # only method = 3 and order = 2 to order = 5 are recommended.
 # Higher orders require data outside the integration domain to be stable.
 # For more information see the documentation.
-abelObj0 = openabel.Abel(nData, forwardBackward, shift, stepSize, method=2, order=2)
-abelObj1 = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=5)
-abelObj2 = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=11)
+abel_obj0 = openabel.Abel(n_data, forward_backward, shift, step_size, method=2, order=2)
+abel_obj1 = openabel.Abel(n_data, forward_backward, shift, step_size, method=3, order=5)
+abel_obj2 = openabel.Abel(n_data, forward_backward, shift, step_size, method=3, order=11)
 
 # Input data
-xx = np.linspace(shift * stepSize, xMax, nData)
-dataIn = np.exp(-0.5 * xx**2 / sig**2)
-xxExt = np.linspace(shift * stepSize, xMax + 5 * stepSize, nData + 5)  # floor((order-1)/2) extra points at right end
-dataInExt = np.exp(-0.5 * xxExt**2 / sig**2)
+xx = np.linspace(shift * step_size, x_max, n_data)
+data_in = np.exp(-0.5 * xx**2 / sig**2)
+xx_ext = np.linspace(
+    shift * step_size,
+    x_max + 5 * step_size,
+    n_data + 5,
+)  # floor((order-1)/2) extra points at right end
+data_in_ext = np.exp(-0.5 * xx_ext**2 / sig**2)
 
 # Backward transform and analytical result
 
-dataOut0 = abelObj0.execute(dataIn)
-dataOut1 = abelObj1.execute(dataIn)
-dataOut2 = abelObj2.execute(
-    dataInExt,
-    leftBoundary=2,
-    rightBoundary=3,
+data_out0 = abel_obj0.execute(data_in)
+data_out1 = abel_obj1.execute(data_in)
+data_out2 = abel_obj2.execute(
+    data_in_ext,
+    left_boundary=2,
+    right_boundary=3,
 )  # 2 means use even symmetry, 3 means input extra points.
-dataOutAna = dataIn * np.sqrt(2 * np.pi) * sig * erf(np.sqrt((xMax**2 - xx**2) / 2) / sig)
+data_out_ana = data_in * np.sqrt(2 * np.pi) * sig * erf(np.sqrt((x_max**2 - xx**2) / 2) / sig)
 
 # Plotting
 fig, axarr = mpl.subplots(2, 1, sharex=True)
 
-axarr[0].plot(xx, dataOutAna, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
-axarr[0].plot(xx, dataOut0, color=colors[1], marker=markers[1], linestyle=linestyles[1], label="openAbel TE 2nd")
-axarr[0].plot(xx, dataOut1, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel FMM 5th")
-axarr[0].plot(xx, dataOut2, color=colors[3], marker=markers[3], linestyle=linestyles[3], label="openAbel FMM 11th")
+axarr[0].plot(xx, data_out_ana, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
+axarr[0].plot(xx, data_out0, color=colors[1], marker=markers[1], linestyle=linestyles[1], label="openAbel TE 2nd")
+axarr[0].plot(xx, data_out1, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel FMM 5th")
+axarr[0].plot(xx, data_out2, color=colors[3], marker=markers[3], linestyle=linestyles[3], label="openAbel FMM 11th")
 axarr[0].set_ylabel("value")
 axarr[0].legend()
 
 axarr[1].semilogy(
     xx[:-1] / sig,
-    np.abs((dataOut0[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
+    np.abs((data_out0[:-1] - data_out_ana[:-1]) / data_out_ana[:-1]),
     color=colors[1],
     marker=markers[1],
     linestyle=linestyles[1],
@@ -101,7 +105,7 @@ axarr[1].semilogy(
 )
 axarr[1].semilogy(
     xx[:-1] / sig,
-    np.abs((dataOut1[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
+    np.abs((data_out1[:-1] - data_out_ana[:-1]) / data_out_ana[:-1]),
     color=colors[2],
     marker=markers[2],
     linestyle=linestyles[2],
@@ -109,7 +113,7 @@ axarr[1].semilogy(
 )
 axarr[1].semilogy(
     xx[:-1] / sig,
-    np.abs((dataOut2[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
+    np.abs((data_out2[:-1] - data_out_ana[:-1]) / data_out_ana[:-1]),
     color=colors[3],
     marker=markers[3],
     linestyle=linestyles[3],

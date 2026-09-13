@@ -1,2 +1,2 @@
 cdef:
-	double pi, machineEpsilon, piinv
+	double pi, machine_epsilon, piinv

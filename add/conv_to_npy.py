@@ -5,10 +5,10 @@ import h5py
 import numpy
 import os
 
-allFileNames = os.listdir('.')
+all_file_names = os.listdir('.')
 
-for fileName in allFileNames:
-    if os.path.splitext(fileName)[1] == '.h5':
-        file = h5py.File(fileName, 'r')
+for file_name in all_file_names:
+    if os.path.splitext(file_name)[1] == '.h5':
+        file = h5py.File(file_name, 'r')
         data = file.get(file.keys()[0]).value
-        numpy.save(os.path.splitext(fileName)[0] + '.npy', data)
+        numpy.save(os.path.splitext(file_name)[0] + '.npy', data)

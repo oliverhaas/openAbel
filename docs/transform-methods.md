@@ -13,14 +13,14 @@ methods:
 ```python
 import openabel
 
-abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=3, order=2)
 ```
 
 The methods with end corrections can do the transformation in different orders of accuracy by setting the `order`
 keyword argument; all other methods ignore `order`. Note when we talk about \(n\) order accuracy we usually mean
 \((n+1/2)\) order accuracy due to the square root in the Abel transform kernel. For higher order methods the
 transformed function has to be sufficiently smooth to achieve the full order of convergence, and in very extreme cases
-the transform becomes unstable if high order is used on non-smooth functions. The length of the data vector `nData` we
+the transform becomes unstable if high order is used on non-smooth functions. The length of the data vector `n_data` we
 denote as \(N\) in the math formulas.
 
 Overall cases where a user should use anything other than `method = 3` (default) and `order = 2` (default) to
@@ -31,7 +31,7 @@ Overall cases where a user should use anything other than `method = 3` (default)
 
 ```python
 # order keyword argument is ignored (only first order implemented)
-abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=0)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=0)
 ```
 
 The desingularized trapezoidal rule is probably the simplest practicable algorithm. It subtracts the singularity and
@@ -52,7 +52,7 @@ leads to quadratic \(O(N^2)\) computational complexity of the method.
 
 ```python
 # order keyword argument is ignored (only somewhat first order implemented)
-abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=1)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=1)
 ```
 
 The Hansen-Law method by [Hansen and Law](https://www.osapublishing.org/josaa/abstract.cfm?uri=josaa-2-4-510) is a
@@ -75,7 +75,7 @@ just stops converging with increasing \(N\). If one ignores several details that
 
 ```python
 # 0 < order < 20
-abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=2, order=2)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=2, order=2)
 ```
 
 The trapezoidal rule with end correction improves on the desingularized trapezoidal rule. It doesn't require
@@ -105,7 +105,7 @@ calculate these end correction coefficients can be found in this repository as w
 
 ```python
 # 0 < order < 20
-abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=3, order=2)
 ```
 
 The default and recommended method is the Fast Multipole Method (FMM) with end corrections. This method provides a

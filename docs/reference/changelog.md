@@ -17,7 +17,7 @@
   allocator requested alignment 0 from `aligned_alloc` and then called `exit` on the NULL it got back. The allocator
   now uses 64-byte alignment, rounds the size up as C11 requires, and raises `MemoryError` on failure.
 - Backward transform with `method=0` raised `FileNotFoundError` (wrong coefficient path).
-- Modified forward transform (`forwardBackward=-2`) with `shift=0.5` raised `KeyError` with `method=2` and crashed
+- Modified forward transform (`forward_backward=-2`) with `shift=0.5` raised `KeyError` with `method=2` and crashed
   with `method=3` (wrong coefficient key).
 - An unsupported `shift` with `method=3` crashed the process instead of raising `NotImplementedError` (uninitialised
   pointers were freed during cleanup).
@@ -28,10 +28,10 @@
   element happened to hold a NaN or Inf bit pattern the result was garbage, so the backward transform with `method=3`
   failed sporadically. The buffers are now sized exactly; results are unchanged otherwise.
 - `method=0` leaked a small allocation per `Abel(...)` construction.
-- `Abel(...)` accepted `nData < 2` and `execute` accepted inputs shorter than the plan needs; depending on the
+- `Abel(...)` accepted `n_data < 2` and `execute` accepted inputs shorter than the plan needs; depending on the
   method the process crashed or the result was garbage. Both now raise `ValueError`, and the message names the
   required length (the boundary value `3` rule in the API reference).
-- An invalid `leftBoundary` value leaked two temporary buffers with methods `0` and `2`.
+- An invalid `left_boundary` value leaked two temporary buffers with methods `0` and `2`.
 - An `order` without coefficient tables (20 and above) raised `KeyError`; it now raises `ValueError`.
 
 ### Changed

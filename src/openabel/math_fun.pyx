@@ -2,7 +2,7 @@
 
 
 
-cdef unsigned int uintMax(unsigned int aa, unsigned int bb) nogil:
+cdef unsigned int uint_max(unsigned int aa, unsigned int bb) nogil:
 
     if aa > bb:
         return aa
@@ -10,7 +10,7 @@ cdef unsigned int uintMax(unsigned int aa, unsigned int bb) nogil:
     return bb
 
 
-cdef unsigned int uintMin(unsigned int aa, unsigned int bb) nogil:
+cdef unsigned int uint_min(unsigned int aa, unsigned int bb) nogil:
 
     if aa < bb:
         return aa
