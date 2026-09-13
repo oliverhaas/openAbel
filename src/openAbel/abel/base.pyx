@@ -56,8 +56,7 @@ cdef abel_plan* plan_fat(int nData, int forwardBackward, double shift, double st
             elif pl.method == 3:
                 plan_fat_fmmTrapEndCorr(pl, order = order, eps = eps)
             else:
-                with gil:
-                    raise NotImplementedError('Method not implemented for given parameters.')
+                raise NotImplementedError('Method not implemented for given parameters.')
         except:
             free(pl.grid)
             free(pl)

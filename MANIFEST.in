@@ -1,0 +1,3 @@
+include LICENSE README.md
+recursive-include src/openAbel *.pyx *.pxd *.npy
+prune tests
