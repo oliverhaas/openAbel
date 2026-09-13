@@ -31,10 +31,10 @@ Creates a transform plan for equispaced data of length `nData`. Creating the pla
 | `order`           | `int`   | Order of the end corrections for methods `2` and `3` (`0 < order < 20`, default `2`); ignored by methods `0` and `1`.                                                                                                |
 | `eps`             | `float` | Target accuracy of the FMM far-field approximation (method `3` only); it sets the number of Chebyshev interpolation nodes. Must be at least the machine epsilon; defaults to ten times the machine epsilon.               |
 
-Raises `ValueError` if a parameter has a non-viable value (for example `nData < 2`, `order <= 0`, or too few data points
-for the requested order) and `NotImplementedError` if the chosen method does not support the given parameters (for
-example an unknown `method`, a `shift` other than `0.0` or `0.5` with methods `2` and `3`, or the modified forward
-transform with the Hansen-Law method).
+Raises `ValueError` if a parameter has a non-viable value (for example `nData < 2`, `order <= 0`, an `order` without
+coefficient tables (`order >= 20`), or too few data points for the requested order) and `NotImplementedError` if the
+chosen method does not support the given parameters (for example an unknown `method`, a `shift` other than `0.0` or
+`0.5` with methods `2` and `3`, or the modified forward transform with the Hansen-Law method).
 
 ### `Abel.execute`
 

@@ -23,4 +23,7 @@ coeffsAllDict = loadCoeffs()
 
 def getCoeffs(coeffsName: str, order: int) -> np.ndarray:
     """Return the coefficients of family ``coeffsName`` for the given ``order``."""
-    return coeffsAllDict[coeffsName][order]
+    byOrder = coeffsAllDict.get(coeffsName)
+    if byOrder is None or order not in byOrder:
+        raise ValueError(f"No {coeffsName} coefficients of order {order}.")
+    return byOrder[order]

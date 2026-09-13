@@ -118,3 +118,10 @@ def test_unsupportedRightBoundary_raisesNotImplemented(rightBoundary, method):
     abelObj = openAbel.Abel(200, -1, 0.0, 0.01, method=method)
     with pytest.raises(NotImplementedError):
         abelObj.execute(np.zeros(200), rightBoundary=rightBoundary)
+
+
+@pytest.mark.parametrize("method", [2, 3])
+def test_orderWithoutCoefficients_raisesValueError(method):
+    # The coefficient tables stop at order 19.
+    with pytest.raises(ValueError):
+        openAbel.Abel(200, -1, 0.0, 0.01, method=method, order=20)

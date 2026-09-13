@@ -32,6 +32,7 @@
   method the process crashed or the result was garbage. Both now raise `ValueError`, and the message names the
   required length (the boundary value `3` rule in the API reference).
 - An invalid `leftBoundary` value leaked two temporary buffers with methods `0` and `2`.
+- An `order` without coefficient tables (20 and above) raised `KeyError`; it now raises `ValueError`.
 
 ### Changed
 
