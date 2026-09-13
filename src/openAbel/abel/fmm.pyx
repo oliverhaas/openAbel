@@ -325,8 +325,8 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
     ordFilM1Hlf = <int> ((md.orderFilter-1)/2)
 
     # Allocate temporary data arrays
-    dataInTemp0 = <double*> malloc((pl.nData+md.order+md.orderFilter-2)*sizeof(double))
-    dataInTemp1 = <double*> malloc((pl.nData+md.order-1)*sizeof(double))
+    dataInTemp0 = <double*> malloc((pl.nData+2*(ordM1Hlf+ordFilM1Hlf))*sizeof(double))
+    dataInTemp1 = <double*> malloc((pl.nData+2*ordM1Hlf)*sizeof(double))
     
     # Left boundary handling
     if leftBoundary == 0 or leftBoundary == 1 or leftBoundary == 2:
@@ -350,7 +350,7 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
             raise NotImplementedError('Method not implemented for given parameters.')           
     # Copy and extend data if necessary
     nn = max(md.order, md.orderFilter-1)
-    for ii in range(pl.nData+md.order+md.orderFilter-2-nLeftExt-nRightExt):
+    for ii in range(pl.nData+2*(ordM1Hlf+ordFilM1Hlf)-nLeftExt-nRightExt):
         dataInTemp0[nLeftExt+ii] = dataIn[ii]
     if leftBoundary == 0:
         for ii in range(nLeftExt):
@@ -398,7 +398,7 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
             raise NotImplementedError('Method not implemented for given parameters.')
 
     # Do scaling or numerical derivative
-    convolve(dataInTemp0, pl.nData+md.order-1, dataInTemp1, md.orderFilter, md.coeffsFilter)
+    convolve(dataInTemp0, pl.nData+2*ordM1Hlf, dataInTemp1, md.orderFilter, md.coeffsFilter)
     free(dataInTemp0)
 
     # Allocate temporary data arrays
@@ -460,7 +460,10 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
     ll = min((pl.nData-2)/md.ss, md.kl[0]-1)
     mm = 2*md.ss
     for kk in range(ll):
-        blas.dgemv('t', &mm, &md.ss, &ONED, &md.direct[kk*md.ss**2*2], &mm, 
+        # Only the rows that hold data: rows beyond the data end are zero in md.direct, and reading the matching
+        # input elements would run past dataInTemp1.
+        nn = min(pl.nData-kk*md.ss-1, mm)
+        blas.dgemv('t', &nn, &md.ss, &ONED, &md.direct[kk*md.ss**2*2], &mm,
                    &dataInTemp1[ordM1Hlf+1+kk*md.ss], &ONE, &ONED, &dataOut[1+kk*md.ss], &ONE)
     for ii in range(ll*md.ss+1, pl.nData-1):
         kk = (ii-1)/md.ss

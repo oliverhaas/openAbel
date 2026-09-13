@@ -492,8 +492,8 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
     orderFilterM1Half = (md.orderFilter-1)/2
 
     # Allocate temporary data arrays
-    dataInTemp0 = <double*> malloc((pl.nData+md.order+md.orderFilter-2)*sizeof(double))
-    dataInTemp1 = <double*> malloc((pl.nData+md.order-1)*sizeof(double))
+    dataInTemp0 = <double*> malloc((pl.nData+2*(orderM1Half+orderFilterM1Half))*sizeof(double))
+    dataInTemp1 = <double*> malloc((pl.nData+2*orderM1Half)*sizeof(double))
     
     # Left boundary handling
     if leftBoundary == 0 or leftBoundary == 1 or leftBoundary == 2:
@@ -515,7 +515,7 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
             raise NotImplementedError('Method not implemented for given parameters.')           
     # Copy and extend data if necessary
     nn = max(md.order, md.orderFilter-1)
-    for ii in range(pl.nData+md.order+md.orderFilter-2-nLeftExt-nRightExt):
+    for ii in range(pl.nData+2*(orderM1Half+orderFilterM1Half)-nLeftExt-nRightExt):
         dataInTemp0[nLeftExt+ii] = dataIn[ii]
     if leftBoundary == 0:
         for ii in range(nLeftExt):
@@ -563,7 +563,7 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
             raise NotImplementedError('Method not implemented for given parameters.')
 
     # Do scaling or numerical derivative
-    convolve(dataInTemp0, pl.nData+md.order-1, dataInTemp1, md.orderFilter, md.coeffsFilter)
+    convolve(dataInTemp0, pl.nData+2*orderM1Half, dataInTemp1, md.orderFilter, md.coeffsFilter)
     free(dataInTemp0)
     
     # Main trapezoidal rule
