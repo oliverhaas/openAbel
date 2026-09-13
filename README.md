@@ -70,7 +70,7 @@ Multipole Method (FMM) as described by
 specifically for the Abel transform similar to
 [Kapur](https://epubs.siam.org/doi/abs/10.1137/S0036142995287847). If data points outside of the
 integration interval can be provided these end corrections are arbitrary order stable and we provide
-coefficients up to 20th order, otherwise it's recommended to use at most 5th order. The FMM leads to a
+coefficients up to 19th order, otherwise it's recommended to use at most 5th order. The FMM leads to a
 linear *O(N)* computational complexity algorithm.
 
 In both error and computational complexity there is no better existing method for the intended purpose
