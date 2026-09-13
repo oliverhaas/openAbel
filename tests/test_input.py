@@ -103,3 +103,18 @@ def test_twoDimensionalInput_raisesValueError():
     abelObj = openAbel.Abel(200, -1, 0.0, 0.01)
     with pytest.raises(ValueError):
         abelObj.execute(np.zeros((200, 1)))
+
+
+@pytest.mark.parametrize("method", [0, 2, 3])
+def test_invalidLeftBoundary_raisesNotImplemented(method):
+    abelObj = openAbel.Abel(200, -1, 0.0, 0.01, method=method)
+    with pytest.raises(NotImplementedError):
+        abelObj.execute(np.zeros(200), leftBoundary=4)
+
+
+@pytest.mark.parametrize("rightBoundary", [1, 2, 4])
+@pytest.mark.parametrize("method", [0, 2, 3])
+def test_unsupportedRightBoundary_raisesNotImplemented(rightBoundary, method):
+    abelObj = openAbel.Abel(200, -1, 0.0, 0.01, method=method)
+    with pytest.raises(NotImplementedError):
+        abelObj.execute(np.zeros(200), rightBoundary=rightBoundary)

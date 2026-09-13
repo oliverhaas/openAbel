@@ -131,6 +131,8 @@ cdef int execute_fat_trapezoidalDesingConst(abel_plan* pl, double* dataIn, doubl
     elif leftBoundary == 3:
         nLeftExt = 0
     else:
+        free(dataInTemp0)
+        free(dataInTemp1)
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
     # Right boundary handling
@@ -501,6 +503,8 @@ cdef int execute_fat_trapezoidalEndCorr(abel_plan* pl, double* dataIn, double* d
     elif leftBoundary == 3:
         nLeftExt = 0
     else:
+        free(dataInTemp0)
+        free(dataInTemp1)
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
     # Right boundary handling
