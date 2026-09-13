@@ -2,7 +2,7 @@ from types import MappingProxyType
 
 import numpy as np
 import pytest
-from analytic import N_DATA, STEP_SIZE, analyticPair, relativeError
+from analytic import N_DATA, STEP_SIZE, analyticPair, inputSamples, relativeError
 
 import openAbel
 
@@ -73,6 +73,45 @@ def test_singleOrderMethods_matchAnalyticTransform(forwardBackward, method, tole
     dataOut = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method).execute(dataIn)
     assert dataOut[-1] == 0.0
     assert np.isfinite(dataOut).all()
+    assert relativeError(dataOut=dataOut, reference=reference) < tolerance
+
+
+def outsideSamplesPerSide(*, forwardBackward: int, order: int) -> int:
+    """Samples outside the domain that boundary value 3 consumes per side: the half widths of the end-correction
+    stencil and, for the backward transform with numerical derivative, of the derivative filter."""
+    orderFilter = order + 1 + order % 2 if forwardBackward == 1 else 1
+    return (order - 1) // 2 + (orderFilter - 1) // 2
+
+
+def test_fmmBackwardOrder2_ignoresInputBeyondStencilReach():
+    # Regression: for even orders the end-correction methods read one input sample past the stencil reach, and the FMM
+    # fed that sample (or, with boundary 0, an uninitialised buffer element) into its direct summation multiplied by a
+    # zero coefficient. A NaN there poisoned the result; with boundary 0 it made the transform flaky.
+    nOutside = outsideSamplesPerSide(forwardBackward=1, order=2)
+    x = np.arange(-nOutside, N_DATA + nOutside + 1) * STEP_SIZE
+    dataIn = inputSamples(forwardBackward=1, x=x)
+    dataIn[-1] = np.nan  # one sample beyond what boundary value 3 needs
+    abelObj = openAbel.Abel(N_DATA, 1, 0.0, STEP_SIZE, method=3, order=2)
+    dataOut = abelObj.execute(dataIn, leftBoundary=3, rightBoundary=3)
+    assert np.isfinite(dataOut).all()
+
+
+@pytest.mark.parametrize("method", [2, 3])
+@pytest.mark.parametrize("shift", [0.0, 0.5])
+@pytest.mark.parametrize(
+    ("forwardBackward", "order", "tolerance"),
+    [(forwardBackward, order, tolerance) for (forwardBackward, order), tolerance in END_CORRECTION_TOLERANCE.items()],
+)
+def test_endCorrectionMethods_outsideSamples_matchAnalyticTransform(forwardBackward, order, tolerance, shift, method):
+    # Boundary value 3 on both sides: the input carries the samples the stencils reach into instead of extrapolating.
+    nOutside = outsideSamplesPerSide(forwardBackward=forwardBackward, order=order)
+    x = (np.arange(-nOutside, N_DATA + nOutside) + shift) * STEP_SIZE
+    dataIn = inputSamples(forwardBackward=forwardBackward, x=x)
+    _, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
+    abelObj = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order)
+    dataOut = abelObj.execute(dataIn, leftBoundary=3, rightBoundary=3)
+    assert dataOut.shape == (N_DATA,)
+    assert dataOut[-1] == 0.0
     assert relativeError(dataOut=dataOut, reference=reference) < tolerance
 
 
