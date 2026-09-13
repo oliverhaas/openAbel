@@ -1,0 +1,80 @@
+site_name: openAbel
+site_description: Fast Abel transforms of equispaced data
+site_url: https://oliverhaas.github.io/openAbel/
+repo_url: https://github.com/oliverhaas/openAbel
+repo_name: oliverhaas/openAbel
+edit_uri: edit/main/docs/
+
+# Internal planning notes, not part of the published site.
+exclude_docs: |
+  superpowers/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: [".", "docs"]
+      check_paths: true
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+extra:
+  version:
+    provider: mike
+
+nav:
+  - Home: index.md
+  - Transform types: transform-types.md
+  - Transform methods: transform-methods.md
+  - Remarks: remarks.md
+  - Examples:
+      - examples/index.md
+      - examples/example000.md
+      - examples/example001.md
+      - examples/example002.md
+      - examples/example003.md
+      - examples/example004.md
+      - examples/example005.md
+  - Reference:
+      - API: reference/api.md
+      - Changelog: reference/changelog.md
