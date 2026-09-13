@@ -33,7 +33,7 @@ jobs:
           ref: ${{ github.event.inputs.version && format('v{0}', github.event.inputs.version) || github.ref }}
       - uses: astral-sh/setup-uv@v7
       - run: uv python install 3.14
-      - run: uv sync
+      - run: uv sync --locked
       - run: uv run ruff check --no-fix
       - run: uv run ruff format --check
       - run: uv run ty check src tests
