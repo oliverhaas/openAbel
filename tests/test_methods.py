@@ -84,9 +84,8 @@ def outsideSamplesPerSide(*, forwardBackward: int, order: int) -> int:
 
 
 def test_fmmBackwardOrder2_ignoresInputBeyondStencilReach():
-    # Regression: for even orders the end-correction methods read one input sample past the stencil reach, and the FMM
-    # fed that sample (or, with boundary 0, an uninitialised buffer element) into its direct summation multiplied by a
-    # zero coefficient. A NaN there poisoned the result; with boundary 0 it made the transform flaky.
+    # Regression: even orders read one sample past the stencil reach and the FMM multiplied it (or, with boundary 0,
+    # an uninitialised buffer element) by a zero coefficient, so a NaN there poisoned the result.
     nOutside = outsideSamplesPerSide(forwardBackward=1, order=2)
     x = np.arange(-nOutside, N_DATA + nOutside + 1) * STEP_SIZE
     dataIn = inputSamples(forwardBackward=1, x=x)
@@ -103,7 +102,6 @@ def test_fmmBackwardOrder2_ignoresInputBeyondStencilReach():
     [(forwardBackward, order, tolerance) for (forwardBackward, order), tolerance in END_CORRECTION_TOLERANCE.items()],
 )
 def test_endCorrectionMethods_outsideSamples_matchAnalyticTransform(forwardBackward, order, tolerance, shift, method):
-    # Boundary value 3 on both sides: the input carries the samples the stencils reach into instead of extrapolating.
     nOutside = outsideSamplesPerSide(forwardBackward=forwardBackward, order=order)
     x = (np.arange(-nOutside, N_DATA + nOutside) + shift) * STEP_SIZE
     dataIn = inputSamples(forwardBackward=forwardBackward, x=x)

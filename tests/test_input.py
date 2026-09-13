@@ -19,8 +19,7 @@ def test_zeroOrder_raisesValueError(method):
 @pytest.mark.parametrize("forwardBackward", [-1, 1, 2, -2])
 @pytest.mark.parametrize("method", [2, 3])
 def test_unsupportedShift_raisesNotImplemented(forwardBackward, method):
-    # Regression (method 3): md.ltp and md.direct0 were not NULL-initialised, so the cleanup after this error freed
-    # garbage and the process crashed instead of raising.
+    # Regression (method 3): the cleanup after this error freed uninitialised pointers and crashed the process.
     with pytest.raises(NotImplementedError):
         openAbel.Abel(200, forwardBackward, 0.25, 0.01, method=method)
 
@@ -44,8 +43,7 @@ def test_epsBelowMachineEpsilon_raisesValueError():
         openAbel.Abel(200, -1, 0.0, 0.01, method=3, eps=0.0)
 
 
-# Samples per side that boundary value 3 needs beyond nData (the half widths of the end-correction stencil and, for
-# forwardBackward=1, of the derivative filter; none for method 1). Columns: forwardBackward, method, order, nOutside.
+# Columns: forwardBackward, method, order, nOutside (samples per side that boundary value 3 needs beyond nData).
 OUTSIDE_SAMPLES = (
     (-1, 0, 2, 0),
     (1, 0, 2, 1),
