@@ -36,7 +36,7 @@ cdef double _kernModified(double rr, double yy) nogil:
     return (yy/rr)**2/mf.sqrt(rr**2-yy**2)
 
 # Plan FMM
-cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.machineEpsilon) nogil except -1:
+cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.machineEpsilon) except -1 nogil:
 
     cdef:
         int ii, jj, ll, kk, mm
@@ -313,7 +313,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.m
 
 # Execute FMM
 cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataOut, int leftBoundary, 
-                                    int rightBoundary) nogil except -1:
+                                    int rightBoundary) except -1 nogil:
 
     cdef:
         methodData_FMM* md
@@ -491,7 +491,7 @@ cdef int execute_fat_fmmTrapEndCorr(abel_plan* pl, double* dataIn, double* dataO
 
 
 # Destroy FMM
-cdef int destroy_fat_fmmTrapEndCorr(abel_plan* pl) nogil except -1:
+cdef int destroy_fat_fmmTrapEndCorr(abel_plan* pl) except -1 nogil:
 
     cdef:
         methodData_FMM* md = <methodData_FMM*> pl.methodData
