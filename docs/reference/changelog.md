@@ -31,6 +31,7 @@
 - `Abel(...)` accepted `nData < 2` and `execute` accepted inputs shorter than the plan needs; depending on the
   method the process crashed or the result was garbage. Both now raise `ValueError`, and the message names the
   required length (the boundary value `3` rule in the API reference).
+- An invalid `leftBoundary` value leaked two temporary buffers with methods `0` and `2`.
 
 ### Changed
 
