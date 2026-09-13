@@ -28,8 +28,7 @@ def test_unsupportedShift_raisesNotImplemented(forwardBackward, method):
 @pytest.mark.parametrize("nData", [-1, 0, 1])
 @pytest.mark.parametrize("method", [0, 1, 2, 3])
 def test_fewerThanTwoGridPoints_raisesValueError(nData, method):
-    # Regression: nData=0 with method 1 wrote past a zero-size block and aborted the process, nData=-1 reserved
-    # gigabytes.
+    # Regression: nData=0 aborted the process with method 1 and nData=-1 reserved gigabytes.
     with pytest.raises(ValueError):
         openAbel.Abel(nData, -1, 0.0, 0.01, method=method)
 
@@ -45,9 +44,8 @@ def test_epsBelowMachineEpsilon_raisesValueError():
         openAbel.Abel(200, -1, 0.0, 0.01, method=3, eps=0.0)
 
 
-# Samples per side that boundary value 3 needs beyond nData: the half widths of the end-correction stencil and, for
-# the backward transform with numerical derivative, of the derivative filter. Method 0 has a first-order stencil,
-# method 1 ignores the boundary values. Columns: forwardBackward, method, order, nOutside.
+# Samples per side that boundary value 3 needs beyond nData (the half widths of the end-correction stencil and, for
+# forwardBackward=1, of the derivative filter; none for method 1). Columns: forwardBackward, method, order, nOutside.
 OUTSIDE_SAMPLES = (
     (-1, 0, 2, 0),
     (1, 0, 2, 1),
@@ -64,8 +62,7 @@ OUTSIDE_SAMPLES = (
 
 @pytest.mark.parametrize(("forwardBackward", "method", "order", "nOutside"), OUTSIDE_SAMPLES)
 def test_outsideBoundaries_shortInput_raisesValueError(forwardBackward, method, order, nOutside):
-    # Regression: a short input crashed the process, and boundary value 3 with exactly nData samples read past the
-    # input and returned garbage.
+    # Regression: a short input crashed the process, and exactly nData samples with boundary 3 read past the input.
     abelObj = openAbel.Abel(200, forwardBackward, 0.0, 0.01, method=method, order=order)
     with pytest.raises(ValueError):
         abelObj.execute(np.zeros(200 + 2 * nOutside - 1), leftBoundary=3, rightBoundary=3)
@@ -122,6 +119,5 @@ def test_unsupportedRightBoundary_raisesNotImplemented(rightBoundary, method):
 
 @pytest.mark.parametrize("method", [2, 3])
 def test_orderWithoutCoefficients_raisesValueError(method):
-    # The coefficient tables stop at order 19.
     with pytest.raises(ValueError):
         openAbel.Abel(200, -1, 0.0, 0.01, method=method, order=20)
