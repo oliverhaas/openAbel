@@ -50,6 +50,9 @@ docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.7.7"]
 [tool.uv]
 default-groups = ["dev", "docs"]
 
+[tool.setuptools]
+include-package-data = false
+
 [tool.setuptools.packages.find]
 namespaces = false
 where = ["src"]
