@@ -1,8 +1,6 @@
 
 
 import numpy as np
-import os.path as osp
-import datetime
 
 from libc.stdlib cimport free
 from openAbel.helper cimport nullCheckMalloc as malloc, nullCheckCalloc as calloc
@@ -56,7 +54,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.m
     md = <methodData_FMM*> malloc(sizeof(methodData_FMM))
     # Initialize to NULL so I can destroy properly when exception is raised
     md.chebRoots = md.kl = md.klCum = md.mtmp = md.mtmm = md.mtlk = NULL 
-    md.direct = md.coeffsSing = md.coeffsNonsing = md.coeffsFilter = NULL
+    md.direct = md.direct0 = md.ltp = md.coeffsSing = md.coeffsNonsing = md.coeffsFilter = NULL
     pl.methodData = <void*> md
 
     # Small data set
@@ -177,7 +175,7 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.m
                 if pl.shift == 0.:
                     cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small', order)
                 elif pl.shift == 0.5:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift_', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
