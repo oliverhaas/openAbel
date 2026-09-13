@@ -1,0 +1,112 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["cython>=3.1", "scipy>=1.13", "setuptools>=77"]
+
+[project]
+authors = [{ email = "ohaas@e1plus.de", name = "Oliver Haas" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Cython",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = ["numpy>=2.0", "scipy>=1.13"]
+description = "Fast Abel transforms of equispaced data: Fast Multipole Method with arbitrary-order end corrections, in Cython"
+keywords = [
+  "abel transform",
+  "cython",
+  "end corrections",
+  "fast multipole method",
+]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+name = "openAbel"
+readme = "README.md"
+requires-python = ">=3.12"
+version = "0.7.0"
+
+[project.urls]
+Homepage = "https://github.com/oliverhaas/openAbel"
+Repository = "https://github.com/oliverhaas/openAbel"
+
+[dependency-groups]
+dev = [
+  "cython==3.3.0",
+  "pre-commit==4.6.2",
+  "pytest==9.1.1",
+  "ruff==0.16.7",
+  "setuptools==84.0.0",
+  "ty==0.0.80",
+]
+docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.7.7"]
+
+[tool.uv]
+default-groups = ["dev", "docs"]
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+namespaces = false
+where = ["src"]
+
+[tool.setuptools.package-data]
+"openAbel" = ["*.pxd"]
+"openAbel.abel" = ["*.pxd", "coeffsData/*.npy"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.c", "*.html"]
+
+[tool.cibuildwheel]
+build = ["cp312-*", "cp313-*", "cp314-*", "cp314t-*"]
+build-frontend = "build[uv]"
+build-verbosity = 1
+test-command = "python -m pytest {project}/tests"
+test-requires = ["pytest"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
+
+[tool.cibuildwheel.macos]
+archs = ["arm64"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+xfail_strict = true
+
+[tool.ruff]
+extend-exclude = ["add"]
+fix = true
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = ["COM812", "CPY", "D", "E501", "EM", "N", "TRY003"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/**" = [
+  "ANN",
+  "ARG001",
+  "B007",
+  "ERA001",
+  "F841",
+  "FBT003",
+  "ICN001",
+  "INP001",
+  "NPY002",
+  "PLR2004",
+  "PTH",
+  "T201",
+]
+"tests/**" = ["ANN", "INP001", "PLR2004", "PT011", "S101"]
+
+[tool.ty.environment]
+python-version = "3.12"
