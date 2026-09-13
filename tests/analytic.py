@@ -19,11 +19,11 @@ def relative_error(*, data_out: np.ndarray, reference: np.ndarray) -> float:
     return float(np.max(np.abs(data_out[:-1] - reference[:-1])) / np.max(np.abs(reference)))
 
 
-def _modified_forward_tail(*, y: float, R: float) -> float:
+def _modified_forward_tail(*, y: float, r_max: float) -> float:
     """2 y^2 int_R^inf exp(-r^2) / (r^2 sqrt(r^2 - y^2)) dr, the part of the modified forward transform beyond R."""
     if y == 0.0:
         return 0.0
-    value, _ = integrate.quad(lambda r: np.exp(-(r**2)) / (r**2 * np.sqrt(r**2 - y**2)), R, np.inf, limit=200)
+    value, _ = integrate.quad(lambda r: np.exp(-(r**2)) / (r**2 * np.sqrt(r**2 - y**2)), r_max, np.inf, limit=200)
     return 2.0 * y**2 * value
 
 
@@ -46,10 +46,10 @@ def input_samples(*, forward_backward: int, x: np.ndarray) -> np.ndarray:
 def analytic_pair(*, forward_backward: int, shift: float) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(data_in, expected data_out)`` for the transform type ``forward_backward`` on ``grid(shift)``."""
     x = grid(shift=shift)
-    R = x[-1]
+    r_max = x[-1]
     g = np.exp(-(x**2))
     data_in = input_samples(forward_backward=forward_backward, x=x)
-    truncated_erf = special.erf(np.sqrt(np.maximum(R**2 - x**2, 0.0)))
+    truncated_erf = special.erf(np.sqrt(np.maximum(r_max**2 - x**2, 0.0)))
     if forward_backward == -1:
         # forward: F(y) = 2 int_y^R r exp(-r^2) / sqrt(r^2 - y^2) dr = sqrt(pi) exp(-y^2) erf(sqrt(R^2 - y^2))
         return data_in, np.sqrt(np.pi) * g * truncated_erf
@@ -61,5 +61,5 @@ def analytic_pair(*, forward_backward: int, shift: float) -> tuple[np.ndarray, n
     h = np.full_like(x, 2.0)
     xp = x[x > 0.0]
     h[x > 0.0] = xp**2 * np.exp(-(xp**2)) * (special.k1e(0.5 * xp**2) - special.k0e(0.5 * xp**2))
-    tail = np.array([*(_modified_forward_tail(y=y, R=R) for y in x[:-1]), h[-1]])
+    tail = np.array([*(_modified_forward_tail(y=y, r_max=r_max) for y in x[:-1]), h[-1]])
     return data_in, h - tail

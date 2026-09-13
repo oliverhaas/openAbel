@@ -210,13 +210,13 @@ def runtimes_abel(n_array, n_measure, method, order):
 
     for ii in range(n_array.shape[0]):
         data_in = np.ones(n_array[ii])
-        T = np.empty(n_measure)
+        timings = np.empty(n_measure)
         for jj in range(n_measure):
             t0 = ti.time()
             abel_obj = oa.Abel(n_array[ii], -1, 0.0, 1.0, method=method, order=order)
             t1 = ti.time()
-            T[jj] = t1 - t0
-        runtimes_pre[ii] = np.sum(T) / n_measure
+            timings[jj] = t1 - t0
+        runtimes_pre[ii] = np.sum(timings) / n_measure
 
         abel_obj = oa.Abel(n_array[ii], -1, 0.0, 1.0, method=method, order=order)
         t0 = ti.time()
