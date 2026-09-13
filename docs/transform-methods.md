@@ -20,7 +20,7 @@ The methods with end corrections can do the transformation in different orders o
 keyword argument; all other methods ignore `order`. Note when we talk about \(n\) order accuracy we usually mean
 \((n+1/2)\) order accuracy due to the square root in the Abel transform kernel. For higher order methods the
 transformed function has to be sufficiently smooth to achieve the full order of convergence, and in very extreme cases
-the transform become unstable if high order is used on non-smooth functions. The length of the data vector `nData` we
+the transform becomes unstable if high order is used on non-smooth functions. The length of the data vector `nData` we
 denote as \(N\) in the math formulas.
 
 Overall cases where a user should use anything other than `method = 3` (default) and `order = 2` (default) to
