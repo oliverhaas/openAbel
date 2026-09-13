@@ -39,12 +39,28 @@ cdef class Abel(object):
 
     def __init__(self, int nData, int forwardBackward, double shift, double stepSize, 
                  int method = 3, int order = 2, double eps = 1.e1*const.machineEpsilon):
-        
+
+        cdef int orderFilter
+
+        if nData < 2:
+            raise ValueError('nData must be at least 2.')
+
         try:
             self.plan = base.plan_fat(nData, forwardBackward, shift, stepSize, 
                                       method = method, order = order, eps = eps)
         except:
             raise
+
+        # Samples per side that execute() reads beyond nData with boundary value 3: the half widths of the
+        # end-correction stencil and of the derivative filter, the same extension widths trap.pyx and fmm.pyx use.
+        # Method 0 has a first-order stencil, method 1 ignores the boundary values.
+        if method == 1:
+            self.nOutside = 0
+        else:
+            if method == 0:
+                order = 1
+            orderFilter = order+1 + (order % 2) if forwardBackward == 1 else 1
+            self.nOutside = (order-1)//2 + (orderFilter-1)//2
 
 
     # TODO maybe support 2D (or nD) arrays as well here?
@@ -81,6 +97,15 @@ cdef class Abel(object):
         cdef:
             double[::1] dataInTemp
             double[::1] dataOut
+            Py_ssize_t nNeeded = self.plan.nData
+
+        if leftBoundary == 3:
+            nNeeded += self.nOutside
+        if rightBoundary == 3:
+            nNeeded += self.nOutside
+        if dataIn.shape[0] < nNeeded:
+            raise ValueError(f'dataIn has {dataIn.shape[0]} samples, but the plan needs at least {nNeeded} for the '
+                             f'given boundary values.')
 
         dataInTemp = numpy.copy(dataIn)
         dataOut = numpy.copy(dataInTemp)

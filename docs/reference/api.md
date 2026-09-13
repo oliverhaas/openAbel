@@ -31,10 +31,10 @@ Creates a transform plan for equispaced data of length `nData`. Creating the pla
 | `order`           | `int`   | Order of the end corrections for methods `2` and `3` (`0 < order < 20`, default `2`); ignored by methods `0` and `1`.                                                                                                |
 | `eps`             | `float` | Target accuracy of the FMM far-field approximation (method `3` only); it sets the number of Chebyshev interpolation nodes. Must be at least the machine epsilon; defaults to ten times the machine epsilon.               |
 
-Raises `ValueError` if a parameter has a non-viable value (for example `order <= 0`, or too few data points for the
-requested order) and `NotImplementedError` if the chosen method does not support the given parameters (for example
-an unknown `method`, a `shift` other than `0.0` or `0.5` with methods `2` and `3`, or the modified forward transform
-with the Hansen-Law method).
+Raises `ValueError` if a parameter has a non-viable value (for example `nData < 2`, `order <= 0`, or too few data points
+for the requested order) and `NotImplementedError` if the chosen method does not support the given parameters (for
+example an unknown `method`, a `shift` other than `0.0` or `0.5` with methods `2` and `3`, or the modified forward
+transform with the Hansen-Law method).
 
 ### `Abel.execute`
 
@@ -55,7 +55,9 @@ copied, never modified.
 With boundary value `3` the input is longer than `nData`: on that side it also carries the `(order - 1) // 2` samples
 outside the domain that the end-correction stencil reaches into, plus `(orderFilter - 1) // 2` samples with
 `orderFilter = order + 1 + order % 2` for the backward transform with numerical derivative (`forwardBackward=1`).
-Samples beyond that are ignored. For the Hansen-Law method (`method=1`) the boundary arguments are ignored.
+Samples beyond that are ignored; a shorter input raises `ValueError`. Method `0` behaves like `order = 1` here (one
+extra sample per side for `forwardBackward=1`, none otherwise). For the Hansen-Law method (`method=1`) the boundary
+arguments are ignored.
 
 Raises `ValueError` for non-viable input and `NotImplementedError` for unsupported boundary combinations.
 

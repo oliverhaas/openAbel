@@ -28,6 +28,9 @@
   element happened to hold a NaN or Inf bit pattern the result was garbage, so the backward transform with `method=3`
   failed sporadically. The buffers are now sized exactly; results are unchanged otherwise.
 - `method=0` leaked a small allocation per `Abel(...)` construction.
+- `Abel(...)` accepted `nData < 2` and `execute` accepted inputs shorter than the plan needs; depending on the
+  method the process crashed or the result was garbage. Both now raise `ValueError`, and the message names the
+  required length (the boundary value `3` rule in the API reference).
 
 ### Changed
 
