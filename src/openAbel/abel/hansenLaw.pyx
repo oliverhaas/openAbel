@@ -99,8 +99,9 @@ cdef int plan_fat_hansenLawLinear(abel_plan* plan) except -1 nogil:
                 md.coeffs[jj] = xjp1oxj**mod.lamk[kk]
                 md.coeffs[jj+1] = constants.piinv*mod.hk[kk]*(md.coeffs[jj]-1.)/mod.lamk[kk]
     else:
+        destroy_fat_hansenLawLinear(plan)
         with gil:
-            raise NotImplementedError
+            raise NotImplementedError('Method not implemented for given parameters.')
 
     return 0
 
@@ -163,8 +164,9 @@ cdef int execute_fat_hansenLawLinear(abel_plan* plan, double* dataIn, double* da
                 dataOut[ii] += xk[kk]
         dataOut[0] = dataOut[1]
     else:
+        free(xk)
         with gil:
-            raise NotImplementedError
+            raise NotImplementedError('Method not implemented for given parameters.')
 
     free(xk)
 

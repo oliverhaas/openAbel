@@ -1,7 +1,5 @@
 
 import numpy as np
-import os.path as osp
-import datetime
 
 
 from libc.stdlib cimport free
@@ -36,7 +34,7 @@ ctypedef struct methodData_DesingConst:
 cdef int plan_fat_trapezoidalDesingConst(abel_plan* pl) except -1 nogil:
 
     cdef:
-        methodData_DesingConst* md = <methodData_DesingConst*> malloc(sizeof(methodData_DesingConst))
+        methodData_DesingConst* md
         int ii, jj, ll
         double[::1] coeffs_filter_mv
         double temp0, temp1
@@ -90,7 +88,7 @@ cdef int plan_fat_trapezoidalDesingConst(abel_plan* pl) except -1 nogil:
         md.coeffsFilter = <double*> malloc(md.orderFilter*sizeof(double))
         with gil:
             try:
-                coeffs_filter_mv = np.load(osp.dirname(__file__) + "/data/coeffs_deriv_smooth_" + "%02d" % 2 + ".npy")
+                coeffs_filter_mv = coeffs.getCoeffs('coeffs_deriv_smooth', 2)
             except:
                 destroy_fat_trapezoidalDesingConst(pl)
                 raise
@@ -407,7 +405,7 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) except -1 nog
                 if pl.shift == 0.:
                     coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift_', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
