@@ -16,7 +16,3 @@ cdef unsigned int uintMin(unsigned int aa, unsigned int bb) nogil:
         return aa
 
     return bb
-
-
-
-
