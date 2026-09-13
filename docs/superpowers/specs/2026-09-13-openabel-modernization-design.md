@@ -252,11 +252,12 @@ lint, and the hooks would touch the `.rst` files.
 
 `.github/workflows/ci.yml`, on push to `main` and pull requests to `main`:
 
-- `lint` (ubuntu-latest, `UV_PYTHON: "3.14"`): `uv sync` (default groups `dev` and `docs`), `uv lock --check`,
+- `lint` (ubuntu-latest, `UV_PYTHON: "3.14"`): `uv sync --locked` (default groups `dev` and `docs`; fails when
+  `uv.lock` is stale, which a plain `uv sync` would silently rewrite),
   `ruff check --no-fix` (`pyproject.toml` sets `fix = true`, so a plain `ruff check` would fix and pass),
   `ruff format --check`, `ty check src tests`, `mkdocs build --strict`.
 - `test`, `fail-fast: false`, matrix `os: ubuntu-latest` x `python: ["3.12", "3.13", "3.14", "3.14t"]`
-  plus `os: macos-latest, python: "3.14"`; each leg `uv python install`, `uv sync` (this compiles the
+  plus `os: macos-latest, python: "3.14"`; each leg `uv python install`, `uv sync --locked` (this compiles the
   extensions) and `uv run pytest`, with `UV_PYTHON` set to the matrix version so the free-threaded leg cannot
   pick up the runner's system interpreter.
 - Action pins: `actions/checkout@v7`, `astral-sh/setup-uv@v7` (dependabot bumps them).
