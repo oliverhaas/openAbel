@@ -182,4 +182,3 @@ cdef int destroy_fat_hansenLawLinear(abel_plan* plan) except -1 nogil:
     free(md)
 
     return 0
-

@@ -108,6 +108,3 @@ cdef int destroy_fat(abel_plan* pl) except -1 nogil:
     free(pl)    
 
     return 0
-
-
-

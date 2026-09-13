@@ -4,49 +4,61 @@
 ############################################################################################################################################
 
 
-import openAbel
-import numpy as np
-from scipy.special import erf
 import matplotlib.pyplot as mpl
+import numpy as np
+
+import openAbel
 
 ############################################################################################################################################
 # Plotting setup
 # This block can be ignored, it's just for nicer plots.
 
 params = {
-   'axes.labelsize': 8,
-   'font.size': 8,
-   'legend.fontsize': 10,
-   'xtick.labelsize': 10,
-   'ytick.labelsize': 10,
-   'text.usetex': False,
-   'figure.figsize': [5., 5.]
-   }
+    "axes.labelsize": 8,
+    "font.size": 8,
+    "legend.fontsize": 10,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10,
+    "text.usetex": False,
+    "figure.figsize": [5.0, 5.0],
+}
 mpl.rcParams.update(params)
 # Color scheme
-colors = ['#005AA9','#E6001A','#99C000','#721085','#EC6500','#009D81','#A60084','#0083CC','#F5A300','#C9D400','#FDCA00']
+colors = [
+    "#005AA9",
+    "#E6001A",
+    "#99C000",
+    "#721085",
+    "#EC6500",
+    "#009D81",
+    "#A60084",
+    "#0083CC",
+    "#F5A300",
+    "#C9D400",
+    "#FDCA00",
+]
 # Plot markers
-markers = ["o", "v" , "s", "D", "p", "*", "h", "+", "^", "x"]
-# Line styles 
-linestyles = ['-', '--', '-.', ':','-', '--', '-.', ':','-', '--', '-.', ':']
+markers = ["o", "v", "s", "D", "p", "*", "h", "+", "^", "x"]
+# Line styles
+linestyles = ["-", "--", "-.", ":", "-", "--", "-.", ":", "-", "--", "-.", ":"]
 lw = 2
 
 ############################################################################################################################################
 
 # Parameters
 nData = 100000
-shift = 0.
+shift = 0.0
 xMax = 20.0
-sig = 1.
-stepSize = xMax/(nData-1)
+sig = 1.0
+stepSize = xMax / (nData - 1)
 
-# Create Abel transform object, which does all precomputation possible without knowing the exact data. 
-abelObjFw = openAbel.Abel(nData, -1, shift, stepSize, order = 3)    
-abelObjBw = openAbel.Abel(nData, -1, shift, stepSize, order = 3)   
+# Create Abel transform object, which does all precomputation possible without knowing the exact data.
+abelObjFw = openAbel.Abel(nData, -1, shift, stepSize, order=3)
+abelObjBw = openAbel.Abel(nData, -1, shift, stepSize, order=3)
 
 # Input data
-xx = np.linspace(shift*stepSize, xMax, nData)
-dataIn = np.exp(-0.5*xx**2/sig**2)
+xx = np.linspace(shift * stepSize, xMax, nData)
+dataIn = np.exp(-0.5 * xx**2 / sig**2)
 
 # Forward Abel transform and analytical result.
 # We show both the analytical result of a truncated Gaussian and a standard Gaussian to show
@@ -54,27 +66,30 @@ dataIn = np.exp(-0.5*xx**2/sig**2)
 dataOut = abelObjFw.execute(dataIn)
 dataOut = abelObjFw.execute(dataOut)
 for ii in range(nData):
-    dataOut[ii] /= 2.*np.pi
+    dataOut[ii] /= 2.0 * np.pi
 
 
 # Plotting
 fig, axarr = mpl.subplots(2, 1, sharex=True)
 
-axarr[0].plot(xx, dataIn, color = colors[0], marker = markers[0], linestyle = linestyles[0], label='analy.')
-axarr[0].plot(xx, dataOut, color = colors[2], marker = markers[2], linestyle = linestyles[2], label='openAbel')
-axarr[0].set_ylabel('value')
+axarr[0].plot(xx, dataIn, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
+axarr[0].plot(xx, dataOut, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel")
+axarr[0].set_ylabel("value")
 axarr[0].legend()
 
-axarr[1].semilogy(xx[:-1], np.abs((dataOut[:-1]-dataIn[:-1])/dataIn[:-1]),
-                  color = colors[3], marker = markers[3], linestyle = linestyles[3], label = 'not trunc.')
-axarr[1].set_ylabel('relative error')
-axarr[1].set_xlabel('y')
+axarr[1].semilogy(
+    xx[:-1],
+    np.abs((dataOut[:-1] - dataIn[:-1]) / dataIn[:-1]),
+    color=colors[3],
+    marker=markers[3],
+    linestyle=linestyles[3],
+    label="not trunc.",
+)
+axarr[1].set_ylabel("relative error")
+axarr[1].set_xlabel("y")
 axarr[1].legend()
 
 mpl.tight_layout()
-mpl.savefig('example006_simpleForwardAndBackward.png', dpi=300)
+mpl.savefig("example006_simpleForwardAndBackward.png", dpi=300)
 
 mpl.show()
-
-
-

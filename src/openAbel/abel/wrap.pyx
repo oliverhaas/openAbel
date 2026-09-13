@@ -97,4 +97,3 @@ cdef class Abel(object):
     def __dealloc__(self):
 
         base.destroy_fat(self.plan)
-

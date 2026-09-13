@@ -611,7 +611,3 @@ cdef:
     double TWOD = 2.
     double MONED = -1.
     double MTWOD = -2.
-
-
-
-
