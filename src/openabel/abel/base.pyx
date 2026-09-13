@@ -1,16 +1,16 @@
 
 
 from libc.stdlib cimport free
-from openAbel.helper cimport nullCheckMalloc as malloc
+from openabel.helper cimport nullCheckMalloc as malloc
 
-from openAbel.abel.hansenLaw cimport plan_fat_hansenLawOrgLin, execute_fat_hansenLawLinear, destroy_fat_hansenLawLinear
-from openAbel.abel.trap cimport plan_fat_trapezoidalDesingConst, execute_fat_trapezoidalDesingConst, \
+from openabel.abel.hansen_law cimport plan_fat_hansenLawOrgLin, execute_fat_hansenLawLinear, destroy_fat_hansenLawLinear
+from openabel.abel.trap cimport plan_fat_trapezoidalDesingConst, execute_fat_trapezoidalDesingConst, \
                                 destroy_fat_trapezoidalDesingConst, \
                                 plan_fat_trapezoidalEndCorr, execute_fat_trapezoidalEndCorr, \
                                 destroy_fat_trapezoidalEndCorr
-from openAbel.abel.fmm cimport plan_fat_fmmTrapEndCorr, execute_fat_fmmTrapEndCorr, destroy_fat_fmmTrapEndCorr
+from openabel.abel.fmm cimport plan_fat_fmmTrapEndCorr, execute_fat_fmmTrapEndCorr, destroy_fat_fmmTrapEndCorr
 
-cimport openAbel.constants as const
+cimport openabel.constants as const
 
 
 ctypedef struct abel_plan:

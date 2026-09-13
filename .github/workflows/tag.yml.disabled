@@ -33,7 +33,7 @@ jobs:
         run: |
           CURRENT_VERSION=$(uv version --short)
           echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
-          HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/openAbel/$CURRENT_VERSION/json")
+          HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/openabel/$CURRENT_VERSION/json")
           if [ "$HTTP_CODE" = "200" ]; then
             echo "on_pypi=true" >> "$GITHUB_OUTPUT"
           elif [ "$HTTP_CODE" = "404" ]; then

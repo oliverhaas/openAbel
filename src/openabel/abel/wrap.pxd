@@ -1,7 +1,7 @@
 
 
 
-cimport openAbel.abel.base as base
+cimport openabel.abel.base as base
 
 
 cdef class Abel(object):

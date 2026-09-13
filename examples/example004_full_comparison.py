@@ -11,7 +11,7 @@ import matplotlib.pyplot as mpl
 import numpy as np
 from scipy.special import erf
 
-import openAbel as oa
+import openabel as oa
 
 ############################################################################################################################################
 # Plotting setup
@@ -290,6 +290,6 @@ ax6.grid(True)
 
 
 mpl.tight_layout()
-mpl.savefig("example004_fullComparison.png", dpi=300)
+mpl.savefig("example004_full_comparison.png", dpi=300)
 
 mpl.show()

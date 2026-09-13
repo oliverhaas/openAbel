@@ -1,20 +1,20 @@
 # API reference
 
-The public Python API of **openAbel** is a single class, `openAbel.Abel`. Everything else in the package is Cython
+The public Python API of **openAbel** is a single class, `openabel.Abel`. Everything else in the package is Cython
 internals; the `.pxd` files are shipped, so the C-level functions can be `cimport`ed from other Cython modules, but
 they are not a supported interface.
 
 ```python
-import openAbel
+import openabel
 
-openAbel.__version__  # e.g. "0.7.0"
-openAbel.__all__  # ["Abel"]
+openabel.__version__  # e.g. "0.7.0"
+openabel.__all__  # ["Abel"]
 ```
 
-## `openAbel.Abel`
+## `openabel.Abel`
 
 ```python
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2, eps=1e1 * machineEpsilon)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2, eps=1e1 * machineEpsilon)
 ```
 
 Creates a transform plan for equispaced data of length `nData`. Creating the plan does the expensive preparation
@@ -66,13 +66,13 @@ Raises `ValueError` for non-viable input and `NotImplementedError` for unsupport
 ```python
 import numpy as np
 
-import openAbel
+import openabel
 
 nData = 200
 stepSize = 3.5 / (nData - 1)
 x = np.arange(nData) * stepSize
 
-abelObj = openAbel.Abel(nData, -1, 0.0, stepSize)  # forward transform, FMM with 2nd order end corrections
+abelObj = openabel.Abel(nData, -1, 0.0, stepSize)  # forward transform, FMM with 2nd order end corrections
 dataOut = abelObj.execute(np.exp(-(x**2)))
 ```
 

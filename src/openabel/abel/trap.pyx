@@ -3,15 +3,15 @@ import numpy as np
 
 
 from libc.stdlib cimport free
-from openAbel.helper cimport nullCheckMalloc as malloc, nullCheckCalloc as calloc
+from openabel.helper cimport nullCheckMalloc as malloc, nullCheckCalloc as calloc
 from libc.string cimport memset
 cimport scipy.linalg.cython_blas as blas
 
-import openAbel.abel.coeffs as coeffs
+import openabel.abel.coeffs as coeffs
 
-cimport openAbel.mathFun as mf
-cimport openAbel.constants as co
-from openAbel.abel.base cimport abel_plan
+cimport openabel.math_fun as mf
+cimport openabel.constants as co
+from openabel.abel.base cimport abel_plan
 
 
 
@@ -304,13 +304,13 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) except -1 nog
     if pl.forwardBackward == -1:    # Forward transform
         with gil:
             try:
-                coeffs_sing_large_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_large', order)
-                coeffs_nonsing_sqrt_small_mv = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
-                coeffs_nonsing_sqrt_large_mv = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
+                coeffs_sing_large_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_lin_sing_large', order)
+                coeffs_nonsing_sqrt_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_mv = coeffs.getCoeffs('coeffs_inv_sqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small_halfShift', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small_half_shift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -354,13 +354,13 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) except -1 nog
     elif pl.forwardBackward == 1 or pl.forwardBackward == 2:    # Backward transform
         with gil:
             try:
-                coeffs_sing_large_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_large', order)
-                coeffs_nonsing_sqrt_small_mv = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
-                coeffs_nonsing_sqrt_large_mv = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
+                coeffs_sing_large_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_sing_large', order)
+                coeffs_nonsing_sqrt_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_mv = coeffs.getCoeffs('coeffs_inv_sqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small_halfShift', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_sing_small_half_shift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -401,13 +401,13 @@ cdef int plan_fat_trapezoidalEndCorr(abel_plan* pl, int order = 2) except -1 nog
     elif pl.forwardBackward == -2:    # Modified forward transform for 1/r^2 singular functions
         with gil:
             try:
-                coeffs_sing_large_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_large', order)
-                coeffs_nonsing_sqrt_small_mv = coeffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
-                coeffs_nonsing_sqrt_large_mv = coeffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
+                coeffs_sing_large_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_large', order)
+                coeffs_nonsing_sqrt_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_nonsing_small', order)
+                coeffs_nonsing_sqrt_large_mv = coeffs.getCoeffs('coeffs_inv_sqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small', order)
                 elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift', order)
+                    coeffs_sing_small_mv = coeffs.getCoeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small_half_shift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:

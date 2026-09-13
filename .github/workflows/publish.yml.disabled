@@ -3,7 +3,7 @@
 #
 # Activation checklist (spec section 6):
 #   1. Make the repository public (or accept a private release).
-#   2. Register the Trusted Publisher on PyPI: project `openAbel`, owner `oliverhaas`, workflow
+#   2. Register the Trusted Publisher on PyPI: project `openabel`, owner `oliverhaas`, workflow
 #      `publish.yml`, environment `pypi`.
 #   3. Create the `pypi` environment in the GitHub repository settings.
 #   4. Enable GitHub Pages from the `gh-pages` branch (docs.yml deploys there through mike).
@@ -86,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/openAbel/
+      url: https://pypi.org/project/openabel/
     permissions:
       id-token: write
     steps:

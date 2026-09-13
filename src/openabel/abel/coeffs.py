@@ -1,15 +1,15 @@
-"""Precomputed end-correction and filter coefficients, loaded eagerly from ``coeffsData/*.npy`` at import."""
+"""Precomputed end-correction and filter coefficients, loaded eagerly from ``coeffs_data/*.npy`` at import."""
 
 from pathlib import Path
 from types import MappingProxyType
 
 import numpy as np
 
-dataDir = Path(__file__).parent / "coeffsData"
+dataDir = Path(__file__).parent / "coeffs_data"
 
 
 def loadCoeffs() -> MappingProxyType[str, MappingProxyType[int, np.ndarray]]:
-    """Load every ``coeffsData/*.npy`` file into a read-only family -> order -> coefficients mapping."""
+    """Load every ``coeffs_data/*.npy`` file into a read-only family -> order -> coefficients mapping."""
     # Outer key: coefficient family, i.e. the file name without its "_NN" suffix. Inner key: the order NN.
     loaded: dict[str, dict[int, np.ndarray]] = {}
     for path in sorted(dataDir.glob("*.npy")):

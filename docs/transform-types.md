@@ -20,9 +20,9 @@ from experiments).
 The type of transform can be chosen by setting the `forwardBackward` parameter:
 
 ```python
-import openAbel
+import openabel
 
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize)
 ```
 
 The parameter `stepSize` is the grid spacing of the equidistant grid, `nData` the length of the data input array, and

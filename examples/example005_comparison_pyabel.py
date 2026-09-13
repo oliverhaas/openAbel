@@ -13,7 +13,7 @@ import abel
 import matplotlib.pyplot as mpl
 import numpy as np
 
-import openAbel as oa
+import openabel as oa
 
 ############################################################################################################################################
 # Plotting setup
@@ -462,6 +462,6 @@ ax6.grid(True)
 
 
 mpl.tight_layout()
-mpl.savefig("example005_comparisonPyAbel.png", dpi=300)
+mpl.savefig("example005_comparison_pyabel.png", dpi=300)
 
 mpl.show()

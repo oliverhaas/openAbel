@@ -11,9 +11,9 @@ When creating the Abel transform object the `method` keyword argument can be pro
 methods:
 
 ```python
-import openAbel
+import openabel
 
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2)
 ```
 
 The methods with end corrections can do the transformation in different orders of accuracy by setting the `order`
@@ -25,13 +25,13 @@ denote as \(N\) in the math formulas.
 
 Overall cases where a user should use anything other than `method = 3` (default) and `order = 2` (default) to
 `order = 5` will be very rare. For a detailed comparison of the methods it is recommended to look at
-[example004_fullComparison](examples/example004.md).
+[example004_full_comparison](examples/example004.md).
 
 ## Desingularized trapezoidal rule
 
 ```python
 # order keyword argument is ignored (only first order implemented)
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=0)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=0)
 ```
 
 The desingularized trapezoidal rule is probably the simplest practicable algorithm. It subtracts the singularity and
@@ -52,7 +52,7 @@ leads to quadratic \(O(N^2)\) computational complexity of the method.
 
 ```python
 # order keyword argument is ignored (only somewhat first order implemented)
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=1)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=1)
 ```
 
 The Hansen-Law method by [Hansen and Law](https://www.osapublishing.org/josaa/abstract.cfm?uri=josaa-2-4-510) is a
@@ -75,7 +75,7 @@ just stops converging with increasing \(N\). If one ignores several details that
 
 ```python
 # 0 < order < 20
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=2, order=2)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=2, order=2)
 ```
 
 The trapezoidal rule with end correction improves on the desingularized trapezoidal rule. It doesn't require
@@ -105,7 +105,7 @@ calculate these end correction coefficients can be found in this repository as w
 
 ```python
 # 0 < order < 20
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=2)
 ```
 
 The default and recommended method is the Fast Multipole Method (FMM) with end corrections. This method provides a
@@ -126,7 +126,7 @@ methods is the Python module [PyAbel](https://github.com/PyAbel/PyAbel).
 
 However, there is no reason not to combine the methods provided in **openAbel** with some kind of filtering for nicer
 results. I've had good results with [maximally flat filters](https://ieeexplore.ieee.org/document/7944698/), as seen
-in [example003_noisyBackward](examples/example003.md), and with additional material in the
+in [example003_noisy_backward](examples/example003.md), and with additional material in the
 [Mathematica notebook](https://github.com/oliverhaas/openAbel/tree/main/add/calcMaxFlat.nb).
 
 Overall even in this special case there are no algorithms to my knowledge which perform inherently better than the

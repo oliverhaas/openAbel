@@ -6,7 +6,7 @@
 
 - Python >= 3.12; wheels for CPython 3.12, 3.13, 3.14 and the free-threaded 3.14t on Linux x86_64 and macOS arm64.
 - `pyproject.toml` (PEP 621) with a `src/` layout; `setup.py` only compiles the Cython extensions. Version `0.7.0` is
-  exposed as `openAbel.__version__`.
+  exposed as `openabel.__version__`.
 - Cython 3, numpy 2 and scipy >= 1.13.
 - pytest replaces nose; ruff, ty and pre-commit; GitHub Actions CI (Linux 3.12-3.14t, macOS 3.14) replaces Travis.
 - Documentation ported from Sphinx to mkdocs-material.

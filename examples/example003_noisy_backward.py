@@ -10,7 +10,7 @@ import matplotlib.pyplot as mpl
 import numpy as np
 from scipy.special import erf
 
-import openAbel
+import openabel
 
 ############################################################################################################################################
 # Plotting setup
@@ -57,7 +57,7 @@ stepSize = xMax / (nData - 1)
 forwardBackward = 2
 noiseAmp = 0.01
 
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)  # Backward Abel transform where user inputs derivative
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize)  # Backward Abel transform where user inputs derivative
 
 
 # No filtering
@@ -162,6 +162,6 @@ axarr[1].set_xlabel("y")
 axarr[1].legend()
 
 mpl.tight_layout()
-mpl.savefig("example003_noisyBackward.png", dpi=300)
+mpl.savefig("example003_noisy_backward.png", dpi=300)
 
 mpl.show()

@@ -5,4 +5,4 @@ from importlib.metadata import version
 from .abel import Abel
 
 __all__ = ["Abel"]
-__version__ = version("openAbel")
+__version__ = version("openabel")

@@ -1,6 +1,6 @@
 
 
-from openAbel.abel.base cimport abel_plan
+from openabel.abel.base cimport abel_plan
 
 
 

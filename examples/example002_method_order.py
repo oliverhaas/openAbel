@@ -8,7 +8,7 @@ import matplotlib.pyplot as mpl
 import numpy as np
 from scipy.special import erf
 
-import openAbel
+import openabel
 
 ############################################################################################################################################
 # Plotting setup
@@ -60,9 +60,9 @@ forwardBackward = -1  # Forward transform, similar definition ('1' = backward) a
 # only method = 3 and order = 2 to order = 5 are recommended.
 # Higher orders require data outside the integration domain to be stable.
 # For more information see the documentation.
-abelObj0 = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=2, order=2)
-abelObj1 = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=5)
-abelObj2 = openAbel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=11)
+abelObj0 = openabel.Abel(nData, forwardBackward, shift, stepSize, method=2, order=2)
+abelObj1 = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=5)
+abelObj2 = openabel.Abel(nData, forwardBackward, shift, stepSize, method=3, order=11)
 
 # Input data
 xx = np.linspace(shift * stepSize, xMax, nData)
@@ -120,6 +120,6 @@ axarr[1].set_xlabel("y")
 axarr[1].legend()
 
 mpl.tight_layout()
-mpl.savefig("example002_methodOrder.png", dpi=300)
+mpl.savefig("example002_method_order.png", dpi=300)
 
 mpl.show()

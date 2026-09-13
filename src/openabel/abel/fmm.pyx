@@ -3,16 +3,16 @@
 import numpy as np
 
 from libc.stdlib cimport free
-from openAbel.helper cimport nullCheckMalloc as malloc, nullCheckCalloc as calloc
+from openabel.helper cimport nullCheckMalloc as malloc, nullCheckCalloc as calloc
 from libc.string cimport memset
 
 cimport scipy.linalg.cython_blas as blas
 
-import openAbel.abel.coeffs as cffs
+import openabel.abel.coeffs as cffs
 
-cimport openAbel.mathFun as mf
-cimport openAbel.constants as co
-from openAbel.abel.base cimport abel_plan
+cimport openabel.math_fun as mf
+cimport openabel.constants as co
+from openabel.abel.base cimport abel_plan
 
 
 ########################################################################################################################
@@ -73,13 +73,13 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.m
         kern = &_kernForward
         with gil:
             try:
-                cffs_s_la_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_large', order)
-                cffs_ns_sqrt_sm_mv = cffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
-                cffs_ns_sqrt_la_mv = cffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
+                cffs_s_la_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_lin_sing_large', order)
+                cffs_ns_sqrt_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_nonsing_small', order)
+                cffs_ns_sqrt_la_mv = cffs.getCoeffs('coeffs_inv_sqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small', order)
                 elif pl.shift == 0.5:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqLin_sing_small_halfShift', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small_half_shift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -121,13 +121,13 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.m
         kern = &_kernBackward
         with gil:
             try:
-                cffs_s_la_mv = cffs.getCoeffs('coeffs_invSqrtDiffSq_sing_large', order)
-                cffs_ns_sqrt_sm_mv = cffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
-                cffs_ns_sqrt_la_mv = cffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
+                cffs_s_la_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_sing_large', order)
+                cffs_ns_sqrt_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_nonsing_small', order)
+                cffs_ns_sqrt_la_mv = cffs.getCoeffs('coeffs_inv_sqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_sing_small', order)
                 elif pl.shift == 0.5:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSq_sing_small_halfShift', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_sing_small_half_shift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:
@@ -169,13 +169,13 @@ cdef int plan_fat_fmmTrapEndCorr(abel_plan* pl, int order = 2, double eps = co.m
         kern = &_kernModified
         with gil:
             try:
-                cffs_s_la_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_large', order)
-                cffs_ns_sqrt_sm_mv = cffs.getCoeffs('coeffs_invSqrt_nonsing_small', order)
-                cffs_ns_sqrt_la_mv = cffs.getCoeffs('coeffs_invSqrt_nonsing_large', order)
+                cffs_s_la_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_large', order)
+                cffs_ns_sqrt_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_nonsing_small', order)
+                cffs_ns_sqrt_la_mv = cffs.getCoeffs('coeffs_inv_sqrt_nonsing_large', order)
                 if pl.shift == 0.:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small', order)
                 elif pl.shift == 0.5:
-                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_invSqrtDiffSqY2OR2_sing_small_halfShift', order)
+                    cffs_s_sm_mv = cffs.getCoeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small_half_shift', order)
                 else:
                     raise NotImplementedError('Method not implemented for given parameters.')
             except:

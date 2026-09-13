@@ -23,7 +23,7 @@ extensions = [
         [str(pyx)],
         extra_compile_args=["-O3"],
     )
-    for pyx in sorted((SRC / "openAbel").rglob("*.pyx"))
+    for pyx in sorted((SRC / "openabel").rglob("*.pyx"))
 ]
 
 setup(ext_modules=cythonize(extensions, compiler_directives=COMPILER_DIRECTIVES))

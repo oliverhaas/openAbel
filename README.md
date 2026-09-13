@@ -20,7 +20,7 @@ Requirements: Python >= 3.12 on Linux or macOS. numpy and scipy are installed au
 Once released on PyPI:
 
 ```bash
-pip install openAbel
+pip install openabel
 ```
 
 Until then, install from the repository (this compiles the Cython extensions, so a C compiler is needed):
@@ -33,18 +33,18 @@ A forward transform of a Gaussian sampled on 200 points, the first sample at `x 
 
 ```python
 import numpy as np
-import openAbel
+import openabel
 
 nData = 200
 stepSize = 3.5 / (nData - 1)
 x = np.arange(nData) * stepSize
 
-abelObj = openAbel.Abel(nData, -1, 0.0, stepSize)
+abelObj = openabel.Abel(nData, -1, 0.0, stepSize)
 dataOut = abelObj.execute(np.exp(-(x**2)))
 ```
 
 The [examples](https://github.com/oliverhaas/openAbel/tree/main/examples) show the transform types and
-methods in more detail, starting with `example000_simpleForward.py`; they need matplotlib.
+methods in more detail, starting with `example000_simple_forward.py`; they need matplotlib.
 
 ## Development
 
@@ -54,7 +54,7 @@ uv run pytest
 uv run pre-commit install  # ruff and the other hooks on commit, ty on push
 ```
 
-After editing a `.pyx` or `.pxd` file, rebuild with `uv sync --reinstall-package openAbel`.
+After editing a `.pyx` or `.pxd` file, rebuild with `uv sync --reinstall-package openabel`.
 
 ## Issues
 

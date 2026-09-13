@@ -2,8 +2,8 @@
 
 import numpy
 
-cimport openAbel.abel.base as base
-cimport openAbel.constants as const
+cimport openabel.abel.base as base
+cimport openabel.constants as const
 
 cdef class Abel(object):
     """

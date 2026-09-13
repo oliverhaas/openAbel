@@ -1,14 +1,13 @@
 ############################################################################################################################################
-# Simple example which calculates forward Abel transform of a Gaussian.
+# Simple example which calculates forward and backward Abel transform of a Gaussian.
 # Results are compared with the analytical solution. Mostly default parameters are used.
 ############################################################################################################################################
 
 
 import matplotlib.pyplot as mpl
 import numpy as np
-from scipy.special import erf
 
-import openAbel
+import openabel
 
 ############################################################################################################################################
 # Plotting setup
@@ -52,10 +51,10 @@ shift = 0.0
 xMax = 20.0
 sig = 1.0
 stepSize = xMax / (nData - 1)
-forwardBackward = -1  # Forward transform, similar definition ('-1' = forward) as in FFT libraries.
 
 # Create Abel transform object, which does all precomputation possible without knowing the exact data.
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize, order=3)
+abelObjFw = openabel.Abel(nData, -1, shift, stepSize, order=3)
+abelObjBw = openabel.Abel(nData, -1, shift, stepSize, order=3)
 
 # Input data
 xx = np.linspace(shift * stepSize, xMax, nData)
@@ -64,41 +63,33 @@ dataIn = np.exp(-0.5 * xx**2 / sig**2)
 # Forward Abel transform and analytical result.
 # We show both the analytical result of a truncated Gaussian and a standard Gaussian to show
 # that some error is due to truncation.
-dataOut = abelObj.execute(dataIn)
-dataOutAna = dataIn * np.sqrt(2 * np.pi) * sig
-dataOutAnaTrunc = dataIn * np.sqrt(2 * np.pi) * sig * erf(np.sqrt((xMax**2 - xx**2) / 2) / sig)
+dataOut = abelObjFw.execute(dataIn)
+dataOut = abelObjFw.execute(dataOut)
+for ii in range(nData):
+    dataOut[ii] /= 2.0 * np.pi
 
 
 # Plotting
 fig, axarr = mpl.subplots(2, 1, sharex=True)
 
-axarr[0].plot(xx, dataOutAna, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
-axarr[0].plot(xx, dataOutAnaTrunc, color=colors[1], marker=markers[1], linestyle=linestyles[1], label="analy. trunc.")
-axarr[0].plot(xx, dataOut, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel")
+axarr[0].plot(xx, dataIn, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
+axarr[0].plot(xx, dataOut, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openabel")
 axarr[0].set_ylabel("value")
 axarr[0].legend()
 
 axarr[1].semilogy(
     xx[:-1],
-    np.abs((dataOut[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
+    np.abs((dataOut[:-1] - dataIn[:-1]) / dataIn[:-1]),
     color=colors[3],
     marker=markers[3],
     linestyle=linestyles[3],
     label="not trunc.",
-)
-axarr[1].semilogy(
-    xx[:-1],
-    np.abs((dataOut[:-1] - dataOutAnaTrunc[:-1]) / dataOutAnaTrunc[:-1]),
-    color=colors[4],
-    marker=markers[3],
-    linestyle=linestyles[4],
-    label="trunc.",
 )
 axarr[1].set_ylabel("relative error")
 axarr[1].set_xlabel("y")
 axarr[1].legend()
 
 mpl.tight_layout()
-mpl.savefig("example000_simpleForward.png", dpi=300)
+mpl.savefig("example006_simple_forward_and_backward.png", dpi=300)
 
 mpl.show()

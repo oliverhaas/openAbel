@@ -8,7 +8,7 @@ import matplotlib.pyplot as mpl
 import numpy as np
 from scipy.special import erf
 
-import openAbel
+import openabel
 
 ############################################################################################################################################
 # Plotting setup
@@ -55,7 +55,7 @@ stepSize = xMax / (nData - 1)
 forwardBackward = 1  # Backward transform, similar definition ('1' = backward) as in FFT libraries.
 
 # Create Abel transform object, which does all precomputation possible without knowing the exact data.
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize)
 
 # Input data
 xx = np.linspace(shift * stepSize, xMax, nData)
@@ -71,7 +71,7 @@ dataOutAnaTrunc = dataIn / np.sqrt(2 * np.pi) / sig * erf(np.sqrt((xMax**2 - xx*
 # There is the option for the user to provide the derivative in the backward Abel transform directly.
 # This is useful and can decrease the error, e.g. if the derivative can be taken analytically.
 forwardBackward = 2
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
+abelObj = openabel.Abel(nData, forwardBackward, shift, stepSize)
 dataIn = -xx / sig**2 * np.exp(-0.5 * xx**2 / sig**2)
 dataOut2 = abelObj.execute(dataIn)
 
@@ -81,7 +81,7 @@ fig, axarr = mpl.subplots(2, 1, sharex=True)
 
 axarr[0].plot(xx, dataOutAna, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
 axarr[0].plot(xx, dataOutAnaTrunc, color=colors[1], marker=markers[1], linestyle=linestyles[1], label="analy. trunc.")
-axarr[0].plot(xx, dataOut, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel")
+axarr[0].plot(xx, dataOut, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openabel")
 axarr[0].plot(xx, dataOut2, color=colors[3], marker=markers[3], linestyle=linestyles[3], label="openAbel analy. der.")
 axarr[0].set_ylabel("value")
 axarr[0].legend()
@@ -115,6 +115,6 @@ axarr[1].set_xlabel("y")
 axarr[1].legend()
 
 mpl.tight_layout()
-mpl.savefig("example001_simpleBackward.png", dpi=300)
+mpl.savefig("example001_simple_backward.png", dpi=300)
 
 mpl.show()

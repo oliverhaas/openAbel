@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from analytic import N_DATA, STEP_SIZE, analyticPair, inputSamples, relativeError
 
-import openAbel
+import openabel
 
 # Relative-error tolerances: the larger of the two shifts' errors measured on the Cython 3 build of 2026-09-13, times
 # 5, rounded up to the next power of ten (spec section 3). Exceptions: order 10 sits 10-100x above the rule because
@@ -58,7 +58,7 @@ SINGLE_ORDER_TOLERANCE = MappingProxyType(
 )
 def test_endCorrectionMethods_matchAnalyticTransform(forwardBackward, order, tolerance, shift, method):
     dataIn, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
-    dataOut = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order).execute(dataIn)
+    dataOut = openabel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order).execute(dataIn)
     assert dataOut[-1] == 0.0
     assert relativeError(dataOut=dataOut, reference=reference) < tolerance
 
@@ -70,7 +70,7 @@ def test_endCorrectionMethods_matchAnalyticTransform(forwardBackward, order, tol
 )
 def test_singleOrderMethods_matchAnalyticTransform(forwardBackward, method, tolerance, shift):
     dataIn, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
-    dataOut = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method).execute(dataIn)
+    dataOut = openabel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method).execute(dataIn)
     assert dataOut[-1] == 0.0
     assert np.isfinite(dataOut).all()
     assert relativeError(dataOut=dataOut, reference=reference) < tolerance
@@ -90,7 +90,7 @@ def test_fmmBackwardOrder2_ignoresInputBeyondStencilReach():
     x = np.arange(-nOutside, N_DATA + nOutside + 1) * STEP_SIZE
     dataIn = inputSamples(forwardBackward=1, x=x)
     dataIn[-1] = np.nan  # one sample beyond what boundary value 3 needs
-    abelObj = openAbel.Abel(N_DATA, 1, 0.0, STEP_SIZE, method=3, order=2)
+    abelObj = openabel.Abel(N_DATA, 1, 0.0, STEP_SIZE, method=3, order=2)
     dataOut = abelObj.execute(dataIn, leftBoundary=3, rightBoundary=3)
     assert np.isfinite(dataOut).all()
 
@@ -106,7 +106,7 @@ def test_endCorrectionMethods_outsideSamples_matchAnalyticTransform(forwardBackw
     x = (np.arange(-nOutside, N_DATA + nOutside) + shift) * STEP_SIZE
     dataIn = inputSamples(forwardBackward=forwardBackward, x=x)
     _, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
-    abelObj = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order)
+    abelObj = openabel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order)
     dataOut = abelObj.execute(dataIn, leftBoundary=3, rightBoundary=3)
     assert dataOut.shape == (N_DATA,)
     assert dataOut[-1] == 0.0
@@ -117,8 +117,8 @@ def test_endCorrectionMethods_outsideSamples_matchAnalyticTransform(forwardBackw
 def test_modifiedForwardHalfShift_trapezoidalAndFmmAgree(order):
     # Regression: the half-shift coefficient key had a trailing underscore; method 2 raised KeyError, method 3 crashed.
     dataIn, _ = analyticPair(forwardBackward=-2, shift=0.5)
-    trapezoidal = openAbel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=2, order=order).execute(dataIn)
-    fmm = openAbel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=3, order=order).execute(dataIn)
+    trapezoidal = openabel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=2, order=order).execute(dataIn)
+    fmm = openabel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=3, order=order).execute(dataIn)
     np.testing.assert_allclose(fmm, trapezoidal, rtol=1e-8, atol=1e-8)
 
 
@@ -126,13 +126,13 @@ def test_modifiedForwardHalfShift_trapezoidalAndFmmAgree(order):
 def test_hansenLawModifiedForward_raisesNotImplemented(shift):
     # Regression: Cython 0.29 swallowed this NotImplementedError (no except clause) and returned a copy of the input.
     with pytest.raises(NotImplementedError):
-        openAbel.Abel(N_DATA, -2, shift, STEP_SIZE, method=1)
+        openabel.Abel(N_DATA, -2, shift, STEP_SIZE, method=1)
 
 
 def test_hansenLaw_worksAfterFailedConstruction():
     # Regression: the failed construction above leaked its plan data; a following transform must be unaffected.
     with pytest.raises(NotImplementedError):
-        openAbel.Abel(N_DATA, -2, 0.0, STEP_SIZE, method=1)
+        openabel.Abel(N_DATA, -2, 0.0, STEP_SIZE, method=1)
     dataIn, reference = analyticPair(forwardBackward=-1, shift=0.0)
-    dataOut = openAbel.Abel(N_DATA, -1, 0.0, STEP_SIZE, method=1).execute(dataIn)
+    dataOut = openabel.Abel(N_DATA, -1, 0.0, STEP_SIZE, method=1).execute(dataIn)
     assert relativeError(dataOut=dataOut, reference=reference) < SINGLE_ORDER_TOLERANCE[-1, 1]
