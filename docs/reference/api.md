@@ -77,5 +77,5 @@ data_out = abel_obj.execute(np.exp(-(x**2)))
 ```
 
 With the end-correction methods (`2` and `3`) the last sample of the result is exactly `0.0`: it is the truncated
-transform at the truncation radius \(R\), where the integration interval has zero length. The
+transform at the truncation radius $R$, where the integration interval has zero length. The
 [examples](../examples/index.md) show how the truncation error behaves.
