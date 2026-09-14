@@ -20,3 +20,10 @@ site/
 # Local tooling state
 .claude/worktrees/
 .superpowers/
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+.env

@@ -44,7 +44,12 @@ data_out = abel_obj.execute(np.exp(-(x**2)))
 ```
 
 The [examples](https://github.com/oliverhaas/openAbel/tree/main/examples) show the transform types and
-methods in more detail, starting with `example000_simple_forward.py`; they need matplotlib.
+methods in more detail, starting with `example000_simple_forward.py`. They need matplotlib (and
+`example005` PyAbel), which a checkout provides as the `examples` dependency group:
+
+```bash
+uv run --group examples python examples/example000_simple_forward.py
+```
 
 ## Development
 

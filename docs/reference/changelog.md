@@ -10,6 +10,8 @@
 - Cython 3, numpy 2 and scipy >= 1.13.
 - pytest replaces nose; ruff, ty and pre-commit; GitHub Actions CI (Linux 3.12-3.14t, macOS 3.14) replaces Travis.
 - Documentation ported from Sphinx to mkdocs-material.
+- The sdist ships the tests and no generated C files; the `examples` dependency group installs matplotlib and PyAbel
+  for the example scripts.
 
 ### Fixed
 

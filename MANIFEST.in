@@ -1,3 +1,4 @@
 include LICENSE README.md
 recursive-include src/openabel *.pyx *.pxd *.npy
-prune tests
+recursive-include tests *.py
+global-exclude *.c

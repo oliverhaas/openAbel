@@ -33,7 +33,9 @@ requires-python = ">=3.12"
 version = "0.7.0"
 
 [project.urls]
+Changelog = "https://github.com/oliverhaas/openAbel/blob/main/docs/reference/changelog.md"
 Homepage = "https://github.com/oliverhaas/openAbel"
+Issues = "https://github.com/oliverhaas/openAbel/issues"
 Repository = "https://github.com/oliverhaas/openAbel"
 
 [dependency-groups]
@@ -46,6 +48,8 @@ dev = [
   "ty==0.0.80",
 ]
 docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.7.7"]
+# Not installed by default: only the example scripts need them.
+examples = ["matplotlib==3.11.2", "pyabel==0.9.1"]
 
 [tool.uv]
 default-groups = ["dev", "docs"]
@@ -110,3 +114,6 @@ select = ["ALL"]
 
 [tool.ty.environment]
 python-version = "3.12"
+
+[tool.ty.src]
+include = ["src", "tests"]
