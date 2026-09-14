@@ -1,5 +1,3 @@
-
-
 from libc.stdlib cimport free
 from openabel.helper cimport null_check_malloc as malloc
 
@@ -13,14 +11,6 @@ from openabel.abel.fmm cimport plan_fat_fmm_trap_end_corr, execute_fat_fmm_trap_
 cimport openabel.constants as const
 
 
-ctypedef struct abel_plan:
-    int n_data, forward_backward, method
-    double shift, step_size
-    double* grid
-    void* method_data
-
-
-
 ########################################################################################################################
 ### Fast Abel transforms                                                                                             ###
 ########################################################################################################################
@@ -28,7 +18,7 @@ ctypedef struct abel_plan:
 
 # Create plan for Abel transform
 cdef abel_plan* plan_fat(int n_data, int forward_backward, double shift, double step_size, 
-                         int method = 3, int order = 2, double eps = 1.e3*const.machine_epsilon) except NULL nogil:
+                         int method = 3, int order = 2, double eps = 1.e1*const.machine_epsilon) except NULL nogil:
 
     cdef:
         abel_plan* pl

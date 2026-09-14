@@ -5,29 +5,41 @@ import numpy
 cimport openabel.abel.base as base
 cimport openabel.constants as const
 
-cdef class Abel(object):
+
+cdef class Abel:
     """
-    This is a wrapper class to make the Abel transform from Cython available
-    in Python.
+    Abel transform plan for equispaced data, the Python interface of openAbel.
+
+    Creating the object does all precomputation that is possible without knowing the data; `execute` then
+    transforms any number of data vectors on the same grid.
 
     Parameters
     ----------
     n_data : int
-        Length of the data vector.
+        Length of the data vector, at least 2.
     forward_backward : int
         Which transform to perform:
         - '-1' forward Abel transform
         - '1' backward (or inverse) Abel transform
-        - '2' backward (or inverse) Abel transform with the 
+        - '2' backward (or inverse) Abel transform with the
           derivative already supplied by user
         - '-2' modified forward Abel transform.
     shift : double
-        Shift of the first sample away from 0 in positive direction in units of step_size.
-        Usually this is either 0 or 0.5, and some methods only support these two values.
+        Shift of the first sample away from 0 in positive direction in units of step_size, not negative.
+        Usually this is either 0 or 0.5; the end-correction methods 2 and 3 only support these two values.
     step_size : double
-        Step size (or grid spacing) between two data points.
+        Step size (or grid spacing) between two data points, positive.
     method : int, optional
-        Which method to employ to calculate transform.
+        Which method to employ to calculate the transform:
+        - '0' desingularized trapezoidal rule (first order, O(N^2))
+        - '1' Hansen-Law method (O(N))
+        - '2' trapezoidal rule with end corrections (O(N^2))
+        - '3' Fast Multipole Method with end corrections (O(N), default).
+    order : int, optional
+        Order of the end corrections for methods 2 and 3 (0 < order < 20, default 2); ignored by methods 0 and 1.
+    eps : double, optional
+        Target accuracy of the FMM far-field approximation (method 3 only); sets the number of Chebyshev
+        interpolation nodes. At least the machine epsilon, default ten times the machine epsilon.
 
     Raises
     ------
@@ -37,19 +49,20 @@ cdef class Abel(object):
         If a method doesn't (yet) support the operation given by parameters.
     """
 
-    def __init__(self, int n_data, int forward_backward, double shift, double step_size, 
+    def __init__(self, int n_data, int forward_backward, double shift, double step_size,
                  int method = 3, int order = 2, double eps = 1.e1*const.machine_epsilon):
 
         cdef int order_filter
 
         if n_data < 2:
             raise ValueError('n_data must be at least 2.')
+        if not step_size > 0.:
+            raise ValueError('step_size must be positive.')
+        if not shift >= 0.:
+            raise ValueError('shift must not be negative.')
 
-        try:
-            self.plan = base.plan_fat(n_data, forward_backward, shift, step_size, 
-                                      method = method, order = order, eps = eps)
-        except:
-            raise
+        self.plan = base.plan_fat(n_data, forward_backward, shift, step_size,
+                                  method = method, order = order, eps = eps)
 
         # Samples per side that execute() reads beyond n_data with boundary value 3: the half widths of the
         # end-correction stencil and of the derivative filter, the same extension widths trap.pyx and fmm.pyx use.
@@ -63,7 +76,6 @@ cdef class Abel(object):
             self.n_outside = (order-1)//2 + (order_filter-1)//2
 
 
-    # TODO maybe support 2D (or nD) arrays as well here?
     def execute(self, double[:] data_in, int left_boundary = 0, int right_boundary = 0):
         """
         This is the function which actually does the transform.
@@ -86,7 +98,7 @@ cdef class Abel(object):
         ------
         data_out : numpy.array
             Transformed data.
-            
+
         Raises
         ------
         ValueError
@@ -110,11 +122,8 @@ cdef class Abel(object):
         data_in_temp = numpy.copy(data_in)
         data_out = numpy.copy(data_in_temp)
 
-        try:
-            base.execute_fat(self.plan, &data_in_temp[0], &data_out[0], left_boundary = left_boundary, 
-                             right_boundary = right_boundary)
-        except:
-            raise        
+        base.execute_fat(self.plan, &data_in_temp[0], &data_out[0], left_boundary = left_boundary,
+                         right_boundary = right_boundary)
 
         return numpy.asarray(data_out)[:self.plan.n_data]
 

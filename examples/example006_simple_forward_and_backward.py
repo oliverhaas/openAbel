@@ -1,6 +1,6 @@
 ############################################################################################################################################
-# Simple example which calculates forward and backward Abel transform of a Gaussian.
-# Results are compared with the analytical solution. Mostly default parameters are used.
+# Simple example which applies the forward and then the backward Abel transform to a Gaussian.
+# The round trip is compared with the input. Mostly default parameters are used.
 ############################################################################################################################################
 
 
@@ -46,27 +46,24 @@ lw = 2
 ############################################################################################################################################
 
 # Parameters
-n_data = 100000
+n_data = 10000
 shift = 0.0
-x_max = 20.0
+x_max = 10.0
 sig = 1.0
 step_size = x_max / (n_data - 1)
 
-# Create Abel transform object, which does all precomputation possible without knowing the exact data.
+# Create the Abel transform objects, which do all precomputation possible without knowing the exact data.
+# '-1' is the forward transform, '1' the backward transform (similar definition as in FFT libraries).
 abel_obj_fw = openabel.Abel(n_data, -1, shift, step_size, order=3)
-abel_obj_bw = openabel.Abel(n_data, -1, shift, step_size, order=3)
+abel_obj_bw = openabel.Abel(n_data, 1, shift, step_size, order=3)
 
 # Input data
 xx = np.linspace(shift * step_size, x_max, n_data)
 data_in = np.exp(-0.5 * xx**2 / sig**2)
 
-# Forward Abel transform and analytical result.
-# We show both the analytical result of a truncated Gaussian and a standard Gaussian to show
-# that some error is due to truncation.
-data_out = abel_obj_fw.execute(data_in)
-data_out = abel_obj_fw.execute(data_out)
-for ii in range(n_data):
-    data_out[ii] /= 2.0 * np.pi
+# Forward transform, then backward transform of the result (which differentiates its input numerically).
+data_fw = abel_obj_fw.execute(data_in)
+data_bw = abel_obj_bw.execute(data_fw)
 
 
 # Plotting
@@ -79,31 +76,40 @@ axarr[0].plot(
     marker=markers[0],
     linestyle=linestyles[0],
     markevery=n_data // 40,
-    label="analy.",
+    label="input",
 )
 axarr[0].plot(
     xx,
-    data_out,
+    data_fw,
+    color=colors[1],
+    marker=markers[1],
+    linestyle=linestyles[1],
+    markevery=n_data // 40,
+    label="forward",
+)
+axarr[0].plot(
+    xx,
+    data_bw,
     color=colors[2],
     marker=markers[2],
     linestyle=linestyles[2],
     markevery=n_data // 40,
-    label="openAbel",
+    label="forward + backward",
 )
 axarr[0].set_ylabel("value")
 axarr[0].legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 
 axarr[1].semilogy(
     xx[:-1],
-    np.abs((data_out[:-1] - data_in[:-1]) / data_in[:-1]),
+    np.abs((data_bw[:-1] - data_in[:-1]) / data_in[:-1]),
     color=colors[3],
     marker=markers[3],
     linestyle=linestyles[3],
     markevery=n_data // 40,
-    label="not trunc.",
+    label="round trip",
 )
 axarr[1].set_ylabel("relative error")
-axarr[1].set_xlabel("y")
+axarr[1].set_xlabel("x")
 axarr[1].legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 
 mpl.savefig("example006_simple_forward_and_backward.png", dpi=300)

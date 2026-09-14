@@ -25,16 +25,17 @@ Creates a transform plan for equispaced data of length `n_data`. Creating the pl
 | ------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `n_data`           | `int`   | Length of the data vector.                                                                                                                                                                                                                                           |
 | `forward_backward` | `int`   | Which transform to perform: `-1` forward Abel transform, `1` backward (or inverse) Abel transform, `2` backward Abel transform with the derivative already supplied by the user, `-2` modified forward Abel transform. See [transform types](../transform-types.md). |
-| `shift`            | `float` | Shift of the first sample away from 0 in positive direction, in units of `step_size`. Usually `0.0` or `0.5`; the end-correction methods support only these two values.                                                                                              |
-| `step_size`        | `float` | Step size (or grid spacing) between two data points.                                                                                                                                                                                                                 |
+| `shift`            | `float` | Shift of the first sample away from 0 in positive direction, in units of `step_size`, not negative. Usually `0.0` or `0.5`; the end-correction methods support only these two values.                                                                                |
+| `step_size`        | `float` | Step size (or grid spacing) between two data points, positive.                                                                                                                                                                                                       |
 | `method`           | `int`   | Transform method: `0` desingularized trapezoidal rule, `1` Hansen-Law, `2` trapezoidal rule with end corrections, `3` Fast Multipole Method with end corrections (default). See [transform methods](../transform-methods.md).                                        |
 | `order`            | `int`   | Order of the end corrections for methods `2` and `3` (`0 < order < 20`, default `2`); ignored by methods `0` and `1`.                                                                                                                                                |
 | `eps`              | `float` | Target accuracy of the FMM far-field approximation (method `3` only); it sets the number of Chebyshev interpolation nodes. Must be at least the machine epsilon; defaults to ten times the machine epsilon.                                                          |
 
-Raises `ValueError` if a parameter has a non-viable value (for example `n_data < 2`, `order <= 0`, an `order` without
-coefficient tables (`order >= 20`), or too few data points for the requested order) and `NotImplementedError` if the
-chosen method does not support the given parameters (for example an unknown `method`, a `shift` other than `0.0` or
-`0.5` with methods `2` and `3`, or the modified forward transform with the Hansen-Law method).
+Raises `ValueError` if a parameter has a non-viable value (for example `n_data < 2`, `step_size <= 0`, `shift < 0`,
+`order <= 0`, an `order` without coefficient tables (`order >= 20`), or too few data points for the requested order)
+and `NotImplementedError` if the chosen method does not support the given parameters (for example an unknown
+`method`, a `shift` other than `0.0` or `0.5` with methods `2` and `3`, or the modified forward transform with the
+Hansen-Law method).
 
 ### `Abel.execute`
 

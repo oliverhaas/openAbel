@@ -43,6 +43,20 @@ def test_eps_below_machine_epsilon_raises_value_error():
         openabel.Abel(200, -1, 0.0, 0.01, method=3, eps=0.0)
 
 
+@pytest.mark.parametrize("step_size", [0.0, -0.01, np.nan])
+@pytest.mark.parametrize("method", [0, 1, 2, 3])
+def test_non_positive_step_size_raises_value_error(step_size, method):
+    with pytest.raises(ValueError):
+        openabel.Abel(200, -1, 0.0, step_size, method=method)
+
+
+@pytest.mark.parametrize("shift", [-0.5, -1.0, np.nan])
+@pytest.mark.parametrize("method", [0, 1, 2, 3])
+def test_negative_shift_raises_value_error(shift, method):
+    with pytest.raises(ValueError):
+        openabel.Abel(200, -1, shift, 0.01, method=method)
+
+
 # Columns: forward_backward, method, order, n_outside (samples per side that boundary value 3 needs beyond n_data).
 OUTSIDE_SAMPLES = (
     (-1, 0, 2, 0),
@@ -105,6 +119,13 @@ def test_invalid_left_boundary_raises_not_implemented(method):
     abel_obj = openabel.Abel(200, -1, 0.0, 0.01, method=method)
     with pytest.raises(NotImplementedError):
         abel_obj.execute(np.zeros(200), left_boundary=4)
+
+
+@pytest.mark.parametrize("left_boundary", [1, 2])
+def test_symmetric_boundary_with_unsupported_shift_raises_not_implemented(left_boundary):
+    abel_obj = openabel.Abel(200, 1, 0.25, 0.01, method=0)
+    with pytest.raises(NotImplementedError):
+        abel_obj.execute(np.zeros(200), left_boundary=left_boundary)
 
 
 @pytest.mark.parametrize("right_boundary", [1, 2, 4])
