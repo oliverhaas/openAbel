@@ -17,7 +17,7 @@ communicative developers which are active on the **PyAbel** GitHub repository.
 If the reader is interested in testing many of the algorithms mentioned in this remarks section, I can only recommend
 to look at **PyAbel**, as it does implement more algorithms for the inverse Abel transform than **openAbel**
 (basically all except the main recommended one in **openAbel**). The
-[example005_comparisonPyAbel](examples/example005.md) of **openAbel** uses **PyAbel** to compare many of the
+[example005_comparison_pyabel](examples/example005.md) of **openAbel** uses **PyAbel** to compare many of the
 algorithms talked about here as well.
 
 ## Hansen-Law method

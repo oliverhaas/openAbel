@@ -6,7 +6,7 @@ cdef extern from "stdlib.h":
 
 # Inline malloc with null check, kind of a simple "hacky" solution not to have to do null check every time manually.
 # Good enough for me and saves a lot of lines.
-# Just "cimport [...] nullCheckMalloc as malloc" to replace normal malloc
+# Just "cimport [...] null_check_malloc as malloc" to replace normal malloc
 # https://stackoverflow.com/questions/26831981/should-i-check-if-malloc-was-successful/26844703
 # I decided to force alignment for up to AVX512 here, since it's usually worth it and not much lost if not.
 # Might change this in the future. So for very specific cases alignment should be chosen manually anyway.
@@ -18,40 +18,40 @@ cdef extern from "stdlib.h":
 # writing through a NULL pointer.
 
 
-cdef inline void* nullCheckMalloc(size_t MemSize, size_t alignment = 64) except NULL nogil:
+cdef inline void* null_check_malloc(size_t mem_size, size_t alignment = 64) except NULL nogil:
 
     cdef:
-        size_t allocSize
-        void* AllocMem
+        size_t alloc_size
+        void* alloc_mem
 
-    if MemSize > SIZE_MAX - (alignment - 1):
+    if mem_size > SIZE_MAX - (alignment - 1):
         with gil:
             raise MemoryError('Requested allocation size overflows size_t.')
 
-    allocSize = ((MemSize + alignment - 1) // alignment) * alignment
+    alloc_size = ((mem_size + alignment - 1) // alignment) * alignment
 
-    if allocSize == 0:
-        allocSize = alignment
+    if alloc_size == 0:
+        alloc_size = alignment
 
-    AllocMem = aligned_alloc(alignment, allocSize)
+    alloc_mem = aligned_alloc(alignment, alloc_size)
 
-    if NULL == AllocMem:
+    if NULL == alloc_mem:
         with gil:
             raise MemoryError('aligned_alloc returned NULL, probably not enough memory or an invalid alignment.')
 
-    return AllocMem
+    return alloc_mem
 
 
-cdef inline void* nullCheckCalloc(size_t nn, size_t size, size_t alignment = 64) except NULL nogil:
+cdef inline void* null_check_calloc(size_t nn, size_t size, size_t alignment = 64) except NULL nogil:
 
     cdef:
-        void* AllocMem
+        void* alloc_mem
 
     if nn != 0 and size > SIZE_MAX // nn:
         with gil:
             raise MemoryError('Requested allocation size overflows size_t.')
 
-    AllocMem = nullCheckMalloc(nn*size, alignment)
-    memset(AllocMem, 0, nn*size)
+    alloc_mem = null_check_malloc(nn*size, alignment)
+    memset(alloc_mem, 0, nn*size)
 
-    return AllocMem
+    return alloc_mem

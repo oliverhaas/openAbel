@@ -17,17 +17,17 @@ on equispaced discretization. This is often due to the
 and the desire to use the same discretization as the FFT or a discrete convolution, or just by the given data (e.g.
 from experiments).
 
-The type of transform can be chosen by setting the `forwardBackward` parameter:
+The type of transform can be chosen by setting the `forward_backward` parameter:
 
 ```python
-import openAbel
+import openabel
 
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size)
 ```
 
-The parameter `stepSize` is the grid spacing of the equidistant grid, `nData` the length of the data input array, and
+The parameter `step_size` is the grid spacing of the equidistant grid, `n_data` the length of the data input array, and
 `shift` is an offset of the samples to the symmetry axis and can usually be only 0 or 0.5 (input in units of
-`stepSize`).
+`step_size`).
 
 ## Forward Abel transform
 
@@ -37,7 +37,7 @@ The forward Abel transform is defined as
 F(y)=2\int_y^\infty\frac{f(r)r}{\sqrt{r^2-y^2}}dr\approx2\int_y^R\frac{f(r)r}{\sqrt{r^2-y^2}}dr\; .
 \]
 
-The forward Abel transform is chosen by setting `forwardBackward=-1`.
+The forward Abel transform is chosen by setting `forward_backward=-1`.
 
 ## Backward (or inverse) Abel transform
 
@@ -48,7 +48,7 @@ f(r)=-\frac{1}{\pi}\int_r^\infty\frac{F'(y)}{\sqrt{y^2-r^2}}dy\approx-\frac{1}{\
 \]
 
 **openAbel** takes care of taking the derivative of the input data supplied by the user. The backward Abel transform is
-chosen by setting `forwardBackward=1`.
+chosen by setting `forward_backward=1`.
 
 ## Backward (or inverse) Abel transform with derivative input
 
@@ -59,7 +59,7 @@ f(r)=-\frac{1}{\pi}\int_r^\infty\frac{g(y)}{\sqrt{y^2-r^2}}dy\approx-\frac{1}{\p
 \]
 
 In contrast to the normal backward Abel transform, **openAbel** expects to get the derivative as input by the user.
-The backward Abel transform with derivative input is chosen by setting `forwardBackward=2`.
+The backward Abel transform with derivative input is chosen by setting `forward_backward=2`.
 
 ## Modified forward Abel transform
 
@@ -75,4 +75,4 @@ just use the parameter `shift = 0.5` instead to avoid the singularity of the ele
 the singularity in the actual integral the convergence is much better. I recommend writing similar methods if one
 encounters other types of singularities in the Abel transform.
 
-The modified forward Abel transform is chosen by setting `forwardBackward=-2`.
+The modified forward Abel transform is chosen by setting `forward_backward=-2`.

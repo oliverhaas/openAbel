@@ -1,5 +1,5 @@
 ############################################################################################################################################
-# Simple example which calculates backward Abel transform of a Gaussian.
+# Simple example which calculates forward Abel transform of a Gaussian.
 # Results are compared with the analytical solution. Mostly default parameters are used.
 ############################################################################################################################################
 
@@ -8,7 +8,7 @@ import matplotlib.pyplot as mpl
 import numpy as np
 from scipy.special import erf
 
-import openAbel
+import openabel
 
 ############################################################################################################################################
 # Plotting setup
@@ -47,74 +47,65 @@ lw = 2
 ############################################################################################################################################
 
 # Parameters
-nData = 40
+n_data = 100000
 shift = 0.0
-xMax = 3.5
+x_max = 20.0
 sig = 1.0
-stepSize = xMax / (nData - 1)
-forwardBackward = 1  # Backward transform, similar definition ('1' = backward) as in FFT libraries.
+step_size = x_max / (n_data - 1)
+forward_backward = -1  # Forward transform, similar definition ('-1' = forward) as in FFT libraries.
 
 # Create Abel transform object, which does all precomputation possible without knowing the exact data.
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
+abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, order=3)
 
 # Input data
-xx = np.linspace(shift * stepSize, xMax, nData)
-dataIn = np.exp(-0.5 * xx**2 / sig**2)
+xx = np.linspace(shift * step_size, x_max, n_data)
+data_in = np.exp(-0.5 * xx**2 / sig**2)
 
-# Backward transform and analytical result.
+# Forward Abel transform and analytical result.
 # We show both the analytical result of a truncated Gaussian and a standard Gaussian to show
 # that some error is due to truncation.
-dataOut = abelObj.execute(dataIn)
-dataOutAna = dataIn / np.sqrt(2 * np.pi) / sig
-dataOutAnaTrunc = dataIn / np.sqrt(2 * np.pi) / sig * erf(np.sqrt((xMax**2 - xx**2) / 2) / sig)
-
-# There is the option for the user to provide the derivative in the backward Abel transform directly.
-# This is useful and can decrease the error, e.g. if the derivative can be taken analytically.
-forwardBackward = 2
-abelObj = openAbel.Abel(nData, forwardBackward, shift, stepSize)
-dataIn = -xx / sig**2 * np.exp(-0.5 * xx**2 / sig**2)
-dataOut2 = abelObj.execute(dataIn)
+data_out = abel_obj.execute(data_in)
+data_out_ana = data_in * np.sqrt(2 * np.pi) * sig
+data_out_ana_trunc = data_in * np.sqrt(2 * np.pi) * sig * erf(np.sqrt((x_max**2 - xx**2) / 2) / sig)
 
 
 # Plotting
 fig, axarr = mpl.subplots(2, 1, sharex=True)
 
-axarr[0].plot(xx, dataOutAna, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
-axarr[0].plot(xx, dataOutAnaTrunc, color=colors[1], marker=markers[1], linestyle=linestyles[1], label="analy. trunc.")
-axarr[0].plot(xx, dataOut, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel")
-axarr[0].plot(xx, dataOut2, color=colors[3], marker=markers[3], linestyle=linestyles[3], label="openAbel analy. der.")
+axarr[0].plot(xx, data_out_ana, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
+axarr[0].plot(
+    xx,
+    data_out_ana_trunc,
+    color=colors[1],
+    marker=markers[1],
+    linestyle=linestyles[1],
+    label="analy. trunc.",
+)
+axarr[0].plot(xx, data_out, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openabel")
 axarr[0].set_ylabel("value")
 axarr[0].legend()
 
 axarr[1].semilogy(
     xx[:-1],
-    np.abs((dataOut[:-1] - dataOutAna[:-1]) / dataOutAna[:-1]),
-    color=colors[4],
-    marker=markers[4],
-    linestyle=linestyles[4],
+    np.abs((data_out[:-1] - data_out_ana[:-1]) / data_out_ana[:-1]),
+    color=colors[3],
+    marker=markers[3],
+    linestyle=linestyles[3],
     label="not trunc.",
 )
 axarr[1].semilogy(
     xx[:-1],
-    np.abs((dataOut[:-1] - dataOutAnaTrunc[:-1]) / dataOutAnaTrunc[:-1]),
-    color=colors[5],
-    marker=markers[5],
-    linestyle=linestyles[5],
+    np.abs((data_out[:-1] - data_out_ana_trunc[:-1]) / data_out_ana_trunc[:-1]),
+    color=colors[4],
+    marker=markers[3],
+    linestyle=linestyles[4],
     label="trunc.",
-)
-axarr[1].semilogy(
-    xx[:-1],
-    np.abs((dataOut2[:-1] - dataOutAnaTrunc[:-1]) / dataOutAnaTrunc[:-1]),
-    color=colors[6],
-    marker=markers[6],
-    linestyle=linestyles[6],
-    label="trunc. analy. der.",
 )
 axarr[1].set_ylabel("relative error")
 axarr[1].set_xlabel("y")
 axarr[1].legend()
 
 mpl.tight_layout()
-mpl.savefig("example001_simpleBackward.png", dpi=300)
+mpl.savefig("example000_simple_forward.png", dpi=300)
 
 mpl.show()

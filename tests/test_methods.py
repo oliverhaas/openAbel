@@ -2,15 +2,15 @@ from types import MappingProxyType
 
 import numpy as np
 import pytest
-from analytic import N_DATA, STEP_SIZE, analyticPair, inputSamples, relativeError
+from analytic import N_DATA, STEP_SIZE, analytic_pair, input_samples, relative_error
 
-import openAbel
+import openabel
 
 # Relative-error tolerances: the larger of the two shifts' errors measured on the Cython 3 build of 2026-09-13, times
 # 5, rounded up to the next power of ten (spec section 3). Exceptions: order 10 sits 10-100x above the rule because
 # the measured errors (1e-15 to 7e-13) are within reach of BLAS noise; (fb=2, method=1) and (fb=1, method=0) are 3x
 # the measured 6.4e-2 and 6.8e-2 because the rule would give 1.
-# Key: (forwardBackward, order) for the end-correction methods 2 and 3.
+# Key: (forward_backward, order) for the end-correction methods 2 and 3.
 END_CORRECTION_TOLERANCE = MappingProxyType(
     {
         (-1, 1): 1e-2,
@@ -35,7 +35,7 @@ END_CORRECTION_TOLERANCE = MappingProxyType(
         (-2, 10): 1e-11,
     },
 )
-# Key: (forwardBackward, method) for the single-order methods 0 (desingularised trapezoidal) and 1 (Hansen-Law).
+# Key: (forward_backward, method) for the single-order methods 0 (desingularised trapezoidal) and 1 (Hansen-Law).
 SINGLE_ORDER_TOLERANCE = MappingProxyType(
     {
         (-1, 0): 1e-2,
@@ -53,86 +53,92 @@ SINGLE_ORDER_TOLERANCE = MappingProxyType(
 @pytest.mark.parametrize("method", [2, 3])
 @pytest.mark.parametrize("shift", [0.0, 0.5])
 @pytest.mark.parametrize(
-    ("forwardBackward", "order", "tolerance"),
-    [(forwardBackward, order, tolerance) for (forwardBackward, order), tolerance in END_CORRECTION_TOLERANCE.items()],
+    ("forward_backward", "order", "tolerance"),
+    [(forward_backward, order, tolerance) for (forward_backward, order), tolerance in END_CORRECTION_TOLERANCE.items()],
 )
-def test_endCorrectionMethods_matchAnalyticTransform(forwardBackward, order, tolerance, shift, method):
-    dataIn, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
-    dataOut = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order).execute(dataIn)
-    assert dataOut[-1] == 0.0
-    assert relativeError(dataOut=dataOut, reference=reference) < tolerance
+def test_end_correction_methods_match_analytic_transform(forward_backward, order, tolerance, shift, method):
+    data_in, reference = analytic_pair(forward_backward=forward_backward, shift=shift)
+    data_out = openabel.Abel(N_DATA, forward_backward, shift, STEP_SIZE, method=method, order=order).execute(data_in)
+    assert data_out[-1] == 0.0
+    assert relative_error(data_out=data_out, reference=reference) < tolerance
 
 
 @pytest.mark.parametrize("shift", [0.0, 0.5])
 @pytest.mark.parametrize(
-    ("forwardBackward", "method", "tolerance"),
-    [(forwardBackward, method, tolerance) for (forwardBackward, method), tolerance in SINGLE_ORDER_TOLERANCE.items()],
+    ("forward_backward", "method", "tolerance"),
+    [(forward_backward, method, tolerance) for (forward_backward, method), tolerance in SINGLE_ORDER_TOLERANCE.items()],
 )
-def test_singleOrderMethods_matchAnalyticTransform(forwardBackward, method, tolerance, shift):
-    dataIn, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
-    dataOut = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method).execute(dataIn)
-    assert dataOut[-1] == 0.0
-    assert np.isfinite(dataOut).all()
-    assert relativeError(dataOut=dataOut, reference=reference) < tolerance
+def test_single_order_methods_match_analytic_transform(forward_backward, method, tolerance, shift):
+    data_in, reference = analytic_pair(forward_backward=forward_backward, shift=shift)
+    data_out = openabel.Abel(N_DATA, forward_backward, shift, STEP_SIZE, method=method).execute(data_in)
+    assert data_out[-1] == 0.0
+    assert np.isfinite(data_out).all()
+    assert relative_error(data_out=data_out, reference=reference) < tolerance
 
 
-def outsideSamplesPerSide(*, forwardBackward: int, order: int) -> int:
+def outside_samples_per_side(*, forward_backward: int, order: int) -> int:
     """Samples outside the domain that boundary value 3 consumes per side: the half widths of the end-correction
     stencil and, for the backward transform with numerical derivative, of the derivative filter."""
-    orderFilter = order + 1 + order % 2 if forwardBackward == 1 else 1
-    return (order - 1) // 2 + (orderFilter - 1) // 2
+    order_filter = order + 1 + order % 2 if forward_backward == 1 else 1
+    return (order - 1) // 2 + (order_filter - 1) // 2
 
 
-def test_fmmBackwardOrder2_ignoresInputBeyondStencilReach():
+def test_fmm_backward_order2_ignores_input_beyond_stencil_reach():
     # Regression: even orders read one sample past the stencil reach and the FMM multiplied it (or, with boundary 0,
     # an uninitialised buffer element) by a zero coefficient, so a NaN there poisoned the result.
-    nOutside = outsideSamplesPerSide(forwardBackward=1, order=2)
-    x = np.arange(-nOutside, N_DATA + nOutside + 1) * STEP_SIZE
-    dataIn = inputSamples(forwardBackward=1, x=x)
-    dataIn[-1] = np.nan  # one sample beyond what boundary value 3 needs
-    abelObj = openAbel.Abel(N_DATA, 1, 0.0, STEP_SIZE, method=3, order=2)
-    dataOut = abelObj.execute(dataIn, leftBoundary=3, rightBoundary=3)
-    assert np.isfinite(dataOut).all()
+    n_outside = outside_samples_per_side(forward_backward=1, order=2)
+    x = np.arange(-n_outside, N_DATA + n_outside + 1) * STEP_SIZE
+    data_in = input_samples(forward_backward=1, x=x)
+    data_in[-1] = np.nan  # one sample beyond what boundary value 3 needs
+    abel_obj = openabel.Abel(N_DATA, 1, 0.0, STEP_SIZE, method=3, order=2)
+    data_out = abel_obj.execute(data_in, left_boundary=3, right_boundary=3)
+    assert np.isfinite(data_out).all()
 
 
 @pytest.mark.parametrize("method", [2, 3])
 @pytest.mark.parametrize("shift", [0.0, 0.5])
 @pytest.mark.parametrize(
-    ("forwardBackward", "order", "tolerance"),
-    [(forwardBackward, order, tolerance) for (forwardBackward, order), tolerance in END_CORRECTION_TOLERANCE.items()],
+    ("forward_backward", "order", "tolerance"),
+    [(forward_backward, order, tolerance) for (forward_backward, order), tolerance in END_CORRECTION_TOLERANCE.items()],
 )
-def test_endCorrectionMethods_outsideSamples_matchAnalyticTransform(forwardBackward, order, tolerance, shift, method):
-    nOutside = outsideSamplesPerSide(forwardBackward=forwardBackward, order=order)
-    x = (np.arange(-nOutside, N_DATA + nOutside) + shift) * STEP_SIZE
-    dataIn = inputSamples(forwardBackward=forwardBackward, x=x)
-    _, reference = analyticPair(forwardBackward=forwardBackward, shift=shift)
-    abelObj = openAbel.Abel(N_DATA, forwardBackward, shift, STEP_SIZE, method=method, order=order)
-    dataOut = abelObj.execute(dataIn, leftBoundary=3, rightBoundary=3)
-    assert dataOut.shape == (N_DATA,)
-    assert dataOut[-1] == 0.0
-    assert relativeError(dataOut=dataOut, reference=reference) < tolerance
+def test_end_correction_methods_outside_samples_match_analytic_transform(
+    forward_backward,
+    order,
+    tolerance,
+    shift,
+    method,
+):
+    n_outside = outside_samples_per_side(forward_backward=forward_backward, order=order)
+    x = (np.arange(-n_outside, N_DATA + n_outside) + shift) * STEP_SIZE
+    data_in = input_samples(forward_backward=forward_backward, x=x)
+    _, reference = analytic_pair(forward_backward=forward_backward, shift=shift)
+    abel_obj = openabel.Abel(N_DATA, forward_backward, shift, STEP_SIZE, method=method, order=order)
+    data_out = abel_obj.execute(data_in, left_boundary=3, right_boundary=3)
+    assert data_out.shape == (N_DATA,)
+    assert data_out[-1] == 0.0
+    assert relative_error(data_out=data_out, reference=reference) < tolerance
 
 
 @pytest.mark.parametrize("order", [1, 2, 3, 5, 10])
-def test_modifiedForwardHalfShift_trapezoidalAndFmmAgree(order):
+def test_modified_forward_half_shift_trapezoidal_and_fmm_agree(order):
     # Regression: the half-shift coefficient key had a trailing underscore; method 2 raised KeyError, method 3 crashed.
-    dataIn, _ = analyticPair(forwardBackward=-2, shift=0.5)
-    trapezoidal = openAbel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=2, order=order).execute(dataIn)
-    fmm = openAbel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=3, order=order).execute(dataIn)
+    data_in, _ = analytic_pair(forward_backward=-2, shift=0.5)
+    trapezoidal = openabel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=2, order=order).execute(data_in)
+    fmm = openabel.Abel(N_DATA, -2, 0.5, STEP_SIZE, method=3, order=order).execute(data_in)
     np.testing.assert_allclose(fmm, trapezoidal, rtol=1e-8, atol=1e-8)
 
 
 @pytest.mark.parametrize("shift", [0.0, 0.5])
-def test_hansenLawModifiedForward_raisesNotImplemented(shift):
+def test_hansen_law_modified_forward_raises_not_implemented(shift):
     # Regression: Cython 0.29 swallowed this NotImplementedError (no except clause) and returned a copy of the input.
     with pytest.raises(NotImplementedError):
-        openAbel.Abel(N_DATA, -2, shift, STEP_SIZE, method=1)
+        openabel.Abel(N_DATA, -2, shift, STEP_SIZE, method=1)
 
 
-def test_hansenLaw_worksAfterFailedConstruction():
+def test_hansen_law_works_after_failed_construction():
     # Regression: the failed construction above leaked its plan data; a following transform must be unaffected.
     with pytest.raises(NotImplementedError):
-        openAbel.Abel(N_DATA, -2, 0.0, STEP_SIZE, method=1)
-    dataIn, reference = analyticPair(forwardBackward=-1, shift=0.0)
-    dataOut = openAbel.Abel(N_DATA, -1, 0.0, STEP_SIZE, method=1).execute(dataIn)
-    assert relativeError(dataOut=dataOut, reference=reference) < SINGLE_ORDER_TOLERANCE[-1, 1]
+        openabel.Abel(N_DATA, -2, 0.0, STEP_SIZE, method=1)
+    data_in, reference = analytic_pair(forward_backward=-1, shift=0.0)
+    data_out = openabel.Abel(N_DATA, -1, 0.0, STEP_SIZE, method=1).execute(data_in)
+    assert relative_error(data_out=data_out, reference=reference) < SINGLE_ORDER_TOLERANCE[-1, 1]

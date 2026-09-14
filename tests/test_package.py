@@ -1,11 +1,11 @@
 import re
 
-import openAbel
+import openabel
 
 
-def test_version_isSemver():
-    assert re.fullmatch(r"\d+\.\d+\.\d+", openAbel.__version__)
+def test_version_is_semver():
+    assert re.fullmatch(r"\d+\.\d+\.\d+", openabel.__version__)
 
 
-def test_publicApi_isAbelOnly():
-    assert openAbel.__all__ == ["Abel"]
+def test_public_api_is_abel_only():
+    assert openabel.__all__ == ["Abel"]

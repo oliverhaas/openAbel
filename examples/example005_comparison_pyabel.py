@@ -13,7 +13,7 @@ import abel
 import matplotlib.pyplot as mpl
 import numpy as np
 
-import openAbel as oa
+import openabel as oa
 
 ############################################################################################################################################
 # Plotting setup
@@ -55,19 +55,19 @@ fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = mpl.subplots(2, 3)
 # Error over radius of different methods and orders
 
 
-def errorAbel(nData, method, order):
+def error_abel(n_data, method, order):
 
-    dx = 1.0 / (nData - 1)
-    xx = np.linspace(0.0, 1.0, nData)
+    dx = 1.0 / (n_data - 1)
+    xx = np.linspace(0.0, 1.0, n_data)
 
-    dataIn = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
-    dataAna = np.sqrt(1 - xx**2) ** 3
-    abelObj = oa.Abel(nData, 1, 0.0, dx, method=method, order=order)
-    dataOut = abelObj.execute(dataIn)
-    abserr = dataOut - dataAna
-    relerr = np.abs(abserr / np.clip(dataAna, 1.0e-300, None))
+    data_in = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
+    data_ana = np.sqrt(1 - xx**2) ** 3
+    abel_obj = oa.Abel(n_data, 1, 0.0, dx, method=method, order=order)
+    data_out = abel_obj.execute(data_in)
+    abserr = data_out - data_ana
+    relerr = np.abs(abserr / np.clip(data_ana, 1.0e-300, None))
 
-    return (xx, abserr, relerr, dataOut, dataAna)
+    return (xx, abserr, relerr, data_out, data_ana)
 
 
 # Loop over several methods and orders
@@ -76,10 +76,10 @@ orders = [-1, 2, 5]
 methods = [1, 3, 3]
 
 for ii in range(len(orders)):
-    (xx, abserr, relerr, dataOut, dataAna) = errorAbel(30, methods[ii], orders[ii])
+    (xx, abserr, relerr, data_out, data_ana) = error_abel(30, methods[ii], orders[ii])
     ax1.plot(
         xx,
-        dataOut,
+        data_out,
         label=str(names[ii]),
         color=colors[ii],
         linestyle=linestyles[ii],
@@ -108,7 +108,7 @@ for ii in range(len(orders)):
 ii += 1
 ax1.plot(
     xx,
-    dataAna,
+    data_ana,
     label="analytical",
     color=colors[ii],
     linestyle=linestyles[ii],
@@ -117,18 +117,18 @@ ax1.plot(
 )
 
 
-def errorAbelPyAbel(nData, method, function):
+def error_pyabel(n_data, method, function):
 
-    dx = 1.0 / (nData - 1)
-    xx = np.linspace(0.0, 1.0, nData)
+    dx = 1.0 / (n_data - 1)
+    xx = np.linspace(0.0, 1.0, n_data)
 
-    dataIn = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
-    dataAna = np.sqrt(1 - xx**2) ** 3
-    dataOut = function(dataIn, basis_dir=".", dr=dx, direction="inverse")
-    abserr = dataOut - dataAna
-    relerr = np.abs(abserr / np.clip(dataAna, 1.0e-300, None))
+    data_in = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
+    data_ana = np.sqrt(1 - xx**2) ** 3
+    data_out = function(data_in, basis_dir=".", dr=dx, direction="inverse")
+    abserr = data_out - data_ana
+    relerr = np.abs(abserr / np.clip(data_ana, 1.0e-300, None))
 
-    return (xx, abserr, relerr, dataOut, dataAna)
+    return (xx, abserr, relerr, data_out, data_ana)
 
 
 jj = ii + 1
@@ -150,10 +150,10 @@ functions = [
     abel.direct.direct_transform,
 ]
 for ii in range(len(methods)):
-    (xx, abserr, relerr, dataOut, dataAna) = errorAbelPyAbel(30, methods[ii], functions[ii])
+    (xx, abserr, relerr, data_out, data_ana) = error_pyabel(30, methods[ii], functions[ii])
     ax1.plot(
         xx,
-        dataOut,
+        data_out,
         label="PA: " + str(methods[ii]),
         color=colors[jj + ii],
         linestyle=linestyles[jj + ii],
@@ -199,20 +199,20 @@ ax3.grid(True)
 # Convergence of different methods
 
 
-def convergenceAbel(nArray, method, order):
+def convergence_abel(n_array, method, order):
 
-    conv = np.empty(nArray.shape[0])
-    for ii in range(nArray.shape[0]):
-        nData = nArray[ii]
-        dx = 1.0 / (nData - 1)
-        xx = np.linspace(0.0, 1.0, nData)
+    conv = np.empty(n_array.shape[0])
+    for ii in range(n_array.shape[0]):
+        n_data = n_array[ii]
+        dx = 1.0 / (n_data - 1)
+        xx = np.linspace(0.0, 1.0, n_data)
 
-        dataIn = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
-        abelObj = oa.Abel(nData, 1, 0.0, dx, method=method, order=order)
-        dataOut = abelObj.execute(dataIn)
-        dataAna = np.sqrt(1 - xx**2) ** 3
+        data_in = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
+        abel_obj = oa.Abel(n_data, 1, 0.0, dx, method=method, order=order)
+        data_out = abel_obj.execute(data_in)
+        data_ana = np.sqrt(1 - xx**2) ** 3
 
-        conv[ii] = np.sqrt(np.sum(((dataOut[:-1] - dataAna[:-1]) / dataAna[:-1]) ** 2) / (nData - 1))
+        conv[ii] = np.sqrt(np.sum(((data_out[:-1] - data_ana[:-1]) / data_ana[:-1]) ** 2) / (n_data - 1))
 
     return conv
 
@@ -221,12 +221,12 @@ def convergenceAbel(nArray, method, order):
 names = ["HL", "FMM 1st", "FMM 5th"]
 orders = [-1, 1, 5]
 methods = [1, 3, 3]
-nArray = 10 ** (np.arange(5) + 2)
+n_array = 10 ** (np.arange(5) + 2)
 
 for ii in range(len(orders)):
-    conv = convergenceAbel(nArray, methods[ii], orders[ii])
+    conv = convergence_abel(n_array, methods[ii], orders[ii])
     ax4.loglog(
-        nArray,
+        n_array,
         conv,
         label=str(names[ii]),
         color=colors[ii],
@@ -236,19 +236,19 @@ for ii in range(len(orders)):
     )
 
 
-def convergenceAbelPyAbel(nArray, method, function):
+def convergence_pyabel(n_array, method, function):
 
-    conv = np.empty(nArray.shape[0])
-    for ii in range(nArray.shape[0]):
-        nData = nArray[ii]
-        dx = 1.0 / (nData - 1)
-        xx = np.linspace(0.0, 1.0, nData)
+    conv = np.empty(n_array.shape[0])
+    for ii in range(n_array.shape[0]):
+        n_data = n_array[ii]
+        dx = 1.0 / (n_data - 1)
+        xx = np.linspace(0.0, 1.0, n_data)
 
-        dataIn = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
-        dataOut = function(dataIn, basis_dir=".", dr=dx, direction="inverse")
-        dataAna = np.sqrt(1 - xx**2) ** 3
+        data_in = 3.0 / 8.0 * np.pi * (1 - xx**2) ** 2
+        data_out = function(data_in, basis_dir=".", dr=dx, direction="inverse")
+        data_ana = np.sqrt(1 - xx**2) ** 3
 
-        conv[ii] = np.sqrt(np.sum(((dataOut[:-1] - dataAna[:-1]) / dataAna[:-1]) ** 2) / (nData - 1))
+        conv[ii] = np.sqrt(np.sum(((data_out[:-1] - data_ana[:-1]) / data_ana[:-1]) ** 2) / (n_data - 1))
 
     return conv
 
@@ -265,9 +265,9 @@ functions = [
     abel.direct.direct_transform,
 ]
 for ii in range(1):
-    conv = convergenceAbelPyAbel(nArray, methods[ii], functions[ii])
+    conv = convergence_pyabel(n_array, methods[ii], functions[ii])
     ax4.loglog(
-        nArray,
+        n_array,
         conv,
         label="PA: " + str(methods[ii]),
         color=colors[jj + ii],
@@ -276,11 +276,11 @@ for ii in range(1):
         linewidth=lw,
     )
 
-nArray = (10 ** (np.arange(4) * 0.5 + 2) + 0.5).astype(int)
+n_array = (10 ** (np.arange(4) * 0.5 + 2) + 0.5).astype(int)
 for ii in range(1, len(methods)):
-    conv = convergenceAbelPyAbel(nArray, methods[ii], functions[ii])
+    conv = convergence_pyabel(n_array, methods[ii], functions[ii])
     ax4.loglog(
-        nArray,
+        n_array,
         conv,
         label="PA: " + str(methods[ii]),
         color=colors[jj + ii],
@@ -300,43 +300,43 @@ ax4.grid(True)
 # Run times of different methods and orders
 
 
-def runtimesAbel(nArray, nMeasure, method, order):
+def runtimes_abel(n_array, n_measure, method, order):
 
-    runtimes = np.zeros(nArray.shape[0])
-    runtimesPre = np.zeros(nArray.shape[0])
+    runtimes = np.zeros(n_array.shape[0])
+    runtimes_pre = np.zeros(n_array.shape[0])
 
-    for ii in range(nArray.shape[0]):
-        dataIn = np.ones(nArray[ii])
-        T = np.empty(nMeasure)
-        for jj in range(nMeasure):
+    for ii in range(n_array.shape[0]):
+        data_in = np.ones(n_array[ii])
+        timings = np.empty(n_measure)
+        for jj in range(n_measure):
             t0 = ti.time()
-            abelObj = oa.Abel(nArray[ii], 1, 0.0, 1.0, method=method, order=order)
+            abel_obj = oa.Abel(n_array[ii], 1, 0.0, 1.0, method=method, order=order)
             t1 = ti.time()
-            T[jj] = t1 - t0
-        runtimesPre[ii] = np.sum(T) / nMeasure
+            timings[jj] = t1 - t0
+        runtimes_pre[ii] = np.sum(timings) / n_measure
 
-        abelObj = oa.Abel(nArray[ii], 1, 0.0, 1.0, method=method, order=order)
+        abel_obj = oa.Abel(n_array[ii], 1, 0.0, 1.0, method=method, order=order)
         t0 = ti.time()
-        for jj in range(nMeasure):
-            dataOut = abelObj.execute(dataIn)
+        for jj in range(n_measure):
+            data_out = abel_obj.execute(data_in)
         t1 = ti.time()
 
-        runtimes[ii] = (t1 - t0) / nMeasure
+        runtimes[ii] = (t1 - t0) / n_measure
 
-    return (runtimesPre, runtimes)
+    return (runtimes_pre, runtimes)
 
 
 # Loop over several methods and orders
 names = ["HL", "FMM 3rd", "FMM 11th"]
 orders = [-1, 3, 11]
 methods = [1, 3, 3]
-nArray = 10 ** (np.arange(5) + 2)
+n_array = 10 ** (np.arange(5) + 2)
 
 for ii in range(3):
-    (runtimesPre, runtimes) = runtimesAbel(nArray, 1, methods[ii], orders[ii])
+    (runtimes_pre, runtimes) = runtimes_abel(n_array, 1, methods[ii], orders[ii])
     ax5.loglog(
-        nArray,
-        runtimesPre,
+        n_array,
+        runtimes_pre,
         label=str(names[ii]),
         color=colors[ii],
         linestyle=linestyles[ii],
@@ -344,7 +344,7 @@ for ii in range(3):
         linewidth=lw,
     )
     ax6.loglog(
-        nArray,
+        n_array,
         runtimes,
         label=str(names[ii]),
         color=colors[ii],
@@ -353,12 +353,12 @@ for ii in range(3):
         linewidth=lw,
     )
 
-nArray = 10 ** (np.arange(4) + 2)
+n_array = 10 ** (np.arange(4) + 2)
 for ii in range(3, len(names)):
-    (runtimesPre, runtimes) = runtimesAbel(nArray, 1, methods[ii], orders[ii])
+    (runtimes_pre, runtimes) = runtimes_abel(n_array, 1, methods[ii], orders[ii])
     ax5.loglog(
-        nArray,
-        runtimesPre,
+        n_array,
+        runtimes_pre,
         label=str(names[ii]),
         color=colors[ii],
         linestyle=linestyles[ii],
@@ -366,7 +366,7 @@ for ii in range(3, len(names)):
         linewidth=lw,
     )
     ax6.loglog(
-        nArray,
+        n_array,
         runtimes,
         label=str(names[ii]),
         color=colors[ii],
@@ -376,32 +376,32 @@ for ii in range(3, len(names)):
     )
 
 
-def runtimesAbelPyAbel(nArray, nMeasure, method, function):
+def runtimes_pyabel(n_array, n_measure, method, function):
 
-    runtimes = np.zeros(nArray.shape[0])
-    runtimesPre = np.zeros(nArray.shape[0])
+    runtimes = np.zeros(n_array.shape[0])
+    runtimes_pre = np.zeros(n_array.shape[0])
 
-    for ii in range(nArray.shape[0]):
-        dataIn = np.ones(nArray[ii])
-        T = np.empty(nMeasure)
-        for jj in range(nMeasure):
+    for ii in range(n_array.shape[0]):
+        data_in = np.ones(n_array[ii])
+        timings = np.empty(n_measure)
+        for jj in range(n_measure):
             for filename in glob.glob(method + "*"):
                 os.remove(filename)
             t0 = ti.time()
-            dataOut = function(dataIn, basis_dir=".", dr=1.0, direction="inverse")
+            data_out = function(data_in, basis_dir=".", dr=1.0, direction="inverse")
             t1 = ti.time()
-            T[jj] = t1 - t0
-        runtimesPre[ii] = np.sum(T) / nMeasure
+            timings[jj] = t1 - t0
+        runtimes_pre[ii] = np.sum(timings) / n_measure
 
         t0 = ti.time()
-        for jj in range(nMeasure):
-            dataOut = function(dataIn, basis_dir=".", dr=1.0, direction="inverse")
+        for jj in range(n_measure):
+            data_out = function(data_in, basis_dir=".", dr=1.0, direction="inverse")
         t1 = ti.time()
 
-        runtimes[ii] = (t1 - t0) / nMeasure
-        runtimesPre[ii] -= runtimes[ii]
+        runtimes[ii] = (t1 - t0) / n_measure
+        runtimes_pre[ii] -= runtimes[ii]
 
-    return (runtimesPre, runtimes)
+    return (runtimes_pre, runtimes)
 
 
 jj = ii + 1
@@ -415,11 +415,11 @@ functions = [
     abel.basex.basex_transform,
     abel.direct.direct_transform,
 ]
-nArray = 10 ** (np.arange(5) + 2)
+n_array = 10 ** (np.arange(5) + 2)
 for ii in range(1):
-    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
+    (runtimes_pre, runtimes) = runtimes_pyabel(n_array, 1, methods[ii], functions[ii])
     ax6.loglog(
-        nArray,
+        n_array,
         runtimes,
         label="PA: " + str(methods[ii]),
         color=colors[jj + ii],
@@ -428,12 +428,12 @@ for ii in range(1):
         linewidth=lw,
     )
 
-nArray = (10 ** (np.arange(4) * 0.5 + 2) + 0.5).astype(int)
+n_array = (10 ** (np.arange(4) * 0.5 + 2) + 0.5).astype(int)
 for ii in range(1, len(methods)):
-    (runtimesPre, runtimes) = runtimesAbelPyAbel(nArray, 1, methods[ii], functions[ii])
+    (runtimes_pre, runtimes) = runtimes_pyabel(n_array, 1, methods[ii], functions[ii])
     ax5.loglog(
-        nArray,
-        runtimesPre,
+        n_array,
+        runtimes_pre,
         label="PA: " + str(methods[ii]),
         color=colors[jj + ii],
         linestyle=linestyles[jj + ii],
@@ -441,7 +441,7 @@ for ii in range(1, len(methods)):
         linewidth=lw,
     )
     ax6.loglog(
-        nArray,
+        n_array,
         runtimes,
         label="PA: " + str(methods[ii]),
         color=colors[jj + ii],
@@ -462,6 +462,6 @@ ax6.grid(True)
 
 
 mpl.tight_layout()
-mpl.savefig("example005_comparisonPyAbel.png", dpi=300)
+mpl.savefig("example005_comparison_pyabel.png", dpi=300)
 
 mpl.show()

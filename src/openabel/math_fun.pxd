@@ -34,5 +34,5 @@ cdef extern from "complex.h":
 
 
 
-cdef unsigned int uintMax(unsigned int aa, unsigned int bb) nogil
-cdef unsigned int uintMin(unsigned int aa, unsigned int bb) nogil
+cdef unsigned int uint_max(unsigned int aa, unsigned int bb) nogil
+cdef unsigned int uint_min(unsigned int aa, unsigned int bb) nogil

@@ -27,7 +27,7 @@ keywords = [
 ]
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
-name = "openAbel"
+name = "openabel"
 readme = "README.md"
 requires-python = ">=3.12"
 version = "0.7.0"
@@ -58,8 +58,8 @@ namespaces = false
 where = ["src"]
 
 [tool.setuptools.package-data]
-"openAbel" = ["*.pxd"]
-"openAbel.abel" = ["*.pxd", "coeffsData/*.npy"]
+"openabel" = ["*.pxd"]
+"openabel.abel" = ["*.pxd", "coeffs_data/*.npy"]
 
 [tool.setuptools.exclude-package-data]
 "*" = ["*.c", "*.html"]
@@ -88,7 +88,7 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = ["COM812", "CPY", "D", "E501", "EM", "N", "TRY003"]
+ignore = ["COM812", "CPY", "D", "E501", "EM", "TRY003"]
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
