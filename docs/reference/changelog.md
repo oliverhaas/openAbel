@@ -28,6 +28,8 @@
   element happened to hold a NaN or Inf bit pattern the result was garbage, so the backward transform with `method=3`
   failed sporadically. The buffers are now sized exactly; results are unchanged otherwise.
 - `method=0` leaked a small allocation per `Abel(...)` construction.
+- The backward transforms with `method=0` and a `shift` other than `0.0` or `0.5` left the first desingularisation
+  weight uninitialised, so the first output sample was off by up to 30% (or garbage).
 - `Abel(...)` accepted `n_data < 2` and `execute` accepted inputs shorter than the plan needs; depending on the
   method the process crashed or the result was garbage. Both now raise `ValueError`, and the message names the
   required length (the boundary value `3` rule in the API reference).

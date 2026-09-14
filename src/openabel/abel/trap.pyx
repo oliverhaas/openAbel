@@ -70,7 +70,7 @@ cdef int plan_fat_trapezoidal_desing_const(abel_plan* pl) except -1 nogil:
         temp0 = mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[0]**2)
         if pl.shift == 0.:
             md.desing[0] = 0.
-        elif pl.shift == 0.5:
+        else:
             temp1 = mf.log((pl.grid[pl.n_data-1]+temp0)/pl.grid[0])
             md.desing[0] = temp1/pl.step_size
     elif pl.forward_backward == -2:

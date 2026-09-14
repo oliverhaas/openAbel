@@ -76,6 +76,17 @@ def test_single_order_methods_match_analytic_transform(forward_backward, method,
     assert relative_error(data_out=data_out, reference=reference) < tolerance
 
 
+@pytest.mark.parametrize("shift", [0.25, 1.0, 3.0])
+@pytest.mark.parametrize(("forward_backward", "tolerance"), [(-1, 1e-2), (1, 5e-2), (2, 2e-2), (-2, 1e-2)])
+def test_desingularised_trapezoidal_supports_any_positive_shift(forward_backward, tolerance, shift):
+    # Regression: the backward transforms left the first desingularisation weight uninitialised for shifts other
+    # than 0 and 0.5, so the first output sample was off by up to 30% (or garbage).
+    data_in, reference = analytic_pair(forward_backward=forward_backward, shift=shift)
+    data_out = openabel.Abel(N_DATA, forward_backward, shift, STEP_SIZE, method=0).execute(data_in)
+    assert np.isfinite(data_out).all()
+    assert relative_error(data_out=data_out, reference=reference) < tolerance
+
+
 def outside_samples_per_side(*, forward_backward: int, order: int) -> int:
     """Samples outside the domain that boundary value 3 consumes per side: the half widths of the end-correction
     stencil and, for the backward transform with numerical derivative, of the derivative filter."""
