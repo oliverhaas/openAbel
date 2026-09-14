@@ -122,6 +122,14 @@ def test_invalid_left_boundary_raises_not_implemented(method):
         abel_obj.execute(np.zeros(200), left_boundary=4)
 
 
+@pytest.mark.parametrize("left_boundary", [1, 2])
+def test_symmetric_boundary_with_unsupported_shift_raises_not_implemented(left_boundary):
+    # Only method 0 accepts shifts other than 0 and 0.5; mirroring the input needs one of the two.
+    abel_obj = openabel.Abel(200, 1, 0.25, 0.01, method=0)
+    with pytest.raises(NotImplementedError):
+        abel_obj.execute(np.zeros(200), left_boundary=left_boundary)
+
+
 @pytest.mark.parametrize("right_boundary", [1, 2, 4])
 @pytest.mark.parametrize("method", [0, 2, 3])
 def test_unsupported_right_boundary_raises_not_implemented(right_boundary, method):
