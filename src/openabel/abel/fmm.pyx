@@ -1,7 +1,3 @@
-
-
-import numpy as np
-
 from libc.stdlib cimport free
 from openabel.helper cimport null_check_malloc as malloc, null_check_calloc as calloc
 from libc.string cimport memset
@@ -10,7 +6,7 @@ cimport scipy.linalg.cython_blas as blas
 
 import openabel.abel.coeffs as cffs
 
-cimport openabel.math_fun as mf
+from libc.math cimport sqrt, log, log2, cos, fmin, fmax
 cimport openabel.constants as co
 from openabel.abel.base cimport abel_plan
 
@@ -25,16 +21,16 @@ ctypedef struct method_data_fmm:
     int pp, pp1, ss, nlevs, k_total, order, order_filter
 
 cdef double _kern_forward(double rr, double yy) nogil:
-    return rr/mf.sqrt(rr**2-yy**2)
+    return rr/sqrt(rr**2-yy**2)
     
 cdef double _kern_backward(double rr, double yy) nogil:
-    return 1/mf.sqrt(rr**2-yy**2)
+    return 1/sqrt(rr**2-yy**2)
 
 cdef double _kern_modified(double rr, double yy) nogil:
-    return (yy/rr)**2/mf.sqrt(rr**2-yy**2)
+    return (yy/rr)**2/sqrt(rr**2-yy**2)
 
 # Plan FMM
-cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = co.machine_epsilon) except -1 nogil:
+cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = 1.e1*co.machine_epsilon) except -1 nogil:
 
     cdef:
         int ii, jj, ll, kk, mm
@@ -92,26 +88,26 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = c
                 md.coeffs_sing[md.order*ii+jj] = cffs_s_sm_mv[ii,jj]
         for ii in range(y_cross, pl.n_data-1):
             y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> mf.fmax(mf.fmin(y_inv_sca,y_large-3),1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
             for jj in range(md.order):
                 md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order,
                                                             &cffs_s_la_mv[y_inv_sca_int-1,jj]) * \
-                                                mf.sqrt(pl.grid[ii]/2./pl.step_size)
+                                                sqrt(pl.grid[ii]/2./pl.step_size)
         n_cross = cffs_ns_sqrt_sm_mv.shape[0]            
         for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = cffs_ns_sqrt_sm_mv[pl.n_data-2-ii,jj] * \
                                                    (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii])*(pl.grid[pl.n_data-1]-pl.grid[ii]))
+                                                   sqrt((pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii])*(pl.grid[pl.n_data-1]-pl.grid[ii]))
         n_large = cffs_ns_sqrt_la_mv.shape[0]      
         for ii in range(max(pl.n_data-1-n_cross,0)):
             n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> mf.fmax(mf.fmin(n_inv_sca,n_large-3),1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order, 
                                                                &cffs_ns_sqrt_la_mv[n_inv_sca_int-1,jj]) * \
                                                    (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                                  (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                                 (pl.grid[pl.n_data-1]-pl.grid[ii]))
         for ii in range(pl.n_data-1):
@@ -140,26 +136,26 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = c
                 md.coeffs_sing[md.order*ii+jj] = cffs_s_sm_mv[ii,jj]/pl.step_size
         for ii in range(y_cross, pl.n_data-1):
             y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> mf.fmax(mf.fmin(y_inv_sca,y_large-3),1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
             for jj in range(md.order):
                 md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order, 
                                                             &cffs_s_la_mv[y_inv_sca_int-1,jj]) / \
-                                                mf.sqrt(pl.grid[ii]*2.*pl.step_size)
+                                                sqrt(pl.grid[ii]*2.*pl.step_size)
         n_cross = cffs_ns_sqrt_sm_mv.shape[0]            
         for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = cffs_ns_sqrt_sm_mv[pl.n_data-2-ii,jj] / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                             (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                            (pl.grid[pl.n_data-1]-pl.grid[ii]))
         n_large = cffs_ns_sqrt_la_mv.shape[0]      
         for ii in range(max(pl.n_data-1-n_cross,0)):
             n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> mf.fmax(mf.fmin(n_inv_sca,n_large-3),1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order, 
                                                                &cffs_ns_sqrt_la_mv[n_inv_sca_int-1,jj]) / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                                  (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                                 (pl.grid[pl.n_data-1]-pl.grid[ii]))
         for ii in range(pl.n_data-1):
@@ -188,27 +184,27 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = c
                 md.coeffs_sing[md.order*ii+jj] = cffs_s_sm_mv[ii,jj]/pl.step_size
         for ii in range(y_cross, pl.n_data-1):
             y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> mf.fmax(mf.fmin(y_inv_sca,y_large-3),1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
             for jj in range(md.order):
                 md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order,
                                                             &cffs_s_la_mv[y_inv_sca_int-1,jj]) / \
-                                                mf.sqrt(pl.grid[ii]*2.*pl.step_size)
+                                                sqrt(pl.grid[ii]*2.*pl.step_size)
         n_cross = cffs_ns_sqrt_sm_mv.shape[0]            
         for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = cffs_ns_sqrt_sm_mv[pl.n_data-2-ii,jj] * \
                                                    (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
-                                                   mf.sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
+                                                   sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
                                                                  (pl.grid[pl.n_data-1]-pl.grid[ii]) )
         n_large = cffs_ns_sqrt_la_mv.shape[0]      
         for ii in range(max(pl.n_data-1-n_cross,0)):
             n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> mf.fmax(mf.fmin(n_inv_sca,n_large-3),1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order, 
                                                                &cffs_ns_sqrt_la_mv[n_inv_sca_int-1,jj]) * \
                                                    (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
-                                                   mf.sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
+                                                   sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
                                                                  (pl.grid[pl.n_data-1]-pl.grid[ii]) )
         for ii in range(pl.n_data-1):
             md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5*kern(pl.grid[pl.n_data-1],pl.grid[ii])
@@ -219,9 +215,9 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = c
             raise NotImplementedError('Method not implemented for given parameters.')
 
     # Hierarchical decomposition
-    md.pp = max(4, <int> ( -0.55*mf.log(2.*eps) + 1. ) )    # Empirical scaling, should be exponential
+    md.pp = max(4, <int> ( -0.55*log(2.*eps) + 1. ) )    # Empirical scaling, should be exponential
     md.pp1 = md.pp + 1
-    md.nlevs = max(<int> ( mf.log2((pl.n_data-1.)/(2.*md.pp)) + 1. ), 2)
+    md.nlevs = max(<int> ( log2((pl.n_data-1.)/(2.*md.pp)) + 1. ), 2)
     md.ss = max(<int> ( (pl.n_data-1.)/2**md.nlevs + 1. ), 3)    # ss ~= 2*pp theoretical
     md.k_total = 2**(md.nlevs+1) - 1                             # Total number of intervals in all levels
     
@@ -339,7 +335,7 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
     # Right boundary handling
-    if right_boundary == 0: # TODO maybe or right_boundary == 1 or right_boundary == 2:
+    if right_boundary == 0:
         n_right_ext = order_m1_half + order_filter_m1_half
     elif right_boundary == 3:
         n_right_ext = 0
@@ -480,7 +476,6 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
         data_out[0] += md.direct0[jj-1]*data_in_temp1[order_m1_half+jj]
 
     # End correction left singular end
-    # TODO maybe BLAS
     for ii in range(pl.n_data-1):
         for jj in range(md.order):
             data_out[ii] += md.coeffs_sing[md.order*ii+jj]*data_in_temp1[ii+jj]
@@ -571,7 +566,6 @@ cdef int convolve(double* data_in, int n_data, double* data_out, int order, doub
         int ii, jj
 
     memset(data_out, 0, n_data*sizeof(double))
-    # TODO Maybe DGEMM or FFT here
     for ii in range(n_data):
         for jj in range(order):
             data_out[ii] += coeffs[jj]*data_in[ii+jj]
@@ -585,7 +579,7 @@ cdef int _cheb_roots(int order, double* roots) nogil:
         int ii
     
     for ii in range(order):
-        roots[ii] = mf.cos(0.5*co.pi*(2.*ii+1.)/order)
+        roots[ii] = cos(0.5*co.pi*(2.*ii+1.)/order)
     
     return 0
 
@@ -612,6 +606,3 @@ cdef:
     int ONE = 1
     double ZEROD = 0.
     double ONED = 1.
-    double TWOD = 2.
-    double MONED = -1.
-    double MTWOD = -2.

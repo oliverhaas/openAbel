@@ -1,10 +1,8 @@
-
-
 from libc.stdlib cimport free
 from openabel.helper cimport null_check_malloc as malloc
 
 cimport openabel.constants as constants
-cimport openabel.math_fun as math_fun
+from libc.math cimport log
 from openabel.abel.base cimport abel_plan
 
 
@@ -140,7 +138,7 @@ cdef int execute_fat_hansen_law_linear(abel_plan* plan, double* data_in, double*
             xk[kk] = 0.
         for ii in range(n_data-2, 0, -1):
             sn[1] = (data_in_old-data_in[ii])/plan.step_size
-            xk[0] += -constants.piinv*math_fun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
+            xk[0] += -constants.piinv*log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
             data_in_old = data_in[ii]
             data_out[ii] = xk[0]
             for kk in range(1, mod.nk):
@@ -155,7 +153,7 @@ cdef int execute_fat_hansen_law_linear(abel_plan* plan, double* data_in, double*
             xk[kk] = 0.
         for ii in range(n_data-2, 0, -1):
             sn[1] = (data_in[ii]+data_in[ii-1])*0.5
-            xk[0] += -constants.piinv*math_fun.log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
+            xk[0] += -constants.piinv*log(plan.grid[ii+1]/plan.grid[ii])*sn[1]
             data_in_old = data_in[ii]
             data_out[ii] = xk[0]
             for kk in range(1, mod.nk):

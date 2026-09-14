@@ -1,15 +1,10 @@
-
-import numpy as np
-
-
 from libc.stdlib cimport free
-from openabel.helper cimport null_check_malloc as malloc, null_check_calloc as calloc
+from openabel.helper cimport null_check_malloc as malloc
 from libc.string cimport memset
-cimport scipy.linalg.cython_blas as blas
 
 import openabel.abel.coeffs as coeffs
 
-cimport openabel.math_fun as mf
+from libc.math cimport sqrt, log, fmin, fmax
 cimport openabel.constants as co
 from openabel.abel.base cimport abel_plan
 
@@ -35,7 +30,7 @@ cdef int plan_fat_trapezoidal_desing_const(abel_plan* pl) except -1 nogil:
 
     cdef:
         method_data_desing_const* md
-        int ii, jj, ll
+        int ii, jj
         double[::1] coeffs_filter_mv
         double temp0, temp1
         int order_filter_m1_half
@@ -60,22 +55,22 @@ cdef int plan_fat_trapezoidal_desing_const(abel_plan* pl) except -1 nogil:
     md.desing = <double*> malloc((pl.n_data-1)*sizeof(double))
     if pl.forward_backward == -1:
         for ii in range(pl.n_data-1):
-            temp0 = mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+            temp0 = sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
             md.desing[ii] = temp0/pl.step_size
     elif pl.forward_backward == 2 or pl.forward_backward == 1:
         for ii in range(1,pl.n_data-1):
-            temp0 = mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
-            temp1 = mf.log((pl.grid[pl.n_data-1]+temp0)/pl.grid[ii])
+            temp0 = sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+            temp1 = log((pl.grid[pl.n_data-1]+temp0)/pl.grid[ii])
             md.desing[ii] = temp1/pl.step_size
-        temp0 = mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[0]**2)
+        temp0 = sqrt(pl.grid[pl.n_data-1]**2-pl.grid[0]**2)
         if pl.shift == 0.:
             md.desing[0] = 0.
         else:
-            temp1 = mf.log((pl.grid[pl.n_data-1]+temp0)/pl.grid[0])
+            temp1 = log((pl.grid[pl.n_data-1]+temp0)/pl.grid[0])
             md.desing[0] = temp1/pl.step_size
     elif pl.forward_backward == -2:
         for ii in range(pl.n_data-1):
-            md.desing[ii] = mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)/pl.grid[pl.n_data-1]/pl.step_size
+            md.desing[ii] = sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)/pl.grid[pl.n_data-1]/pl.step_size
     else:
         destroy_fat_trapezoidal_desing_const(pl)
         with gil:
@@ -136,7 +131,7 @@ cdef int execute_fat_trapezoidal_desing_const(abel_plan* pl, double* data_in, do
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
     # Right boundary handling
-    if right_boundary == 0: # TODO or right_boundary == 1 or right_boundary == 2:
+    if right_boundary == 0:
         n_right_ext = order_filter_m1_half
     elif right_boundary == 3:
         n_right_ext = 0
@@ -203,25 +198,25 @@ cdef int execute_fat_trapezoidal_desing_const(abel_plan* pl, double* data_in, do
     if pl.forward_backward == -1:
         for ii in range(pl.n_data-1):
             for jj in range(ii+1, pl.n_data-1):
-                data_out[ii] += (data_in_temp1[jj]-data_in_temp1[ii]) * pl.grid[jj]/mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+                data_out[ii] += (data_in_temp1[jj]-data_in_temp1[ii]) * pl.grid[jj]/sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             jj = pl.n_data-1
-            data_out[ii] += 0.5*(data_in_temp1[jj]-data_in_temp1[ii]) * pl.grid[jj]/mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+            data_out[ii] += 0.5*(data_in_temp1[jj]-data_in_temp1[ii]) * pl.grid[jj]/sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             data_out[ii] += data_in_temp1[ii]*md.desing[ii]
     elif pl.forward_backward == 1 or pl.forward_backward == 2:
         for ii in range(pl.n_data-1):
             for jj in range(ii+1, pl.n_data-1):
-                data_out[ii] += (data_in_temp1[jj]-data_in_temp1[ii]) / mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+                data_out[ii] += (data_in_temp1[jj]-data_in_temp1[ii]) / sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             jj = pl.n_data-1
-            data_out[ii] += 0.5*(data_in_temp1[jj]-data_in_temp1[ii]) / mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+            data_out[ii] += 0.5*(data_in_temp1[jj]-data_in_temp1[ii]) / sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             data_out[ii] += data_in_temp1[ii]*md.desing[ii]
     elif pl.forward_backward == -2:
         for ii in range(pl.n_data-1):
             for jj in range(ii+1, pl.n_data-1):
                 data_out[ii] += (data_in_temp1[jj]-data_in_temp1[ii]) * (pl.grid[ii]/pl.grid[jj])**2 / \
-                               mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+                               sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
             jj = pl.n_data-1
             data_out[ii] += 0.5*(data_in_temp1[pl.n_data-1]-data_in_temp1[ii]) * (pl.grid[ii]/pl.grid[pl.n_data-1])**2 / \
-                           mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+                           sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
             data_out[ii] += data_in_temp1[ii]*md.desing[ii]
     else:
         free(data_in_temp1)
@@ -238,10 +233,6 @@ cdef int destroy_fat_trapezoidal_desing_const(abel_plan* pl) except -1 nogil:
     cdef:
         method_data_desing_const* md = <method_data_desing_const*> pl.method_data
 
-    # Input check
-    if NULL == pl:
-        with gil:
-            raise ValueError('Illegal input argument.')   
     free(md.desing)
     free(md.coeffs_filter)
     free(md)
@@ -272,7 +263,7 @@ cdef int plan_fat_trapezoidal_end_corr(abel_plan* pl, int order = 2) except -1 n
         double[:,::1] coeffs_ext_small_mv
         double[:,::1] coeffs_ext_large_mv
         double[::1] coeffs_filter_mv
-        int ii, jj, ll
+        int ii, jj
         double n_inv_sca, y_inv_sca
         int n_cross, n_large, n_inv_sca_int, y_cross, y_large, y_inv_sca_int
         int order_m1_half, order_filter_m1_half, order_m1_half_inner
@@ -323,33 +314,33 @@ cdef int plan_fat_trapezoidal_end_corr(abel_plan* pl, int order = 2) except -1 n
                 md.coeffs_sing[md.order*ii+jj] = coeffs_sing_small_mv[ii,jj]
         for ii in range(y_cross, pl.n_data-1):
             y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> mf.fmax(mf.fmin(y_inv_sca,y_large-3),1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
             for jj in range(md.order):
                 md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order, 
                                                             &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) * \
-                                                mf.sqrt(pl.grid[ii]/2./pl.step_size)
+                                                sqrt(pl.grid[ii]/2./pl.step_size)
         n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
         for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] * \
                                                    (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                             (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                            (pl.grid[pl.n_data-1]-pl.grid[ii]))
         n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
         for ii in range(max(pl.n_data-1-n_cross,0)):
             n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> mf.fmax(mf.fmin(n_inv_sca,n_large-3),1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order,
                                                                &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) * \
                                                    (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                             (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                            (pl.grid[pl.n_data-1]-pl.grid[ii]))
         for ii in range(pl.n_data-1):
             md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5*pl.grid[pl.n_data-1] / \
-                                                              mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+                                                              sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
 
     elif pl.forward_backward == 1 or pl.forward_backward == 2:    # Backward transform
         with gil:
@@ -373,30 +364,30 @@ cdef int plan_fat_trapezoidal_end_corr(abel_plan* pl, int order = 2) except -1 n
                 md.coeffs_sing[md.order*ii+jj] = coeffs_sing_small_mv[ii,jj]/pl.step_size
         for ii in range(y_cross, pl.n_data-1):
             y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> mf.fmax(mf.fmin(y_inv_sca,y_large-3),1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
             for jj in range(md.order):
                 md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order,
                                                             &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) / \
-                                                mf.sqrt(pl.grid[ii]*2.*pl.step_size)
+                                                sqrt(pl.grid[ii]*2.*pl.step_size)
         n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
         for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                             (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                            (pl.grid[pl.n_data-1]-pl.grid[ii]))
         n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
         for ii in range(max(pl.n_data-1-n_cross,0)):
             n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> mf.fmax(mf.fmin(n_inv_sca,n_large-3),1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order,
                                                                &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) / \
-                                                   mf.sqrt((pl.grid[pl.n_data-1] + \
+                                                   sqrt((pl.grid[pl.n_data-1] + \
                                                             (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
                                                            (pl.grid[pl.n_data-1]-pl.grid[ii]))
         for ii in range(pl.n_data-1):
-            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5/mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5/sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
 
     elif pl.forward_backward == -2:    # Modified forward transform for 1/r^2 singular functions
         with gil:
@@ -420,29 +411,29 @@ cdef int plan_fat_trapezoidal_end_corr(abel_plan* pl, int order = 2) except -1 n
                 md.coeffs_sing[md.order*ii+jj] = coeffs_sing_small_mv[ii,jj]/pl.step_size
         for ii in range(y_cross, pl.n_data-1):
             y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> mf.fmax(mf.fmin(y_inv_sca,y_large-3),1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
             for jj in range(md.order):
                 md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order, 
                                                             &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) / \
-                                                mf.sqrt(pl.grid[ii]*2.*pl.step_size)
+                                                sqrt(pl.grid[ii]*2.*pl.step_size)
         n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
         for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] * \
                                                    (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
-                                                   mf.sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
+                                                   sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
                                                                  (pl.grid[pl.n_data-1]-pl.grid[ii]) )
         n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
         for ii in range(max(pl.n_data-1-n_cross,0)):
             n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> mf.fmax(mf.fmin(n_inv_sca,n_large-3),1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
             for jj in range(md.order):
                 md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order, &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) * \
                                                    (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
-                                                   mf.sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
+                                                   sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
                                                                  (pl.grid[pl.n_data-1]-pl.grid[ii]) )
         for ii in range(pl.n_data-1):
-            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5*(pl.grid[ii]/pl.grid[pl.n_data-1])**2/mf.sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5*(pl.grid[ii]/pl.grid[pl.n_data-1])**2/sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
 
     else:
         destroy_fat_trapezoidal_end_corr(pl)
@@ -508,7 +499,7 @@ cdef int execute_fat_trapezoidal_end_corr(abel_plan* pl, double* data_in, double
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
     # Right boundary handling
-    if right_boundary == 0: # TODO or right_boundary == 1 or right_boundary == 2:
+    if right_boundary == 0:
         n_right_ext = order_m1_half + order_filter_m1_half
     elif right_boundary == 3:
         n_right_ext = 0
@@ -575,15 +566,15 @@ cdef int execute_fat_trapezoidal_end_corr(abel_plan* pl, double* data_in, double
     if pl.forward_backward == -1:
         for ii in range(pl.n_data-1):
             for jj in range(ii+1, pl.n_data):
-                data_out[ii] += data_in_temp1[order_m1_half+jj]*pl.grid[jj]/mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+                data_out[ii] += data_in_temp1[order_m1_half+jj]*pl.grid[jj]/sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
     elif pl.forward_backward == 1 or pl.forward_backward == 2:
         for ii in range(pl.n_data-1):
             for jj in range(ii+1, pl.n_data):
-                data_out[ii] += data_in_temp1[order_m1_half+jj]/mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+                data_out[ii] += data_in_temp1[order_m1_half+jj]/sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
     elif pl.forward_backward == -2:
         for ii in range(pl.n_data-1):
             for jj in range(ii+1, pl.n_data):
-                data_out[ii] += data_in_temp1[order_m1_half+jj]*(pl.grid[ii]/pl.grid[jj])**2/mf.sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
+                data_out[ii] += data_in_temp1[order_m1_half+jj]*(pl.grid[ii]/pl.grid[jj])**2/sqrt(pl.grid[jj]**2-pl.grid[ii]**2)
     else:
         free(data_in_temp1)
         with gil:
@@ -672,7 +663,6 @@ cdef int convolve(double* data_in, int n_data, double* data_out, int order, doub
         int ii, jj
 
     memset(data_out, 0, n_data*sizeof(double))
-    # TODO Maybe DGEMM or FFT here
     for ii in range(n_data):
         for jj in range(order):
             data_out[ii] += coeffs[jj]*data_in[ii+jj]
