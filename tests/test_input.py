@@ -46,7 +46,6 @@ def test_eps_below_machine_epsilon_raises_value_error():
 @pytest.mark.parametrize("step_size", [0.0, -0.01, np.nan])
 @pytest.mark.parametrize("method", [0, 1, 2, 3])
 def test_non_positive_step_size_raises_value_error(step_size, method):
-    # Regression: every method silently returned NaN, Inf or a mirrored result.
     with pytest.raises(ValueError):
         openabel.Abel(200, -1, 0.0, step_size, method=method)
 
@@ -124,7 +123,6 @@ def test_invalid_left_boundary_raises_not_implemented(method):
 
 @pytest.mark.parametrize("left_boundary", [1, 2])
 def test_symmetric_boundary_with_unsupported_shift_raises_not_implemented(left_boundary):
-    # Only method 0 accepts shifts other than 0 and 0.5; mirroring the input needs one of the two.
     abel_obj = openabel.Abel(200, 1, 0.25, 0.01, method=0)
     with pytest.raises(NotImplementedError):
         abel_obj.execute(np.zeros(200), left_boundary=left_boundary)

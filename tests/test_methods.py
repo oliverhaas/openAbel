@@ -80,8 +80,6 @@ def test_single_order_methods_match_analytic_transform(forward_backward, method,
 @pytest.mark.parametrize("shift", [0.25, 1.0, 3.0])
 @pytest.mark.parametrize(("forward_backward", "tolerance"), [(-1, 1e-2), (1, 5e-2), (2, 2e-2), (-2, 1e-2)])
 def test_desingularised_trapezoidal_supports_any_positive_shift(forward_backward, tolerance, shift):
-    # Regression: the backward transforms left the first desingularisation weight uninitialised for shifts other
-    # than 0 and 0.5, so the first output sample was off by up to 30% (or garbage).
     data_in, reference = analytic_pair(forward_backward=forward_backward, shift=shift)
     data_out = openabel.Abel(N_DATA, forward_backward, shift, STEP_SIZE, method=0).execute(data_in)
     assert np.isfinite(data_out).all()
@@ -132,8 +130,7 @@ def test_end_correction_methods_outside_samples_match_analytic_transform(
 
 
 def symmetric_left_boundary(*, forward_backward: int) -> int:
-    """Boundary value matching the symmetry of the Gaussian inputs: the derivative input of forward_backward=2 is odd
-    (1), every other input is even (2)."""
+    """1 (odd) for the derivative input of forward_backward=2, 2 (even) for the other Gaussian inputs."""
     return 1 if forward_backward == 2 else 2
 
 
@@ -159,8 +156,6 @@ def test_end_correction_methods_symmetric_boundary_match_analytic_transform(
 
 @pytest.mark.parametrize("shift", [0.0, 0.5])
 def test_desingularised_trapezoidal_even_boundary_improves_numerical_derivative(shift):
-    # Method 0 extends the input only for the derivative filter of forward_backward=1; the other transforms are
-    # unaffected by the boundary value.
     data_in, reference = analytic_pair(forward_backward=1, shift=shift)
     abel_obj = openabel.Abel(N_DATA, 1, shift, STEP_SIZE, method=0)
     extrapolated = relative_error(data_out=abel_obj.execute(data_in, left_boundary=0), reference=reference)
@@ -181,7 +176,6 @@ def test_fmm_eps_bounds_the_deviation_from_the_default_eps(forward_backward, eps
 
 @pytest.mark.parametrize("n_data", [4, 5, 6, 7, 8])
 def test_fmm_with_few_data_points_matches_trapezoidal_without_blas_complaints(n_data, capfd):
-    # Regression: the far-field DGEMM calls got a negative dimension and OpenBLAS printed an "illegal value" line.
     x = np.arange(n_data) * STEP_SIZE
     data_in = input_samples(forward_backward=-1, x=x)
     trapezoidal = openabel.Abel(n_data, -1, 0.0, STEP_SIZE, method=2).execute(data_in)

@@ -61,10 +61,7 @@ abel_obj_bw = openabel.Abel(n_data, 1, shift, step_size, order=3)
 xx = np.linspace(shift * step_size, x_max, n_data)
 data_in = np.exp(-0.5 * xx**2 / sig**2)
 
-# Forward transform, then backward transform of the result. The backward transform takes the derivative of its
-# input numerically, which amplifies the (tiny) error of the forward transform; the round trip is still accurate
-# to about 1e-8 over most of the domain. The relative error grows towards the end of the domain, where the
-# Gaussian is vanishingly small and the truncation of the integration domain shows.
+# Forward transform, then backward transform of the result (which differentiates its input numerically).
 data_fw = abel_obj_fw.execute(data_in)
 data_bw = abel_obj_bw.execute(data_fw)
 
