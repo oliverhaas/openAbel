@@ -1,3 +1,4 @@
+import ctypes
 from types import MappingProxyType
 
 import numpy as np
@@ -128,6 +129,20 @@ def test_end_correction_methods_outside_samples_match_analytic_transform(
     assert data_out.shape == (N_DATA,)
     assert data_out[-1] == 0.0
     assert relative_error(data_out=data_out, reference=reference) < tolerance
+
+
+@pytest.mark.parametrize("n_data", [4, 5, 6, 7, 8])
+def test_fmm_with_few_data_points_matches_trapezoidal_without_blas_complaints(n_data, capfd):
+    # Regression: the far-field DGEMM calls got a negative dimension and OpenBLAS printed an "illegal value" line.
+    x = np.arange(n_data) * STEP_SIZE
+    data_in = input_samples(forward_backward=-1, x=x)
+    trapezoidal = openabel.Abel(n_data, -1, 0.0, STEP_SIZE, method=2).execute(data_in)
+    fmm = openabel.Abel(n_data, -1, 0.0, STEP_SIZE, method=3).execute(data_in)
+    ctypes.CDLL(None).fflush(None)
+    captured = capfd.readouterr()
+    assert captured.out == ""
+    assert captured.err == ""
+    np.testing.assert_allclose(fmm, trapezoidal, rtol=1e-8, atol=1e-8)
 
 
 @pytest.mark.parametrize("order", [1, 2, 3, 5, 10])

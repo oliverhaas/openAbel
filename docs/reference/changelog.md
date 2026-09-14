@@ -37,6 +37,8 @@
 - An `order` without coefficient tables (20 and above) raised `KeyError`; it now raises `ValueError`.
 - A `step_size` that is not positive or a negative `shift` silently produced NaN, Inf or mirrored results; both now
   raise `ValueError`.
+- The FMM (`method=3`) with fewer than eight data points called DGEMM with a negative dimension; the results were
+  right, but OpenBLAS printed an "illegal value" complaint.
 
 ### Changed
 

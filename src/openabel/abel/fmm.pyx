@@ -405,10 +405,12 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
     moments = <double*> calloc(md.k_total*md.pp1, sizeof(double))
     local = <double*> calloc(md.k_total*md.pp1, sizeof(double))
 
-    # Finest level moment calculation
+    # Finest level moment calculation. For n_data < 3*ss+2 there is no complete block after the first two, and BLAS
+    # complains about a negative dimension instead of doing nothing.
     mm = (pl.n_data-2)/md.ss - 2         # basically kl[0]-2, as first two block are not needed
-    blas.dgemm('n', 'n', &md.pp1, &mm, &md.ss, &ONED, md.ltp, &md.pp1, 
-               &data_in_temp1[order_m1_half+2*md.ss+1], &md.ss, &ZEROD, &moments[2*md.pp1], &md.pp1)
+    if mm > 0:
+        blas.dgemm('n', 'n', &md.pp1, &mm, &md.ss, &ONED, md.ltp, &md.pp1,
+                   &data_in_temp1[order_m1_half+2*md.ss+1], &md.ss, &ZEROD, &moments[2*md.pp1], &md.pp1)
     mm += 2
     for ii in range(mm*md.ss+1, pl.n_data):
         nn = (ii-1) - mm*md.ss
@@ -449,7 +451,9 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
 
     # Potential evaluation / local to potential
     mm = (pl.n_data-2)/md.ss - 1          # basically kl[0]-2, as last two block are not needed
-    blas.dgemm('t', 'n', &md.ss, &mm, &md.pp1, &ONED, md.ltp, &md.pp1, local, &md.pp1, &ZEROD, &data_out[1], &md.ss)
+    if mm > 0:
+        blas.dgemm('t', 'n', &md.ss, &mm, &md.pp1, &ONED, md.ltp, &md.pp1, local, &md.pp1, &ZEROD, &data_out[1],
+                   &md.ss)
     for jj in range(md.pp1):
         data_out[0] += local[jj]*_lagrange_p_int(-1., jj, md.cheb_roots, md.pp1)
     
