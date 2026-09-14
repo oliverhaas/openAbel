@@ -33,6 +33,7 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = 1
 
     cdef:
         int ii, jj, ll, kk, mm
+        size_t block    # the offsets into mtlk and direct exceed int for n_data above roughly 1e7
         method_data_fmm* md
         double ti, tauj, temp
         double (*kern)(double, double) nogil
@@ -81,8 +82,10 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = 1
     md.mtmp = <double*> malloc(md.pp1**2*sizeof(double))
     md.mtmm = <double*> malloc(md.pp1**2*sizeof(double))
     md.ltp = <double*> malloc(md.pp1*md.ss*sizeof(double))
-    md.mtlk = <double*> calloc(2*md.k_total*md.pp1**2, sizeof(double))
-    md.direct = <double*> calloc(2**md.nlevs*md.ss**2*2, sizeof(double))
+    block = md.k_total
+    md.mtlk = <double*> calloc(2*block*md.pp1**2, sizeof(double))
+    block = 2**md.nlevs
+    md.direct = <double*> calloc(2*block*md.ss**2, sizeof(double))
     md.direct0 = <double*> malloc(2*md.ss*sizeof(double))
 
     # More hierarchical decomposition stuff
@@ -109,28 +112,31 @@ cdef int plan_fat_fmm_trap_end_corr(abel_plan* pl, int order = 2, double eps = 1
     for ll in range(md.nlevs-1):
         # If even
         for kk in range(0, md.kl[ll]-2, 2):
+            block = 2*(md.kl_cum[ll]+kk)
             for ii in range(md.pp1):
                 ti = (md.kl[md.nlevs-ll]*(kk+0.5+0.5*md.cheb_roots[ii])*md.ss + pl.shift)*pl.step_size
                 for jj in range(md.pp1):
                     tauj = (md.kl[md.nlevs-ll]*(kk+2.5+0.5*md.cheb_roots[jj])*md.ss + pl.shift)*pl.step_size
-                    md.mtlk[(2*(md.kl_cum[ll]+kk))*md.pp1**2+ii*md.pp1+jj] = kern(tauj, ti)
+                    md.mtlk[block*md.pp1**2+ii*md.pp1+jj] = kern(tauj, ti)
                     tauj = (md.kl[md.nlevs-ll]*(kk+3.5+0.5*md.cheb_roots[jj])*md.ss + pl.shift)*pl.step_size
-                    md.mtlk[(2*(md.kl_cum[ll]+kk)+1)*md.pp1**2+ii*md.pp1+jj] = kern(tauj, ti)
+                    md.mtlk[(block+1)*md.pp1**2+ii*md.pp1+jj] = kern(tauj, ti)
         # If odd
         for kk in range(1, md.kl[ll]-2, 2):
+            block = 2*(md.kl_cum[ll]+kk)
             for ii in range(md.pp1):
                 ti = (md.kl[md.nlevs-ll]*(kk+0.5+0.5*md.cheb_roots[ii])*md.ss + pl.shift)*pl.step_size
                 for jj in range(md.pp1):
                     tauj = (md.kl[md.nlevs-ll]*(kk+2.5+0.5*md.cheb_roots[jj])*md.ss + pl.shift)*pl.step_size
-                    md.mtlk[(2*(md.kl_cum[ll]+kk))*md.pp1**2+ii*md.pp1+jj] = kern(tauj, ti)
+                    md.mtlk[block*md.pp1**2+ii*md.pp1+jj] = kern(tauj, ti)
 
     # Direct short range coefficients
     for ii in range(1, pl.n_data):
         kk = <int> ((ii-1)/md.ss)
         ll = (ii-1) - kk*md.ss
         mm = min(pl.n_data-kk*md.ss-1, 2*md.ss)
+        block = kk
         for jj in range(ll+1, mm):
-            md.direct[kk*md.ss**2*2+md.ss*2*ll+jj] = kern(pl.grid[ii+jj-ll], pl.grid[ii])
+            md.direct[2*block*md.ss**2+md.ss*2*ll+jj] = kern(pl.grid[ii+jj-ll], pl.grid[ii])
     mm = min(pl.n_data, 2*md.ss+1)
     for jj in range(1, mm):
         md.direct0[jj-1] = kern(pl.grid[jj], pl.grid[0])    
@@ -145,6 +151,7 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
     cdef:
         method_data_fmm* md
         int ii, jj, kk, ll, mm, nn
+        size_t block
         (double*) moments = NULL, local = NULL, data_in_temp1 = NULL
         int order_m1_half, order_m1_half_inner
 
@@ -182,13 +189,15 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
     for ll in range(md.nlevs-1):
         # If even
         for kk in range(0, md.kl[ll]-2, 2):
-            blas.dgemv('t', &md.pp1, &md.pp1, &ONED, &md.mtlk[(2*(md.kl_cum[ll]+kk))*md.pp1**2], &md.pp1, 
+            block = 2*(md.kl_cum[ll]+kk)
+            blas.dgemv('t', &md.pp1, &md.pp1, &ONED, &md.mtlk[block*md.pp1**2], &md.pp1, 
                        &moments[(kk+md.kl_cum[ll]+2)*md.pp1], &ONE, &ZEROD, &local[(md.kl_cum[ll]+kk)*md.pp1], &ONE)
-            blas.dgemv('t', &md.pp1, &md.pp1, &ONED, &md.mtlk[(2*(md.kl_cum[ll]+kk)+1)*md.pp1**2], &md.pp1, 
+            blas.dgemv('t', &md.pp1, &md.pp1, &ONED, &md.mtlk[(block+1)*md.pp1**2], &md.pp1, 
                        &moments[(kk+md.kl_cum[ll]+3)*md.pp1], &ONE, &ONED, &local[(md.kl_cum[ll]+kk)*md.pp1], &ONE)
         # If odd
         for kk in range(1, md.kl[ll]-2, 2):
-            blas.dgemv('t', &md.pp1, &md.pp1, &ONED, &md.mtlk[(2*(md.kl_cum[ll]+kk))*md.pp1**2], &md.pp1, 
+            block = 2*(md.kl_cum[ll]+kk)
+            blas.dgemv('t', &md.pp1, &md.pp1, &ONED, &md.mtlk[block*md.pp1**2], &md.pp1, 
                        &moments[(kk+md.kl_cum[ll]+2)*md.pp1], &ONE, &ZEROD, &local[(md.kl_cum[ll]+kk)*md.pp1], &ONE)
     
     # Downward Pass / Local to local
@@ -220,14 +229,16 @@ cdef int execute_fat_fmm_trap_end_corr(abel_plan* pl, double* data_in, double* d
         # Only the rows that hold data: rows beyond the data end are zero in md.direct, and reading the matching
         # input elements would run past data_in_temp1.
         nn = min(pl.n_data-kk*md.ss-1, mm)
-        blas.dgemv('t', &nn, &md.ss, &ONED, &md.direct[kk*md.ss**2*2], &mm,
+        block = kk
+        blas.dgemv('t', &nn, &md.ss, &ONED, &md.direct[2*block*md.ss**2], &mm,
                    &data_in_temp1[order_m1_half+1+kk*md.ss], &ONE, &ONED, &data_out[1+kk*md.ss], &ONE)
     for ii in range(ll*md.ss+1, pl.n_data-1):
         kk = (ii-1)/md.ss
         nn = (ii-1) - kk*md.ss
         mm = min(pl.n_data-kk*md.ss-1, 2*md.ss)
+        block = kk
         for jj in range(nn+1, mm):
-            data_out[ii] += md.direct[kk*md.ss**2*2+md.ss*2*nn+jj]*data_in_temp1[order_m1_half+ii+jj-nn]
+            data_out[ii] += md.direct[2*block*md.ss**2+md.ss*2*nn+jj]*data_in_temp1[order_m1_half+ii+jj-nn]
     mm = min(pl.n_data, 2*md.ss+1)
     for jj in range(1, mm):
         data_out[0] += md.direct0[jj-1]*data_in_temp1[order_m1_half+jj]

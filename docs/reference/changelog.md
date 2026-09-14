@@ -39,6 +39,8 @@
   raise `ValueError`.
 - The FMM (`method=3`) with fewer than eight data points called DGEMM with a negative dimension; the results were
   right, but OpenBLAS printed an "illegal value" complaint.
+- The FMM (`method=3`) sized its coefficient tables and indexed them with `int` arithmetic, which overflows for
+  `n_data` above roughly 1e7; the sizes and offsets are now computed in `size_t`.
 
 ### Changed
 
