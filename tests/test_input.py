@@ -43,6 +43,21 @@ def test_eps_below_machine_epsilon_raises_value_error():
         openabel.Abel(200, -1, 0.0, 0.01, method=3, eps=0.0)
 
 
+@pytest.mark.parametrize("step_size", [0.0, -0.01, np.nan])
+@pytest.mark.parametrize("method", [0, 1, 2, 3])
+def test_non_positive_step_size_raises_value_error(step_size, method):
+    # Regression: every method silently returned NaN, Inf or a mirrored result.
+    with pytest.raises(ValueError):
+        openabel.Abel(200, -1, 0.0, step_size, method=method)
+
+
+@pytest.mark.parametrize("shift", [-0.5, -1.0, np.nan])
+@pytest.mark.parametrize("method", [0, 1, 2, 3])
+def test_negative_shift_raises_value_error(shift, method):
+    with pytest.raises(ValueError):
+        openabel.Abel(200, -1, shift, 0.01, method=method)
+
+
 # Columns: forward_backward, method, order, n_outside (samples per side that boundary value 3 needs beyond n_data).
 OUTSIDE_SAMPLES = (
     (-1, 0, 2, 0),

@@ -35,6 +35,8 @@
   required length (the boundary value `3` rule in the API reference).
 - An invalid `left_boundary` value leaked two temporary buffers with methods `0` and `2`.
 - An `order` without coefficient tables (20 and above) raised `KeyError`; it now raises `ValueError`.
+- A `step_size` that is not positive or a negative `shift` silently produced NaN, Inf or mirrored results; both now
+  raise `ValueError`.
 
 ### Changed
 
