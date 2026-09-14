@@ -1,6 +1,7 @@
 # openAbel
 
 [![CI](https://github.com/oliverhaas/openAbel/actions/workflows/ci.yml/badge.svg)](https://github.com/oliverhaas/openAbel/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/openabel)](https://pypi.org/project/openabel/)
 
 Fast Abel transforms of equispaced data in Python, with all calculations done in Cython.
 
@@ -17,13 +18,13 @@ used from Python with numpy arrays or from Cython using pointers.
 
 Requirements: Python >= 3.12 on Linux or macOS. numpy and scipy are installed automatically.
 
-Once released on PyPI:
-
 ```bash
 pip install openabel
 ```
 
-Until then, install from the repository (this compiles the Cython extensions, so a C compiler is needed):
+Wheels are provided for CPython 3.12 to 3.14 on Linux x86_64 and macOS arm64. Elsewhere pip compiles
+the Cython extensions from the sdist, which needs a C compiler. The development version installs from
+the repository:
 
 ```bash
 pip install git+https://github.com/oliverhaas/openAbel
@@ -82,9 +83,9 @@ In both error and computational complexity there is no better existing method fo
 to my knowledge. I should really stress that there are dozens of publications and methods out there
 which claim to be fast and/or accurate, but don't get anywhere close to **openAbel** in those aspects.
 
-For more information see the documentation on the
-[transform methods](https://github.com/oliverhaas/openAbel/blob/main/docs/transform-methods.md) and the
-[examples](https://github.com/oliverhaas/openAbel/blob/main/docs/examples/index.md).
+For more information see the [documentation](https://oliverhaas.github.io/openAbel/), in particular the
+pages on the [transform methods](https://github.com/oliverhaas/openAbel/blob/main/docs/transform-methods.md)
+and the [examples](https://github.com/oliverhaas/openAbel/blob/main/docs/examples/index.md).
 
 ## Copyright and license
 

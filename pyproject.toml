@@ -34,6 +34,7 @@ version = "0.7.0"
 
 [project.urls]
 Changelog = "https://github.com/oliverhaas/openAbel/blob/main/docs/reference/changelog.md"
+Documentation = "https://oliverhaas.github.io/openAbel/"
 Homepage = "https://github.com/oliverhaas/openAbel"
 Issues = "https://github.com/oliverhaas/openAbel/issues"
 Repository = "https://github.com/oliverhaas/openAbel"

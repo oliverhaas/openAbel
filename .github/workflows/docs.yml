@@ -1,6 +1,3 @@
-# DISABLED. This file ends in `.disabled` so GitHub ignores it. A commented-out `*.yml` is still parsed by
-# GitHub and shows up as a failing "invalid workflow" run, which is why disabling-by-rename is used instead.
-# Activation checklist: see publish.yml.disabled.
 name: Docs
 
 on:
@@ -25,7 +22,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v10.1.0
       - run: uv python install 3.14
       - run: uv sync --locked
       - name: Deploy docs (version tag)

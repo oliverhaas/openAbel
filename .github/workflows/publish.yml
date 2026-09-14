@@ -1,0 +1,80 @@
+# Publishes the tagged version to PyPI through trusted publishing (project openabel, environment pypi). tag.yml
+# dispatches it after a green CI run on main; the manual dispatch takes an existing tag. setup-uv publishes no major
+# tags since v8, hence the exact pin here and in the other workflows.
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (without the v prefix)"
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: "3.14"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.version && format('v{0}', github.event.inputs.version) || github.ref }}
+      - uses: astral-sh/setup-uv@v10.1.0
+      - run: uv python install 3.14
+      - run: uv sync --locked
+      - run: uv run ruff check --no-fix
+      - run: uv run ruff format --check
+      - run: uv run ty check src tests
+      - run: uv run pytest
+
+  build_wheels:
+    name: Wheels on ${{ matrix.os }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.version && format('v{0}', github.event.inputs.version) || github.ref }}
+      - uses: astral-sh/setup-uv@v10.1.0
+      - uses: pypa/cibuildwheel@v4.2.1
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.version && format('v{0}', github.event.inputs.version) || github.ref }}
+      - uses: astral-sh/setup-uv@v10.1.0
+      - run: uv build --sdist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: ./dist/*.tar.gz
+
+  publish:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/openabel/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: "*"
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1

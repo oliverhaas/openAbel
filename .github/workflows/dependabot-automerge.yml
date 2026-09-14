@@ -1,3 +1,5 @@
+# Needs "Allow auto-merge" in the repository settings and the CI jobs as required status checks on main; otherwise
+# the merge happens before CI finishes.
 name: Dependabot auto-merge
 
 on: pull_request
