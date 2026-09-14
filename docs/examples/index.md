@@ -12,3 +12,4 @@ reproduced here with their output figures. They need `matplotlib`; example005 al
 - [example003_noisy_backward](example003.md): filtering and transforming noisy data.
 - [example004_full_comparison](example004.md): accuracy and timing comparison of all **openAbel** methods.
 - [example005_comparison_pyabel](example005.md): comparison of **openAbel** with **PyAbel** methods.
+- [example006_simple_forward_and_backward](example006.md): a forward transform followed by the backward transform.

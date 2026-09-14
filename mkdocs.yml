@@ -75,6 +75,7 @@ nav:
       - examples/example003.md
       - examples/example004.md
       - examples/example005.md
+      - examples/example006.md
   - Reference:
       - API: reference/api.md
       - Changelog: reference/changelog.md
