@@ -30,10 +30,8 @@ cdef int plan_fat_trapezoidal_desing_const(abel_plan* pl) except -1 nogil:
 
     cdef:
         method_data_desing_const* md
-        int ii, jj
-        double[::1] coeffs_filter_mv
+        int ii
         double temp0, temp1
-        int order_filter_m1_half
 
     # Input check
     if NULL == pl:
@@ -76,30 +74,13 @@ cdef int plan_fat_trapezoidal_desing_const(abel_plan* pl) except -1 nogil:
         with gil:
             raise NotImplementedError('Method not implemented for given parameters.')
 
-    # Input modification filter
-    if pl.forward_backward == 1:
-        md.order_filter = 3
-        order_filter_m1_half = 1
-        md.coeffs_filter = <double*> malloc(md.order_filter*sizeof(double))
-        with gil:
-            try:
-                coeffs_filter_mv = coeffs.get_coeffs('coeffs_deriv_smooth', 2)
-            except:
-                destroy_fat_trapezoidal_desing_const(pl)
-                raise
-        for ii in range(md.order_filter):
-            md.coeffs_filter[ii] = coeffs_filter_mv[ii]*(-co.piinv)
-    elif pl.forward_backward == 2 or pl.forward_backward == -1 or pl.forward_backward == -2:
-        md.order_filter = 1
-        md.coeffs_filter = <double*> malloc(1*sizeof(double))
-        if pl.forward_backward == 2:            
-            md.coeffs_filter[0] = -co.piinv*pl.step_size
-        else:
-            md.coeffs_filter[0] = 2.*pl.step_size
-    else:
-        destroy_fat_trapezoidal_desing_const(pl)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
+    # Input modification filter, as for first order end corrections
+    with gil:
+        try:
+            plan_filter_coeffs(pl, 1, &md.coeffs_filter, &md.order_filter)
+        except:
+            destroy_fat_trapezoidal_desing_const(pl)
+            raise
 
     return 0
 
@@ -109,89 +90,13 @@ cdef int execute_fat_trapezoidal_desing_const(abel_plan* pl, double* data_in, do
                                             int right_boundary) except -1 nogil:
 
     cdef:
-        int ii, jj, nn, order_filter_m1_half, n_left_ext, n_right_ext
+        int ii, jj
         method_data_desing_const* md
-        (double*) data_in_temp0 = NULL, data_in_temp1 = NULL
+        double* data_in_temp1
 
     md = <method_data_desing_const*> pl.method_data
-    order_filter_m1_half = (md.order_filter-1)/2
-
-    # Allocate temporary data arrays
-    data_in_temp0 = <double*> malloc((pl.n_data+md.order_filter-1)*sizeof(double))
-    data_in_temp1 = <double*> malloc(pl.n_data*sizeof(double))
-    
-    # Left boundary handling
-    if left_boundary == 0 or left_boundary == 1 or left_boundary == 2:
-        n_left_ext = order_filter_m1_half
-    elif left_boundary == 3:
-        n_left_ext = 0
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-    # Right boundary handling
-    if right_boundary == 0:
-        n_right_ext = order_filter_m1_half
-    elif right_boundary == 3:
-        n_right_ext = 0
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')           
-    # Copy and extend data if necessary
-    nn = md.order_filter-1
-    for ii in range(pl.n_data+md.order_filter-1-n_left_ext-n_right_ext):
-        data_in_temp0[n_left_ext+ii] = data_in[ii]
-    if left_boundary == 0:
-        for ii in range(n_left_ext):
-            data_in_temp0[ii] = polint(&data_in_temp0[n_left_ext], nn, ii-n_left_ext)
-    elif left_boundary == 1:
-        if pl.shift == 0.:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = -data_in_temp0[n_left_ext+1+ii]
-        elif pl.shift == 0.5:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = -data_in_temp0[n_left_ext+ii]
-        else:
-            free(data_in_temp0)
-            free(data_in_temp1)
-            with gil:
-                raise NotImplementedError('Method not implemented for given parameters.')
-    elif left_boundary == 2:
-        if pl.shift == 0.:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = data_in_temp0[n_left_ext+1+ii]
-        elif pl.shift == 0.5:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = data_in_temp0[n_left_ext+ii]
-        else:
-            free(data_in_temp0)
-            free(data_in_temp1)
-            with gil:
-                raise NotImplementedError('Method not implemented for given parameters.')
-    elif left_boundary == 3:
-        pass
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-    if right_boundary == 0:
-        for ii in range(n_right_ext):
-            data_in_temp0[pl.n_data+order_filter_m1_half+ii] = polint(&data_in_temp0[pl.n_data+order_filter_m1_half-nn], nn, ii+nn)
-    elif right_boundary == 3:
-        pass
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-
-    # Do scaling or numerical derivative
-    convolve(data_in_temp0, pl.n_data, data_in_temp1, md.order_filter, md.coeffs_filter)
-    free(data_in_temp0)
+    data_in_temp1 = prepare_input_end_corr(pl, data_in, 1, md.order_filter, md.coeffs_filter, left_boundary,
+                                           right_boundary)
 
     # Main trapezoidal rule
     memset(data_out, 0, pl.n_data*sizeof(double))
@@ -252,217 +157,33 @@ ctypedef struct method_data_end_corr:
     int order_filter
 
 
-# Plan desingularized quadrature trapezoidal
+# Plan end-corrected trapezoidal
 cdef int plan_fat_trapezoidal_end_corr(abel_plan* pl, int order = 2) except -1 nogil:
+
     cdef:
         method_data_end_corr* md
-        double[:,::1] coeffs_nonsing_sqrt_small_mv
-        double[:,::1] coeffs_nonsing_sqrt_large_mv
-        double[:,::1] coeffs_sing_small_mv
-        double[:,::1] coeffs_sing_large_mv
-        double[:,::1] coeffs_ext_small_mv
-        double[:,::1] coeffs_ext_large_mv
-        double[::1] coeffs_filter_mv
-        int ii, jj
-        double n_inv_sca, y_inv_sca
-        int n_cross, n_large, n_inv_sca_int, y_cross, y_large, y_inv_sca_int
-        int order_m1_half, order_filter_m1_half, order_m1_half_inner
 
     # Input check
     if NULL == pl or order <= 0:
         with gil:
-            raise ValueError('Illegal input argument.')   
+            raise ValueError('Illegal input argument.')
 
     # Main method struct
     md = <method_data_end_corr*> malloc(sizeof(method_data_end_corr))
     md.coeffs_sing = NULL
     md.coeffs_nonsing = NULL
     md.coeffs_filter = NULL
+    md.order = order
     pl.method_data = <void*> md
 
-    # Small data set
-    if pl.n_data < order+2:
-        destroy_fat_trapezoidal_end_corr(pl)
-        with gil:
-            raise ValueError('Not enough data points for given parameters.')
-
-    # Load and prepare end correction coefficients
-    md.order = order
-    order_m1_half = <int> ((md.order-1)/2)
-    order_m1_half_inner = <int> (md.order/2)
-    md.coeffs_sing = <double*> malloc(md.order*(pl.n_data-1)*sizeof(double))
-    md.coeffs_nonsing = <double*> malloc(md.order*(pl.n_data-1)*sizeof(double))
-    if pl.forward_backward == -1:    # Forward transform
-        with gil:
-            try:
-                coeffs_sing_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_lin_sing_large', order)
-                coeffs_nonsing_sqrt_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_small', order)
-                coeffs_nonsing_sqrt_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_large', order)
-                if pl.shift == 0.:
-                    coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small', order)
-                elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small_half_shift', order)
-                else:
-                    raise NotImplementedError('Method not implemented for given parameters.')
-            except:
-                destroy_fat_trapezoidal_end_corr(pl)
-                raise
-        y_cross = coeffs_sing_small_mv.shape[0]
-        y_large = coeffs_sing_large_mv.shape[0]
-        for ii in range(min(y_cross,pl.n_data-1)):
-            for jj in range(md.order):
-                md.coeffs_sing[md.order*ii+jj] = coeffs_sing_small_mv[ii,jj]
-        for ii in range(y_cross, pl.n_data-1):
-            y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
-            for jj in range(md.order):
-                md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order, 
-                                                            &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) * \
-                                                sqrt(pl.grid[ii]/2./pl.step_size)
-        n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
-        for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
-            for jj in range(md.order):
-                md.coeffs_nonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] * \
-                                                   (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
-                                                   sqrt((pl.grid[pl.n_data-1] + \
-                                                            (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
-                                                           (pl.grid[pl.n_data-1]-pl.grid[ii]))
-        n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
-        for ii in range(max(pl.n_data-1-n_cross,0)):
-            n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
-            for jj in range(md.order):
-                md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order,
-                                                               &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) * \
-                                                   (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
-                                                   sqrt((pl.grid[pl.n_data-1] + \
-                                                            (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
-                                                           (pl.grid[pl.n_data-1]-pl.grid[ii]))
-        for ii in range(pl.n_data-1):
-            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5*pl.grid[pl.n_data-1] / \
-                                                              sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
-
-    elif pl.forward_backward == 1 or pl.forward_backward == 2:    # Backward transform
-        with gil:
-            try:
-                coeffs_sing_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_sing_large', order)
-                coeffs_nonsing_sqrt_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_small', order)
-                coeffs_nonsing_sqrt_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_large', order)
-                if pl.shift == 0.:
-                    coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_sing_small', order)
-                elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_sing_small_half_shift', order)
-                else:
-                    raise NotImplementedError('Method not implemented for given parameters.')
-            except:
-                destroy_fat_trapezoidal_end_corr(pl)
-                raise
-        y_cross = coeffs_sing_small_mv.shape[0]
-        y_large = coeffs_sing_large_mv.shape[0]
-        for ii in range(min(y_cross,pl.n_data-1)):
-            for jj in range(md.order):
-                md.coeffs_sing[md.order*ii+jj] = coeffs_sing_small_mv[ii,jj]/pl.step_size
-        for ii in range(y_cross, pl.n_data-1):
-            y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
-            for jj in range(md.order):
-                md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order,
-                                                            &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) / \
-                                                sqrt(pl.grid[ii]*2.*pl.step_size)
-        n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
-        for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
-            for jj in range(md.order):
-                md.coeffs_nonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] / \
-                                                   sqrt((pl.grid[pl.n_data-1] + \
-                                                            (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
-                                                           (pl.grid[pl.n_data-1]-pl.grid[ii]))
-        n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
-        for ii in range(max(pl.n_data-1-n_cross,0)):
-            n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
-            for jj in range(md.order):
-                md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order,
-                                                               &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) / \
-                                                   sqrt((pl.grid[pl.n_data-1] + \
-                                                            (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
-                                                           (pl.grid[pl.n_data-1]-pl.grid[ii]))
-        for ii in range(pl.n_data-1):
-            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5/sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
-
-    elif pl.forward_backward == -2:    # Modified forward transform for 1/r^2 singular functions
-        with gil:
-            try:
-                coeffs_sing_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_large', order)
-                coeffs_nonsing_sqrt_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_small', order)
-                coeffs_nonsing_sqrt_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_large', order)
-                if pl.shift == 0.:
-                    coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small', order)
-                elif pl.shift == 0.5:
-                    coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small_half_shift', order)
-                else:
-                    raise NotImplementedError('Method not implemented for given parameters.')
-            except:
-                destroy_fat_trapezoidal_end_corr(pl)
-                raise
-        y_cross = coeffs_sing_small_mv.shape[0]
-        y_large = coeffs_sing_large_mv.shape[0]
-        for ii in range(min(y_cross,pl.n_data-1)):
-            for jj in range(md.order):
-                md.coeffs_sing[md.order*ii+jj] = coeffs_sing_small_mv[ii,jj]/pl.step_size
-        for ii in range(y_cross, pl.n_data-1):
-            y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
-            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
-            for jj in range(md.order):
-                md.coeffs_sing[md.order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, md.order, 
-                                                            &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) / \
-                                                sqrt(pl.grid[ii]*2.*pl.step_size)
-        n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
-        for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
-            for jj in range(md.order):
-                md.coeffs_nonsing[md.order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] * \
-                                                   (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
-                                                   sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
-                                                                 (pl.grid[pl.n_data-1]-pl.grid[ii]) )
-        n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
-        for ii in range(max(pl.n_data-1-n_cross,0)):
-            n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
-            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
-            for jj in range(md.order):
-                md.coeffs_nonsing[md.order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, md.order, &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) * \
-                                                   (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
-                                                   sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
-                                                                 (pl.grid[pl.n_data-1]-pl.grid[ii]) )
-        for ii in range(pl.n_data-1):
-            md.coeffs_nonsing[md.order*ii+order_m1_half_inner] -= 0.5*(pl.grid[ii]/pl.grid[pl.n_data-1])**2/sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
-
-    else:
-        destroy_fat_trapezoidal_end_corr(pl)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-
-    # Input modification filter
-    if pl.forward_backward == 1:
-        md.order_filter = md.order+1 + (md.order % 2)
-        md.coeffs_filter = <double*> malloc(md.order_filter*sizeof(double))
-        with gil:
-            try:
-                coeffs_filter_mv = coeffs.get_coeffs('coeffs_deriv_smooth', md.order_filter-1)
-            except:
-                destroy_fat_trapezoidal_end_corr(pl)
-                raise
-        for ii in range(md.order_filter):
-            md.coeffs_filter[ii] = coeffs_filter_mv[ii]*(-co.piinv)
-    elif pl.forward_backward == 2 or pl.forward_backward == -1 or pl.forward_backward == -2:
-        md.order_filter = 1
-        md.coeffs_filter = <double*> malloc(1*sizeof(double))
-        if pl.forward_backward == 2:            
-            md.coeffs_filter[0] = -co.piinv*pl.step_size
-        else:
-            md.coeffs_filter[0] = 2.*pl.step_size
-    else:
-        destroy_fat_trapezoidal_end_corr(pl)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
+    # End correction coefficients and input modification filter
+    with gil:
+        try:
+            plan_end_corr_coeffs(pl, order, &md.coeffs_sing, &md.coeffs_nonsing)
+            plan_filter_coeffs(pl, order, &md.coeffs_filter, &md.order_filter)
+        except:
+            destroy_fat_trapezoidal_end_corr(pl)
+            raise
 
     return 0
 
@@ -474,93 +195,15 @@ cdef int execute_fat_trapezoidal_end_corr(abel_plan* pl, double* data_in, double
     cdef:
         int ii, jj, nn
         method_data_end_corr* md
-        double* data_in_temp0 = NULL
-        double* data_in_temp1 = NULL
-        int order_m1_half, order_filter_m1_half, order_m1_half_inner
-        int n_left_ext, n_right_ext
+        double* data_in_temp1
+        int order_m1_half, order_m1_half_inner
 
     md = <method_data_end_corr*> pl.method_data
     order_m1_half = <int> ((md.order-1)/2)
     order_m1_half_inner = <int> (md.order/2)
-    order_filter_m1_half = (md.order_filter-1)/2
+    data_in_temp1 = prepare_input_end_corr(pl, data_in, md.order, md.order_filter, md.coeffs_filter, left_boundary,
+                                           right_boundary)
 
-    # Allocate temporary data arrays
-    data_in_temp0 = <double*> malloc((pl.n_data+2*(order_m1_half+order_filter_m1_half))*sizeof(double))
-    data_in_temp1 = <double*> malloc((pl.n_data+2*order_m1_half)*sizeof(double))
-    
-    # Left boundary handling
-    if left_boundary == 0 or left_boundary == 1 or left_boundary == 2:
-        n_left_ext = order_m1_half + order_filter_m1_half
-    elif left_boundary == 3:
-        n_left_ext = 0
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-    # Right boundary handling
-    if right_boundary == 0:
-        n_right_ext = order_m1_half + order_filter_m1_half
-    elif right_boundary == 3:
-        n_right_ext = 0
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')           
-    # Copy and extend data if necessary
-    nn = max(md.order, md.order_filter-1)
-    for ii in range(pl.n_data+2*(order_m1_half+order_filter_m1_half)-n_left_ext-n_right_ext):
-        data_in_temp0[n_left_ext+ii] = data_in[ii]
-    if left_boundary == 0:
-        for ii in range(n_left_ext):
-            data_in_temp0[ii] = polint(&data_in_temp0[n_left_ext], nn, ii-n_left_ext)
-    elif left_boundary == 1:
-        if pl.shift == 0.:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = -data_in_temp0[n_left_ext+1+ii]
-        elif pl.shift == 0.5:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = -data_in_temp0[n_left_ext+ii]
-        else:
-            free(data_in_temp0)
-            free(data_in_temp1)
-            with gil:
-                raise NotImplementedError('Method not implemented for given parameters.')
-    elif left_boundary == 2:
-        if pl.shift == 0.:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = data_in_temp0[n_left_ext+1+ii]
-        elif pl.shift == 0.5:
-            for ii in range(n_left_ext):
-                data_in_temp0[n_left_ext-1-ii] = data_in_temp0[n_left_ext+ii]
-        else:
-            free(data_in_temp0)
-            free(data_in_temp1)
-            with gil:
-                raise NotImplementedError('Method not implemented for given parameters.')
-    elif left_boundary == 3:
-        pass
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-    if right_boundary == 0:
-        for ii in range(n_right_ext):
-            data_in_temp0[pl.n_data+order_m1_half+order_filter_m1_half+ii] = polint(&data_in_temp0[pl.n_data+order_m1_half+order_filter_m1_half-nn], nn, ii+nn)
-    elif right_boundary == 3:
-        pass
-    else:
-        free(data_in_temp0)
-        free(data_in_temp1)
-        with gil:
-            raise NotImplementedError('Method not implemented for given parameters.')
-
-    # Do scaling or numerical derivative
-    convolve(data_in_temp0, pl.n_data+2*order_m1_half, data_in_temp1, md.order_filter, md.coeffs_filter)
-    free(data_in_temp0)
-    
     # Main trapezoidal rule
     memset(data_out, 0, pl.n_data*sizeof(double))
     if pl.forward_backward == -1:
@@ -609,7 +252,298 @@ cdef int destroy_fat_trapezoidal_end_corr(abel_plan* pl) except -1 nogil:
 
     return 0
 
-	
+
+########################################################################################################################
+### Preparation shared by the trapezoidal rules and the FMM                                                          ###
+
+
+# End correction weights of every output point for the singular end (the lower integration limit) and the smooth end
+# (the truncation radius), order weights each, loaded from the coefficient tables and scaled to the grid of pl. The
+# caller frees both arrays, also after an exception.
+cdef int plan_end_corr_coeffs(abel_plan* pl, int order, double** coeffs_sing, double** coeffs_nonsing) except -1 nogil:
+
+    cdef:
+        double[:,::1] coeffs_nonsing_sqrt_small_mv
+        double[:,::1] coeffs_nonsing_sqrt_large_mv
+        double[:,::1] coeffs_sing_small_mv
+        double[:,::1] coeffs_sing_large_mv
+        double* cs
+        double* cn
+        int ii, jj
+        double n_inv_sca, y_inv_sca
+        int n_cross, n_large, n_inv_sca_int, y_cross, y_large, y_inv_sca_int
+        int order_m1_half_inner
+
+    # Small data set
+    if pl.n_data < order+2:
+        with gil:
+            raise ValueError('Not enough data points for given parameters.')
+
+    order_m1_half_inner = <int> (order/2)
+    coeffs_sing[0] = <double*> malloc(order*(pl.n_data-1)*sizeof(double))
+    coeffs_nonsing[0] = <double*> malloc(order*(pl.n_data-1)*sizeof(double))
+    cs = coeffs_sing[0]
+    cn = coeffs_nonsing[0]
+    if pl.forward_backward == -1:    # Forward transform
+        with gil:
+            coeffs_sing_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_lin_sing_large', order)
+            coeffs_nonsing_sqrt_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_small', order)
+            coeffs_nonsing_sqrt_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_large', order)
+            if pl.shift == 0.:
+                coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small', order)
+            elif pl.shift == 0.5:
+                coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_lin_sing_small_half_shift', order)
+            else:
+                raise NotImplementedError('Method not implemented for given parameters.')
+        y_cross = coeffs_sing_small_mv.shape[0]
+        y_large = coeffs_sing_large_mv.shape[0]
+        for ii in range(min(y_cross,pl.n_data-1)):
+            for jj in range(order):
+                cs[order*ii+jj] = coeffs_sing_small_mv[ii,jj]
+        for ii in range(y_cross, pl.n_data-1):
+            y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
+            for jj in range(order):
+                cs[order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, order, 
+                                             &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) * \
+                                 sqrt(pl.grid[ii]/2./pl.step_size)
+        n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
+        for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
+            for jj in range(order):
+                cn[order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] * \
+                                 (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
+                                 sqrt((pl.grid[pl.n_data-1] + \
+                                          (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
+                                         (pl.grid[pl.n_data-1]-pl.grid[ii]))
+        n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
+        for ii in range(max(pl.n_data-1-n_cross,0)):
+            n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
+            for jj in range(order):
+                cn[order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, order,
+                                             &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) * \
+                                 (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size) / \
+                                 sqrt((pl.grid[pl.n_data-1] + \
+                                          (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
+                                         (pl.grid[pl.n_data-1]-pl.grid[ii]))
+        for ii in range(pl.n_data-1):
+            cn[order*ii+order_m1_half_inner] -= 0.5*pl.grid[pl.n_data-1] / \
+                                            sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+
+    elif pl.forward_backward == 1 or pl.forward_backward == 2:    # Backward transform
+        with gil:
+            coeffs_sing_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_sing_large', order)
+            coeffs_nonsing_sqrt_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_small', order)
+            coeffs_nonsing_sqrt_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_large', order)
+            if pl.shift == 0.:
+                coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_sing_small', order)
+            elif pl.shift == 0.5:
+                coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_sing_small_half_shift', order)
+            else:
+                raise NotImplementedError('Method not implemented for given parameters.')
+        y_cross = coeffs_sing_small_mv.shape[0]
+        y_large = coeffs_sing_large_mv.shape[0]
+        for ii in range(min(y_cross,pl.n_data-1)):
+            for jj in range(order):
+                cs[order*ii+jj] = coeffs_sing_small_mv[ii,jj]/pl.step_size
+        for ii in range(y_cross, pl.n_data-1):
+            y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
+            for jj in range(order):
+                cs[order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, order,
+                                             &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) / \
+                                 sqrt(pl.grid[ii]*2.*pl.step_size)
+        n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
+        for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
+            for jj in range(order):
+                cn[order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] / \
+                                 sqrt((pl.grid[pl.n_data-1] + \
+                                          (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
+                                         (pl.grid[pl.n_data-1]-pl.grid[ii]))
+        n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
+        for ii in range(max(pl.n_data-1-n_cross,0)):
+            n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
+            for jj in range(order):
+                cn[order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, order,
+                                             &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) / \
+                                 sqrt((pl.grid[pl.n_data-1] + \
+                                          (jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) * \
+                                         (pl.grid[pl.n_data-1]-pl.grid[ii]))
+        for ii in range(pl.n_data-1):
+            cn[order*ii+order_m1_half_inner] -= 0.5/sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+
+    elif pl.forward_backward == -2:    # Modified forward transform for 1/r^2 singular functions
+        with gil:
+            coeffs_sing_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_large', order)
+            coeffs_nonsing_sqrt_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_small', order)
+            coeffs_nonsing_sqrt_large_mv = coeffs.get_coeffs('coeffs_inv_sqrt_nonsing_large', order)
+            if pl.shift == 0.:
+                coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small', order)
+            elif pl.shift == 0.5:
+                coeffs_sing_small_mv = coeffs.get_coeffs('coeffs_inv_sqrt_diff_sq_y2_over_r2_sing_small_half_shift', order)
+            else:
+                raise NotImplementedError('Method not implemented for given parameters.')
+        y_cross = coeffs_sing_small_mv.shape[0]
+        y_large = coeffs_sing_large_mv.shape[0]
+        for ii in range(min(y_cross,pl.n_data-1)):
+            for jj in range(order):
+                cs[order*ii+jj] = coeffs_sing_small_mv[ii,jj]/pl.step_size
+        for ii in range(y_cross, pl.n_data-1):
+            y_inv_sca = pl.step_size/pl.grid[ii]*(y_cross-1)*(y_large-1)
+            y_inv_sca_int = <int> fmax(fmin(y_inv_sca,y_large-3),1)
+            for jj in range(order):
+                cs[order*ii+jj] = interp_cubic(y_inv_sca-y_inv_sca_int, order, 
+                                             &coeffs_sing_large_mv[y_inv_sca_int-1,jj]) / \
+                                 sqrt(pl.grid[ii]*2.*pl.step_size)
+        n_cross = coeffs_nonsing_sqrt_small_mv.shape[0]            
+        for ii in range(max(pl.n_data-1-n_cross,0),pl.n_data-1):
+            for jj in range(order):
+                cn[order*ii+jj] = coeffs_nonsing_sqrt_small_mv[pl.n_data-2-ii,jj] * \
+                                 (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
+                                 sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
+                                               (pl.grid[pl.n_data-1]-pl.grid[ii]) )
+        n_large = coeffs_nonsing_sqrt_large_mv.shape[0]      
+        for ii in range(max(pl.n_data-1-n_cross,0)):
+            n_inv_sca = pl.step_size/(pl.grid[pl.n_data-1]-pl.grid[ii])*n_cross*(n_large-1)
+            n_inv_sca_int = <int> fmax(fmin(n_inv_sca,n_large-3),1)
+            for jj in range(order):
+                cn[order*ii+jj] = interp_cubic(n_inv_sca-n_inv_sca_int, order, &coeffs_nonsing_sqrt_large_mv[n_inv_sca_int-1,jj]) * \
+                                 (pl.grid[ii]/(pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size))**2 / \
+                                 sqrt( (pl.grid[pl.n_data-1]+(jj-order_m1_half_inner)*pl.step_size+pl.grid[ii]) *
+                                               (pl.grid[pl.n_data-1]-pl.grid[ii]) )
+        for ii in range(pl.n_data-1):
+            cn[order*ii+order_m1_half_inner] -= 0.5*(pl.grid[ii]/pl.grid[pl.n_data-1])**2/sqrt(pl.grid[pl.n_data-1]**2-pl.grid[ii]**2)
+
+    else:
+        with gil:
+            raise NotImplementedError('Method not implemented for given parameters.')
+
+    return 0
+
+
+# Filter applied to the input before the quadrature: the scaling of the forward transforms, or the smoothed
+# numerical derivative for the backward transform with numerical derivative (order_filter points). The caller frees
+# coeffs_filter, also after an exception.
+cdef int plan_filter_coeffs(abel_plan* pl, int order, double** coeffs_filter, int* order_filter) except -1 nogil:
+
+    cdef:
+        int ii
+        double[::1] coeffs_filter_mv
+
+    if pl.forward_backward == 1:
+        order_filter[0] = order+1 + (order % 2)
+        coeffs_filter[0] = <double*> malloc(order_filter[0]*sizeof(double))
+        with gil:
+            coeffs_filter_mv = coeffs.get_coeffs('coeffs_deriv_smooth', order_filter[0]-1)
+        for ii in range(order_filter[0]):
+            coeffs_filter[0][ii] = coeffs_filter_mv[ii]*(-co.piinv)
+    elif pl.forward_backward == 2 or pl.forward_backward == -1 or pl.forward_backward == -2:
+        order_filter[0] = 1
+        coeffs_filter[0] = <double*> malloc(1*sizeof(double))
+        if pl.forward_backward == 2:            
+            coeffs_filter[0][0] = -co.piinv*pl.step_size
+        else:
+            coeffs_filter[0][0] = 2.*pl.step_size
+    else:
+        with gil:
+            raise NotImplementedError('Method not implemented for given parameters.')
+
+    return 0
+
+
+# Copy the input into a buffer extended by the reach of the end correction stencil and the filter on each side
+# (extrapolated for boundary value 0, mirrored for 1 and 2, taken from the input for 3) and apply the filter. Returns
+# the filtered buffer of n_data + 2*((order-1)/2) samples; the caller frees it.
+cdef double* prepare_input_end_corr(abel_plan* pl, double* data_in, int order, int order_filter, double* coeffs_filter,
+                                    int left_boundary, int right_boundary) except NULL nogil:
+
+    cdef:
+        int ii, nn
+        (double*) data_in_temp0 = NULL, data_in_temp1 = NULL
+        int order_m1_half, order_filter_m1_half, n_left_ext, n_right_ext
+
+    order_m1_half = <int> ((order-1)/2)
+    order_filter_m1_half = <int> ((order_filter-1)/2)
+
+    # Allocate temporary data arrays
+    data_in_temp0 = <double*> malloc((pl.n_data+2*(order_m1_half+order_filter_m1_half))*sizeof(double))
+    data_in_temp1 = <double*> malloc((pl.n_data+2*order_m1_half)*sizeof(double))
+    
+    # Left boundary handling
+    if left_boundary == 0 or left_boundary == 1 or left_boundary == 2:
+        n_left_ext = order_m1_half + order_filter_m1_half
+    elif left_boundary == 3:
+        n_left_ext = 0
+    else:
+        free(data_in_temp0)
+        free(data_in_temp1)
+        with gil:
+            raise NotImplementedError('Method not implemented for given parameters.')
+    # Right boundary handling
+    if right_boundary == 0:
+        n_right_ext = order_m1_half + order_filter_m1_half
+    elif right_boundary == 3:
+        n_right_ext = 0
+    else:
+        free(data_in_temp0)
+        free(data_in_temp1)
+        with gil:
+            raise NotImplementedError('Method not implemented for given parameters.')           
+    # Copy and extend data if necessary
+    nn = max(order, order_filter-1)
+    for ii in range(pl.n_data+2*(order_m1_half+order_filter_m1_half)-n_left_ext-n_right_ext):
+        data_in_temp0[n_left_ext+ii] = data_in[ii]
+    if left_boundary == 0:
+        for ii in range(n_left_ext):
+            data_in_temp0[ii] = polint(&data_in_temp0[n_left_ext], nn, ii-n_left_ext)
+    elif left_boundary == 1:
+        if pl.shift == 0.:
+            for ii in range(n_left_ext):
+                data_in_temp0[n_left_ext-1-ii] = -data_in_temp0[n_left_ext+1+ii]
+        elif pl.shift == 0.5:
+            for ii in range(n_left_ext):
+                data_in_temp0[n_left_ext-1-ii] = -data_in_temp0[n_left_ext+ii]
+        else:
+            free(data_in_temp0)
+            free(data_in_temp1)
+            with gil:
+                raise NotImplementedError('Method not implemented for given parameters.')
+    elif left_boundary == 2:
+        if pl.shift == 0.:
+            for ii in range(n_left_ext):
+                data_in_temp0[n_left_ext-1-ii] = data_in_temp0[n_left_ext+1+ii]
+        elif pl.shift == 0.5:
+            for ii in range(n_left_ext):
+                data_in_temp0[n_left_ext-1-ii] = data_in_temp0[n_left_ext+ii]
+        else:
+            free(data_in_temp0)
+            free(data_in_temp1)
+            with gil:
+                raise NotImplementedError('Method not implemented for given parameters.')
+    elif left_boundary == 3:
+        pass
+    else:
+        free(data_in_temp0)
+        free(data_in_temp1)
+        with gil:
+            raise NotImplementedError('Method not implemented for given parameters.')
+    if right_boundary == 0:
+        for ii in range(n_right_ext):
+            data_in_temp0[pl.n_data+order_m1_half+order_filter_m1_half+ii] = polint(&data_in_temp0[pl.n_data+order_m1_half+order_filter_m1_half-nn], nn, ii+nn)
+    elif right_boundary == 3:
+        pass
+    else:
+        free(data_in_temp0)
+        free(data_in_temp1)
+        with gil:
+            raise NotImplementedError('Method not implemented for given parameters.')
+
+    # Do scaling or numerical derivative
+    convolve(data_in_temp0, pl.n_data+2*order_m1_half, data_in_temp1, order_filter, coeffs_filter)
+    free(data_in_temp0)
+
+    return data_in_temp1
 
 
 ########################################################################################################################
