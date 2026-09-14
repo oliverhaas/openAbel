@@ -5,10 +5,6 @@ repo_url: https://github.com/oliverhaas/openAbel
 repo_name: oliverhaas/openAbel
 edit_uri: edit/main/docs/
 
-# Internal planning notes, not part of the published site.
-exclude_docs: |
-  superpowers/
-
 theme:
   name: material
   palette:

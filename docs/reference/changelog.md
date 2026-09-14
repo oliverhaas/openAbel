@@ -51,7 +51,7 @@
   step_size, method=3, order=2, eps=...)` and `execute(data_in, left_boundary=0, right_boundary=0)`. Positional
   calls from 0.6 keep working once the import is updated; keyword arguments need the new names. The Cython module
   `hansen_law`, the internals and the coefficient data files are renamed the same way; the unused `math_fun` module
-  is gone.
+  and the unused `coeffs_inv_sqrt_sing` coefficient tables are gone.
 - Cython 3 build: exception clauses moved after `nogil`, `cpow=True` keeps the integer power semantics of the FMM
   code, `freethreading_compatible=True`.
 - The backward transform with `method=0` was never usable before this release; its first-order accuracy is

@@ -19,7 +19,6 @@ site/
 
 # Local tooling state
 .claude/worktrees/
-.superpowers/
 
 # Editors and OS
 .idea/

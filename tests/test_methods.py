@@ -8,9 +8,9 @@ from analytic import N_DATA, STEP_SIZE, analytic_pair, input_samples, relative_e
 import openabel
 
 # Relative-error tolerances: the larger of the two shifts' errors measured on the Cython 3 build of 2026-09-13, times
-# 5, rounded up to the next power of ten (spec section 3). Exceptions: order 10 sits 10-100x above the rule because
-# the measured errors (1e-15 to 7e-13) are within reach of BLAS noise; (fb=2, method=1) and (fb=1, method=0) are 3x
-# the measured 6.4e-2 and 6.8e-2 because the rule would give 1.
+# 5, rounded up to the next power of ten. Exceptions: order 10 sits 10-100x above the rule because the measured
+# errors (1e-15 to 7e-13) are within reach of BLAS noise; (fb=2, method=1) and (fb=1, method=0) are 3x the measured
+# 6.4e-2 and 6.8e-2 because the rule would give 1.
 # Key: (forward_backward, order) for the end-correction methods 2 and 3.
 END_CORRECTION_TOLERANCE = MappingProxyType(
     {
