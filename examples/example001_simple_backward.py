@@ -17,11 +17,11 @@ import openabel
 params = {
     "axes.labelsize": 8,
     "font.size": 8,
-    "legend.fontsize": 10,
+    "legend.fontsize": 8,
     "xtick.labelsize": 10,
     "ytick.labelsize": 10,
     "text.usetex": False,
-    "figure.figsize": [5.0, 5.0],
+    "figure.figsize": [6.5, 5.0],
 }
 mpl.rcParams.update(params)
 # Color scheme
@@ -77,7 +77,7 @@ data_out2 = abel_obj.execute(data_in)
 
 
 # Plotting
-fig, axarr = mpl.subplots(2, 1, sharex=True)
+fig, axarr = mpl.subplots(2, 1, sharex=True, layout="constrained")
 
 axarr[0].plot(xx, data_out_ana, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
 axarr[0].plot(
@@ -88,10 +88,10 @@ axarr[0].plot(
     linestyle=linestyles[1],
     label="analy. trunc.",
 )
-axarr[0].plot(xx, data_out, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openabel")
+axarr[0].plot(xx, data_out, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel")
 axarr[0].plot(xx, data_out2, color=colors[3], marker=markers[3], linestyle=linestyles[3], label="openAbel analy. der.")
 axarr[0].set_ylabel("value")
-axarr[0].legend()
+axarr[0].legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 
 axarr[1].semilogy(
     xx[:-1],
@@ -119,9 +119,8 @@ axarr[1].semilogy(
 )
 axarr[1].set_ylabel("relative error")
 axarr[1].set_xlabel("y")
-axarr[1].legend()
+axarr[1].legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 
-mpl.tight_layout()
 mpl.savefig("example001_simple_backward.png", dpi=300)
 
 mpl.show()

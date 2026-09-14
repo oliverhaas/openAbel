@@ -17,11 +17,11 @@ import openabel
 params = {
     "axes.labelsize": 8,
     "font.size": 8,
-    "legend.fontsize": 10,
+    "legend.fontsize": 8,
     "xtick.labelsize": 10,
     "ytick.labelsize": 10,
     "text.usetex": False,
-    "figure.figsize": [5.0, 5.0],
+    "figure.figsize": [6.5, 5.0],
 }
 mpl.rcParams.update(params)
 # Color scheme
@@ -86,14 +86,14 @@ data_out2 = abel_obj2.execute(
 data_out_ana = data_in * np.sqrt(2 * np.pi) * sig * erf(np.sqrt((x_max**2 - xx**2) / 2) / sig)
 
 # Plotting
-fig, axarr = mpl.subplots(2, 1, sharex=True)
+fig, axarr = mpl.subplots(2, 1, sharex=True, layout="constrained")
 
 axarr[0].plot(xx, data_out_ana, color=colors[0], marker=markers[0], linestyle=linestyles[0], label="analy.")
 axarr[0].plot(xx, data_out0, color=colors[1], marker=markers[1], linestyle=linestyles[1], label="openAbel TE 2nd")
 axarr[0].plot(xx, data_out1, color=colors[2], marker=markers[2], linestyle=linestyles[2], label="openAbel FMM 5th")
 axarr[0].plot(xx, data_out2, color=colors[3], marker=markers[3], linestyle=linestyles[3], label="openAbel FMM 11th")
 axarr[0].set_ylabel("value")
-axarr[0].legend()
+axarr[0].legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 
 axarr[1].semilogy(
     xx[:-1] / sig,
@@ -121,9 +121,8 @@ axarr[1].semilogy(
 )
 axarr[1].set_ylabel("relative error")
 axarr[1].set_xlabel("y")
-axarr[1].legend()
+axarr[1].legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 
-mpl.tight_layout()
 mpl.savefig("example002_method_order.png", dpi=300)
 
 mpl.show()

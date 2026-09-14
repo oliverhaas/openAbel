@@ -21,11 +21,11 @@ import openabel as oa
 params = {
     "axes.labelsize": 8,
     "font.size": 8,
-    "legend.fontsize": 10,
+    "legend.fontsize": 8,
     "xtick.labelsize": 10,
     "ytick.labelsize": 10,
     "text.usetex": False,
-    "figure.figsize": [12.0, 8.0],
+    "figure.figsize": [16.0, 8.0],
 }
 mpl.rcParams.update(params)
 # Color scheme
@@ -48,7 +48,7 @@ markers = ["o", "v", "s", "D", "p", "*", "h", "+", "^", "x"]
 linestyles = ["-", "--", "-.", ":", "-", "--", "-.", ":", "-", "--", "-.", ":"]
 lw = 2
 
-fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = mpl.subplots(2, 3)
+fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = mpl.subplots(2, 3, layout="constrained")
 
 
 ############################################################################################################################################
@@ -180,17 +180,17 @@ for ii in range(len(methods)):
     )
 
 
-ax1.legend()
+ax1.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 ax1.set_xlabel("radius")
 ax1.set_ylabel("value")
 ax1.grid(True)
 
-ax2.legend()
+ax2.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 ax2.set_xlabel("radius")
 ax2.set_ylabel("absolute error")
 ax2.grid(True)
 
-ax3.legend()
+ax3.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 ax3.set_xlabel("radius")
 ax3.set_ylabel("relative error")
 ax3.grid(True)
@@ -290,7 +290,7 @@ for ii in range(1, len(methods)):
     )
 
 
-ax4.legend()
+ax4.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 ax4.set_xlabel("number of data points")
 ax4.set_ylabel("relative error")
 ax4.grid(True)
@@ -450,18 +450,17 @@ for ii in range(1, len(methods)):
         linewidth=lw,
     )
 
-ax5.legend()
+ax5.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 ax5.set_xlabel("number of data points")
 ax5.set_ylabel("run time pre computation in s")
 ax5.grid(True)
 
-ax6.legend()
+ax6.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
 ax6.set_xlabel("number of data points")
 ax6.set_ylabel("run time main computation in s")
 ax6.grid(True)
 
 
-mpl.tight_layout()
 mpl.savefig("example005_comparison_pyabel.png", dpi=300)
 
 mpl.show()

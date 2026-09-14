@@ -34,13 +34,13 @@ quickly, but is in principle possible. I successfully tried that, but due to the
 flawed) it's not useful.
 
 The second approximation is to rewrite the Abel transform kernel and approximate it by a sum of exponentials. At first
-it looks like one could get a linear computational complexity \(O(N)\) algorithm. Problem is that the kernel has (even
+it looks like one could get a linear computational complexity $O(N)$ algorithm. Problem is that the kernel has (even
 after rewriting) a singularity, so it's obviously pretty difficult to approximate a singularity by a sum of
 exponentials (again I tried many published approaches for that; most have flaws as well or are at least difficult and
 don't lead to good enough results). Increasing the number of exponentials used increases the computational
-complexity. My guess is that the algorithm is \(O(N \log(N))\) at best because of the increasing number of required
+complexity. My guess is that the algorithm is $O(N \log(N))$ at best because of the increasing number of required
 exponentials. In practice it turns out it's pretty much impossible to get anything really universally useful, unless
-one aims only for fairly large errors (like Hansen-Law with roughly \(10^{-3}\)). For many use cases this is probably
+one aims only for fairly large errors (like Hansen-Law with roughly $10^{-3}$). For many use cases this is probably
 enough (e.g. experimental ones which are usually fairly noisy anyway), so the method has still some value. But even if
 that is the case and one ignores every problem I mentioned here the method is still not more efficient than the main
 **openAbel** methods, so it's never the best choice as long as one does not have to implement the algorithms (FMM is a
@@ -59,7 +59,7 @@ wanted to improve convergence. In context of a problem similar to the Abel trans
 Fast Multipole Method in **openAbel** as well. I actually tried several higher order versions of this, and the effort
 is not really worth it, since the end corrections used in **openAbel** are much more efficient. And it gets very
 complicated -- maybe impossible -- to program if one tries to avoid instabilities; I'm actually not sure if my test
-implementations were definitely reliable. And of course this method, it's \(O(N^2)\), is slower than the main
+implementations were definitely reliable. And of course this method, it's $O(N^2)$, is slower than the main
 **openAbel** methods.
 
 ## Piecewise polynomial analytic integration
@@ -71,7 +71,7 @@ projection, [Bordas](https://aip.scitation.org/doi/abs/10.1063/1.1147044) does b
 probably more publications. I actually thought initially when I decided to use the Fast Multipole Method, that the
 piecewise polynomial analytic integration would be useful in combination. In principle it works, but is again pretty
 messy and the end corrections used in **openAbel** are overall much more efficient in every sense once implemented.
-But without the Fast Multipole Method it's a slow \(O(N^2)\) method as well, and that slow way is what all
+But without the Fast Multipole Method it's a slow $O(N^2)$ method as well, and that slow way is what all
 publications do to my knowledge.
 
 ## Analytic integration of a basis set expansion
@@ -99,9 +99,9 @@ publication has 791 citations as of writing this. I'm guessing mainly because th
 basis set implicitly applied some smoothing in the transform, which usually produces nicer pictures without tweaking
 than other algorithms. I'm fairly convinced that one can achieve similarly nice results with other methods and some
 smoothing. Similar to other methods described here the method can be tested in **PyAbel**. The preprocessing is
-incredibly painfully slow (it's \(O(N^3)\) I think, and it takes minutes for even small arrays \(N=1000\), where
-**openAbel**'s main methods are \(O(N)\) and take milliseconds), and the actual transform is not much better
-(\(O(N^2)\) and **openAbel** is \(O(N)\) again). Overall **BASEX** is a fairly often cited algorithm nevertheless.
+incredibly painfully slow (it's $O(N^3)$ I think, and it takes minutes for even small arrays $N=1000$, where
+**openAbel**'s main methods are $O(N)$ and take milliseconds), and the actual transform is not much better
+($O(N^2)$ and **openAbel** is $O(N)$ again). Overall **BASEX** is a fairly often cited algorithm nevertheless.
 
 I can see how in some cases one might be able to choose a nicely suitable basis set to enforce some structure in either
 the projected or reconstructed data. I expect this would be the only case where such an approach would make sense,

@@ -3,8 +3,8 @@
 In **openAbel** there are a couple of different algorithms for the calculation of the Abel transforms implemented,
 although most of them are just for comparisons and it is recommended to only use the default method.
 
-The main two obstacles when calculating the transforms numerically are the singularity at \(r=y\) and the dependence
-of the result on \(y\), meaning computational complexity is quadratic \(O(N^2)\) if one naively integrates. The main
+The main two obstacles when calculating the transforms numerically are the singularity at $r=y$ and the dependence
+of the result on $y$, meaning computational complexity is quadratic $O(N^2)$ if one naively integrates. The main
 difference between the implemented transforms is how those two issues are treated.
 
 When creating the Abel transform object the `method` keyword argument can be provided to choose different transform
@@ -17,11 +17,11 @@ abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=3, o
 ```
 
 The methods with end corrections can do the transformation in different orders of accuracy by setting the `order`
-keyword argument; all other methods ignore `order`. Note when we talk about \(n\) order accuracy we usually mean
-\((n+1/2)\) order accuracy due to the square root in the Abel transform kernel. For higher order methods the
+keyword argument; all other methods ignore `order`. Note when we talk about $n$ order accuracy we usually mean
+$(n+1/2)$ order accuracy due to the square root in the Abel transform kernel. For higher order methods the
 transformed function has to be sufficiently smooth to achieve the full order of convergence, and in very extreme cases
 the transform becomes unstable if high order is used on non-smooth functions. The length of the data vector `n_data` we
-denote as \(N\) in the math formulas.
+denote as $N$ in the math formulas.
 
 Overall cases where a user should use anything other than `method = 3` (default) and `order = 2` (default) to
 `order = 5` will be very rare. For a detailed comparison of the methods it is recommended to look at
@@ -38,15 +38,15 @@ The desingularized trapezoidal rule is probably the simplest practicable algorit
 integrates it analytically, and numerically integrates the remaining desingularized term with the trapezoidal rule. In
 the implementation this is done to first order, i.e. for the forward Abel transform this leads to
 
-\[
+$$
 F(y)=2\int_{y}^{R}\frac{(f(r)-f(y))r}{\sqrt{r^2-y^2}}dr+f(y)\sqrt{R^2-y^2}\;.
-\]
+$$
 
 Now the singularity seems to be removed, but a closer look and one can see that the singularity is still there in the
-derivative of the integrand, so the convergence is first order in \(N\) instead of second order expected when using
+derivative of the integrand, so the convergence is first order in $N$ instead of second order expected when using
 trapezoidal rule. One can analytically remove the singularity in higher order with more terms, but this gets kinda
 complicated (and possibly unstable, plus there are other practical issues). The trapezoidal rule portion of the method
-leads to quadratic \(O(N^2)\) computational complexity of the method.
+leads to quadratic $O(N^2)$ computational complexity of the method.
 
 ## Hansen-Law method
 
@@ -61,14 +61,14 @@ linear approximation of the input functions to integrate analytically piece by p
 2nd order accurate transform, but the approximation of the Abel transform kernel as a sum of exponentials is quite
 difficult. In other words the approximation
 
-\[
+$$
 \frac{1}{\sqrt{1-\exp{(-2t)}}}\approx\sum_{k=1}^K\exp{(-\lambda_kt)}
-\]
+$$
 
-is in practice not possible to achieve with high accuracy and reasonable \(K\). This is the main limitation of the
-method, and the original space state model approximation has a typical relative error of \(10^{-3}\) at best -- then it
-just stops converging with increasing \(N\). If one ignores several details that makes the method apparently linear
-\(O(N)\) computational complexity, so it is implemented here for comparisons. More comments in the
+is in practice not possible to achieve with high accuracy and reasonable $K$. This is the main limitation of the
+method, and the original space state model approximation has a typical relative error of $10^{-3}$ at best -- then it
+just stops converging with increasing $N$. If one ignores several details that makes the method apparently linear
+$O(N)$ computational complexity, so it is implemented here for comparisons. More comments in the
 [remarks](remarks.md).
 
 ## Trapezoidal rule with end corrections
@@ -80,19 +80,19 @@ abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=2, o
 
 The trapezoidal rule with end correction improves on the desingularized trapezoidal rule. It doesn't require
 analytical integration because it uses precalculated end correction coefficients of arbitrary order. As described in
-[Kapur](https://epubs.siam.org/doi/abs/10.1137/S0036142995287847) one can construct \(\alpha_i\) and \(\beta_i\) such
+[Kapur](https://epubs.siam.org/doi/abs/10.1137/S0036142995287847) one can construct $\alpha_i$ and $\beta_i$ such
 that the approximation
 
-\[
+$$
 \int_{a}^{b}f(x)dx \approx h\cdot\sum_{i=1}^{N-2}f(x_i) +
                            h\cdot\sum_{i=0}^{M-1}\alpha_if(x_{i-p}) +
                            h\cdot\sum_{i=0}^{M-1}\beta_if(x_{N-1-q})
-\]
+$$
 
-is accurate to order \(M\). Note that \(p\) and \(q\) should be chosen such that the correction is centered around the
+is accurate to order $M$. Note that $p$ and $q$ should be chosen such that the correction is centered around the
 end points: Similar to central finite differences this leads to an arbitrary order stable scheme, and thus incredibly
-fast convergence and small errors. Otherwise it's not recommended to go higher than \(M=5\), again similar to forward
-and backward finite differences. The trapezoidal rule portion of the method leads to quadratic \(O(N^2)\) computational
+fast convergence and small errors. Otherwise it's not recommended to go higher than $M=5$, again similar to forward
+and backward finite differences. The trapezoidal rule portion of the method leads to quadratic $O(N^2)$ computational
 complexity of the method.
 
 Since the calculation of the end correction coefficients requires some analytical calculations, is quite troublesome
@@ -109,12 +109,12 @@ abel_obj = openabel.Abel(n_data, forward_backward, shift, step_size, method=3, o
 ```
 
 The default and recommended method is the Fast Multipole Method (FMM) with end corrections. This method provides a
-fast linear \(O(N)\) computational complexity transform of arbitrary order. The specific FMM used is based on Chebyshev
+fast linear $O(N)$ computational complexity transform of arbitrary order. The specific FMM used is based on Chebyshev
 interpolation and nicely described and applied by
 [Tausch](https://link.springer.com/chapter/10.1007/978-3-642-25670-7_6) on a similar problem. In principle the FMM
 uses a hierarchic decomposition to combine a linear amount of direct short-range contributions and smooth
 approximations of long-range contributions with efficient reuse of intermediate results to get in total a linear
-\(O(N)\) computational complexity algorithm. This method thus provides extremely fast convergence and fast computation,
+$O(N)$ computational complexity algorithm. This method thus provides extremely fast convergence and fast computation,
 and is optimal in that sense for the intended purpose.
 
 ## Remarks on transforms of noisy data
