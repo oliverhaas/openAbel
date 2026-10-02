@@ -9,6 +9,11 @@ on:
 permissions:
   contents: write
 
+# Each deploy pushes to gh-pages; of two running at once, the later push is rejected.
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
