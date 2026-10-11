@@ -44,9 +44,9 @@ dev = [
   "cython==3.3.0",
   "pre-commit==4.6.2",
   "pytest==9.1.1",
-  "ruff==0.16.9",
+  "ruff==0.16.10",
   "setuptools==84.0.0",
-  "ty==0.0.84",
+  "ty==0.0.85",
 ]
 docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.7.7"]
 # Not installed by default: only the example scripts need them.
