@@ -42,11 +42,11 @@ Repository = "https://github.com/oliverhaas/openAbel"
 [dependency-groups]
 dev = [
   "cython==3.3.0",
-  "pre-commit==4.6.2",
+  "pre-commit==4.7.0",
   "pytest==9.1.1",
-  "ruff==0.16.10",
+  "ruff==0.17.0",
   "setuptools==84.0.0",
-  "ty==0.0.85",
+  "ty==0.0.87",
 ]
 docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.7.7"]
 # Not installed by default: only the example scripts need them.
