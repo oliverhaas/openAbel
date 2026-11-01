@@ -43,12 +43,12 @@ Repository = "https://github.com/oliverhaas/openAbel"
 dev = [
   "cython==3.3.0",
   "pre-commit==4.7.0",
-  "pytest==9.1.1",
-  "ruff==0.17.1",
+  "pytest==9.2.0",
+  "ruff==0.17.3",
   "setuptools==84.2.1",
-  "ty==0.0.90",
+  "ty==0.0.94",
 ]
-docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.7.7"]
+docs = ["mike==2.2.0", "mkdocs==1.6.1", "mkdocs-material==9.8.0"]
 # Not installed by default: only the example scripts need them.
 examples = ["matplotlib==3.11.2", "pyabel==0.9.1"]
 
